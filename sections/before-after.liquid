@@ -1,0 +1,626 @@
+{%- liquid
+  assign img_before = section.settings.image_before
+  assign img_after = section.settings.image_after
+  assign uid = section.id
+  assign max_w = section.settings.max_width
+
+  assign ratio = section.settings.ratio
+  if ratio == 'auto'
+    if img_after != blank
+      assign ratio_css = img_after.aspect_ratio
+    elsif img_before != blank
+      assign ratio_css = img_before.aspect_ratio
+    else
+      assign ratio_css = '1 / 1'
+    endif
+  else
+    assign ratio_css = ratio
+  endif
+
+  assign ratio_m = section.settings.ratio_mobile
+  if ratio_m == 'same'
+    assign ratio_m_css = ratio_css
+  else
+    assign ratio_m_css = ratio_m
+  endif
+
+  assign alt_before = section.settings.alt_before | default: img_before.alt | escape
+  assign alt_after = section.settings.alt_after | default: img_after.alt | escape
+  assign sizes_attr = '(min-width: ' | append: max_w | append: 'px) ' | append: max_w | append: 'px, 100vw'
+  assign handle_alpha = section.settings.handle_opacity | divided_by: 100.0
+-%}
+
+<style>
+  .ba-{{ uid }}-wrap {
+    margin-top: {{ section.settings.margin_top }}px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    padding: {{ section.settings.padding_top }}px 16px {{ section.settings.padding_bottom }}px;
+  }
+
+  .ba-{{ uid }} {
+    --ba-pos: {{ section.settings.start_position }}%;
+    --ba-line-c: {{ section.settings.line_color }};
+    --ba-line-w: {{ section.settings.line_width }}px;
+    --ba-handle: clamp(44px, 11vw, {{ section.settings.handle_size }}px);
+    --ba-handle-bg: {{ section.settings.handle_bg | color_modify: 'alpha', handle_alpha }};
+    --ba-arrow: {{ section.settings.arrow_color }};
+    --ba-fit: {{ section.settings.image_fit }};
+    --ba-label-bg: {{ section.settings.label_bg }};
+    --ba-label-c: {{ section.settings.label_color }};
+    --ba-label-size: clamp(11px, 2.6vw, {{ section.settings.label_size }}px);
+
+    position: relative;
+    width: 100%;
+    max-width: {{ max_w }}px;
+    margin-inline: auto;
+    aspect-ratio: {{ ratio_m_css }};
+    border-radius: {{ section.settings.radius }}px;
+    overflow: hidden;
+    background: #0d0d0d;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    cursor: ew-resize;
+  }
+
+  @media screen and (min-width: 750px) {
+    .ba-{{ uid }} { aspect-ratio: {{ ratio_css }}; }
+  }
+
+  .ba-{{ uid }} .ba__layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ba-{{ uid }} .ba__layer--before {
+    clip-path: inset(0 calc(100% - var(--ba-pos)) 0 0);
+    will-change: clip-path;
+  }
+
+  .ba-{{ uid }} .ba__img,
+  .ba-{{ uid }} .ba__layer svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: var(--ba-fit);
+    pointer-events: none;
+  }
+
+  .ba-{{ uid }} .ba__line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--ba-pos);
+    width: var(--ba-line-w);
+    background: var(--ba-line-c);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .ba-{{ uid }} .ba__handle {
+    position: absolute;
+    top: 50%;
+    left: var(--ba-pos);
+    width: var(--ba-handle);
+    height: var(--ba-handle);
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid var(--ba-line-c);
+    background: var(--ba-handle-bg);
+    color: var(--ba-arrow);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+    cursor: ew-resize;
+    touch-action: none;
+  }
+
+  .ba-{{ uid }} .ba__handle:focus-visible {
+    outline: 3px solid var(--ba-line-c);
+    outline-offset: 4px;
+  }
+
+  .ba-{{ uid }} .ba__handle svg {
+    width: 52%;
+    height: 52%;
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .ba-{{ uid }} .ba__label {
+    position: absolute;
+    {{ section.settings.label_position }}: clamp(10px, 2.4vw, 20px);
+    z-index: 2;
+    padding: 0.5em 0.95em;
+    background: var(--ba-label-bg);
+    color: var(--ba-label-c);
+    font-size: var(--ba-label-size);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    border-radius: {{ section.settings.label_radius }}px;
+    pointer-events: none;
+  }
+
+  .ba-{{ uid }} .ba__label--before { left: clamp(10px, 2.4vw, 20px); }
+  .ba-{{ uid }} .ba__label--after { right: clamp(10px, 2.4vw, 20px); }
+
+  .ba-{{ uid }}:not(.is-dragging) .ba__layer--before,
+  .ba-{{ uid }}:not(.is-dragging) .ba__line,
+  .ba-{{ uid }}:not(.is-dragging) .ba__handle {
+    transition: clip-path 0.14s ease-out, left 0.14s ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ba-{{ uid }} .ba__layer--before,
+    .ba-{{ uid }} .ba__line,
+    .ba-{{ uid }} .ba__handle { transition: none !important; }
+  }
+
+  .ba-{{ uid }}-empty {
+    max-width: {{ max_w }}px;
+    margin-inline: auto;
+    padding: 32px 20px;
+    border: 1px dashed rgba(128, 128, 128, 0.5);
+    border-radius: {{ section.settings.radius }}px;
+    text-align: center;
+    font-size: 14px;
+  }
+</style>
+
+<div class="ba-{{ uid }}-wrap">
+  {%- if img_before == blank and img_after == blank and request.design_mode -%}
+    <div class="ba-{{ uid }}-empty">
+      Elegí la imagen "Antes" y la imagen "Después" en los ajustes de esta sección.
+    </div>
+  {%- elsif img_before != blank or img_after != blank -%}
+    <div
+      class="ba-{{ uid }} ba"
+      data-ba
+      data-start="{{ section.settings.start_position }}"
+    >
+      <div class="ba__layer ba__layer--after">
+        {%- if img_after != blank -%}
+          {{
+            img_after
+            | image_url: width: 2000
+            | image_tag:
+              class: 'ba__img',
+              alt: alt_after,
+              widths: '400, 600, 800, 1000, 1200, 1600, 2000',
+              sizes: sizes_attr,
+              loading: 'lazy'
+          }}
+        {%- else -%}
+          {{ 'lifestyle-2' | placeholder_svg_tag: 'ba__img' }}
+        {%- endif -%}
+      </div>
+
+      <div class="ba__layer ba__layer--before">
+        {%- if img_before != blank -%}
+          {{
+            img_before
+            | image_url: width: 2000
+            | image_tag:
+              class: 'ba__img',
+              alt: alt_before,
+              widths: '400, 600, 800, 1000, 1200, 1600, 2000',
+              sizes: sizes_attr,
+              loading: 'lazy'
+          }}
+        {%- else -%}
+          {{ 'lifestyle-1' | placeholder_svg_tag: 'ba__img' }}
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_labels -%}
+        {%- if section.settings.text_before != blank -%}
+          <span class="ba__label ba__label--before">{{ section.settings.text_before | escape }}</span>
+        {%- endif -%}
+        {%- if section.settings.text_after != blank -%}
+          <span class="ba__label ba__label--after">{{ section.settings.text_after | escape }}</span>
+        {%- endif -%}
+      {%- endif -%}
+
+      <div class="ba__line" aria-hidden="true"></div>
+
+      <button
+        type="button"
+        class="ba__handle"
+        data-ba-handle
+        role="slider"
+        tabindex="0"
+        aria-label="{{ section.settings.slider_label | escape }}"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="{{ section.settings.start_position }}"
+        aria-valuetext="{{ section.settings.start_position }}%"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M10.2 5.6 L3.6 12 L10.2 18.4 Z" />
+          <path d="M13.8 5.6 L20.4 12 L13.8 18.4 Z" />
+        </svg>
+      </button>
+    </div>
+  {%- endif -%}
+</div>
+
+<script>
+  (function () {
+    if (window.__moxBeforeAfter) return;
+    window.__moxBeforeAfter = true;
+
+    function init(root) {
+      if (root.dataset.baReady) return;
+      root.dataset.baReady = '1';
+
+      var handle = root.querySelector('[data-ba-handle]');
+      if (!handle) return;
+
+      var value = parseFloat(root.dataset.start);
+      if (isNaN(value)) value = 50;
+
+      var frame = null;
+      var dragging = false;
+
+      function paint() {
+        frame = null;
+        var rounded = Math.round(value * 10) / 10;
+        root.style.setProperty('--ba-pos', rounded + '%');
+        handle.setAttribute('aria-valuenow', Math.round(rounded));
+        handle.setAttribute('aria-valuetext', Math.round(rounded) + '%');
+      }
+
+      function set(next) {
+        value = next < 0 ? 0 : next > 100 ? 100 : next;
+        if (frame === null) frame = requestAnimationFrame(paint);
+      }
+
+      function fromPointer(event) {
+        var box = root.getBoundingClientRect();
+        if (!box.width) return;
+        set(((event.clientX - box.left) / box.width) * 100);
+      }
+
+      root.addEventListener('pointerdown', function (event) {
+        if (event.pointerType === 'mouse' && event.button !== 0) return;
+        dragging = true;
+        root.classList.add('is-dragging');
+        try {
+          root.setPointerCapture(event.pointerId);
+        } catch (err) {}
+        fromPointer(event);
+      });
+
+      root.addEventListener('pointermove', function (event) {
+        if (dragging) fromPointer(event);
+      });
+
+      function stop(event) {
+        if (!dragging) return;
+        dragging = false;
+        root.classList.remove('is-dragging');
+        try {
+          root.releasePointerCapture(event.pointerId);
+        } catch (err) {}
+      }
+
+      root.addEventListener('pointerup', stop);
+      root.addEventListener('pointercancel', stop);
+
+      handle.addEventListener('keydown', function (event) {
+        var step = event.shiftKey ? 10 : 2;
+        var next;
+
+        if (event.key === 'ArrowLeft') next = value - step;
+        else if (event.key === 'ArrowRight') next = value + step;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = 100;
+        else return;
+
+        event.preventDefault();
+        set(next);
+      });
+
+      set(value);
+    }
+
+    function scan(scope) {
+      var nodes = (scope || document).querySelectorAll('[data-ba]');
+      for (var i = 0; i < nodes.length; i++) init(nodes[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        scan();
+      });
+    } else {
+      scan();
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      scan(event.target);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Antes y después",
+  "tag": "section",
+  "class": "mox-before-after",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Imágenes"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_before",
+      "label": "Imagen Antes"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_after",
+      "label": "Imagen Después"
+    },
+    {
+      "type": "text",
+      "id": "alt_before",
+      "label": "Texto alternativo — Antes",
+      "info": "Si lo dejás vacío se usa el alt cargado en Archivos."
+    },
+    {
+      "type": "text",
+      "id": "alt_after",
+      "label": "Texto alternativo — Después"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Ajuste de la imagen",
+      "options": [
+        { "value": "cover", "label": "Recortar para llenar (cover)" },
+        { "value": "contain", "label": "Mostrar completa (contain)" }
+      ],
+      "default": "cover"
+    },
+    {
+      "type": "header",
+      "content": "Etiquetas"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_labels",
+      "label": "Mostrar etiquetas",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text_before",
+      "label": "Texto Antes",
+      "default": "Antes"
+    },
+    {
+      "type": "text",
+      "id": "text_after",
+      "label": "Texto Después",
+      "default": "Después"
+    },
+    {
+      "type": "select",
+      "id": "label_position",
+      "label": "Posición",
+      "options": [
+        { "value": "top", "label": "Arriba" },
+        { "value": "bottom", "label": "Abajo" }
+      ],
+      "default": "top"
+    },
+    {
+      "type": "color",
+      "id": "label_bg",
+      "label": "Fondo de la etiqueta",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "label_color",
+      "label": "Color del texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "label_size",
+      "label": "Tamaño de fuente",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "label_radius",
+      "label": "Redondeo de la etiqueta",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Divisor"
+    },
+    {
+      "type": "range",
+      "id": "start_position",
+      "label": "Posición inicial",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Color de la línea",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "line_width",
+      "label": "Grosor de la línea",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "handle_size",
+      "label": "Tamaño del círculo",
+      "min": 40,
+      "max": 88,
+      "step": 2,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "color",
+      "id": "handle_bg",
+      "label": "Fondo del círculo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "handle_opacity",
+      "label": "Opacidad del círculo",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 35,
+      "info": "Por debajo de 100% se ve la imagen a través del control."
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Color de las flechas",
+      "default": "#1c1c1c"
+    },
+    {
+      "type": "text",
+      "id": "slider_label",
+      "label": "Etiqueta accesible del control",
+      "default": "Comparar antes y después",
+      "info": "Lo que anuncian los lectores de pantalla."
+    },
+    {
+      "type": "header",
+      "content": "Contenedor"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho máximo",
+      "min": 400,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1100
+    },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "Proporción en escritorio",
+      "options": [
+        { "value": "auto", "label": "La de la imagen" },
+        { "value": "1 / 1", "label": "1:1 cuadrada" },
+        { "value": "4 / 5", "label": "4:5 vertical" },
+        { "value": "3 / 2", "label": "3:2 horizontal" },
+        { "value": "16 / 9", "label": "16:9 panorámica" }
+      ],
+      "default": "1 / 1"
+    },
+    {
+      "type": "select",
+      "id": "ratio_mobile",
+      "label": "Proporción en celular",
+      "options": [
+        { "value": "same", "label": "Igual que escritorio" },
+        { "value": "1 / 1", "label": "1:1 cuadrada" },
+        { "value": "4 / 5", "label": "4:5 vertical" },
+        { "value": "3 / 4", "label": "3:4 vertical" }
+      ],
+      "default": "4 / 5"
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "label": "Redondeo de las esquinas",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Espaciado"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "label": "Margen inferior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Antes y después"
+    }
+  ]
+}
+{% endschema %}

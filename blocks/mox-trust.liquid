@@ -1,0 +1,279 @@
+{%- liquid
+  assign s = block.settings
+  assign gid = block.id
+
+  if s.layout == 'inline'
+    assign dir = 'row'
+    assign align = 'flex-start'
+    assign txt_align = 'left'
+  else
+    assign dir = 'column'
+    assign align = 'center'
+    assign txt_align = 'center'
+  endif
+-%}
+
+<div id="mox-trust-{{ gid }}" class="mox-trust spacing-style" style="--mt-cols: {{ s.columns }}; --mt-gap: {{ s.gap }}px; --mt-icon: {{ s.icon_size }}px; --mt-stroke: {{ s.icon_weight }}; --mt-icon-color: {{ s.icon_color }}; --mt-text-color: {{ s.text_color }}; --mt-text-size: {{ s.text_size }}px; --mt-dir: {{ dir }}; --mt-align: {{ align }}; --mt-txt-align: {{ txt_align }}; {% render 'spacing-style', settings: block.settings %}" {{ block.shopify_attributes }}>
+
+  {%- if s.show_divider -%}
+    <hr class="mox-trust__divider" style="border-color: {{ s.divider_color }};">
+  {%- endif -%}
+
+  {%- if s.title != blank -%}
+    <p class="mox-trust__title" style="font-size: {{ s.title_size }}px; color: {{ s.title_color }}; text-align: {{ s.title_align }};">{{ s.title }}</p>
+  {%- endif -%}
+
+  <ul class="mox-trust__grid">
+    {%- for i in (1..4) -%}
+      {%- liquid
+        assign k_text = 'text_' | append: i
+        assign k_icon = 'icon_' | append: i
+        assign texto = s[k_text]
+        assign icono = s[k_icon]
+      -%}
+      {%- if texto != blank -%}
+        <li class="mox-trust__item">
+          <span class="mox-trust__icon" aria-hidden="true">
+            {%- case icono -%}
+              {%- when 'camion' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M1.5 5.5h11v10h-11z"/><path d="M12.5 9h4l3 3v3.5h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+              {%- when 'escudo' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5l7.5 3v6c0 4.5-3 8.2-7.5 10-4.5-1.8-7.5-5.5-7.5-10v-6z"/><path d="M8.5 11.8l2.4 2.4 4.6-5"/></svg>
+              {%- when 'corazon' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 20.5S3 15 3 9.2A4.7 4.7 0 0 1 12 6.8a4.7 4.7 0 0 1 9 2.4c0 5.8-9 11.3-9 11.3z"/></svg>
+              {%- when 'auriculares' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h2.5v5.5H4.5A2.5 2.5 0 0 1 2 17v-.5A2.5 2.5 0 0 1 4.5 14z"/><path d="M20 14h-2.5v5.5h2A2.5 2.5 0 0 0 22 17v-.5a2.5 2.5 0 0 0-2.5-2.5z"/></svg>
+              {%- when 'reloj' -%}
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M12 6.8V12l3.6 2.2"/></svg>
+              {%- when 'devolucion' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 9.5A9 9 0 0 1 20 11"/><path d="M20.5 14.5A9 9 0 0 1 4 13"/><path d="M3.5 4.5v5h5"/><path d="M20.5 19.5v-5h-5"/></svg>
+              {%- when 'estrella' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3.5l2.7 5.5 6 .9-4.35 4.2 1.05 6-5.4-2.8-5.4 2.8 1.05-6L3.3 9.9l6-.9z"/></svg>
+              {%- when 'candado' -%}
+                <svg viewBox="0 0 24 24" fill="none"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+              {%- when 'caja' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5L12 11.5l8.5-4"/><path d="M12 11.5v9"/></svg>
+              {%- when 'ojo' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.8"/></svg>
+              {%- when 'check' -%}
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.7 2.7L16 9.5"/></svg>
+              {%- when 'rayo' -%}
+                <svg viewBox="0 0 24 24" fill="none"><path d="M13 2.5L4.5 13.5H11l-1 8 8.5-11H12z"/></svg>
+              {%- else -%}
+                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9"/></svg>
+            {%- endcase -%}
+          </span>
+          <span class="mox-trust__text">{{ texto }}</span>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+
+<style>
+  #mox-trust-{{ gid }} { width: 100%; box-sizing: border-box; }
+
+  #mox-trust-{{ gid }} .mox-trust__divider {
+    border: 0;
+    border-top: 1px solid;
+    margin: 0 0 22px;
+  }
+
+  #mox-trust-{{ gid }} .mox-trust__title {
+    font-weight: 600;
+    margin: 0 0 20px;
+    letter-spacing: .01em;
+    line-height: 1.25;
+  }
+
+  #mox-trust-{{ gid }} .mox-trust__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(var(--mt-cols), minmax(0, 1fr));
+    gap: var(--mt-gap);
+  }
+
+  #mox-trust-{{ gid }} .mox-trust__item {
+    display: flex;
+    flex-direction: var(--mt-dir);
+    align-items: var(--mt-align);
+    gap: 10px;
+    text-align: var(--mt-txt-align);
+    min-width: 0;
+  }
+
+  #mox-trust-{{ gid }} .mox-trust__icon {
+    flex: 0 0 auto;
+    display: block;
+    line-height: 0;
+  }
+
+  #mox-trust-{{ gid }} .mox-trust__icon svg {
+    width: var(--mt-icon);
+    height: var(--mt-icon);
+    display: block;
+    stroke: var(--mt-icon-color);
+    stroke-width: var(--mt-stroke);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  #mox-trust-{{ gid }} .mox-trust__text {
+    font-size: var(--mt-text-size);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--mt-text-color);
+    overflow-wrap: break-word;
+  }
+
+  /* En celular siempre dos columnas, para que el texto no se apriete */
+  @media screen and (max-width: 749px) {
+    #mox-trust-{{ gid }} .mox-trust__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Beneficios MOX",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "title", "label": "Título", "default": "¿Por qué elegirnos?", "info": "Dejalo vacío para ocultarlo." },
+    { "type": "range", "id": "title_size", "label": "Tamaño del título", "min": 12, "max": 40, "step": 1, "unit": "px", "default": 17 },
+    { "type": "color", "id": "title_color", "label": "Color del título", "default": "#111111" },
+    {
+      "type": "select",
+      "id": "title_align",
+      "label": "Alineación del título",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" }
+      ],
+      "default": "left"
+    },
+
+    { "type": "header", "content": "Beneficio 1" },
+    { "type": "text", "id": "text_1", "label": "Texto", "default": "Envío gratis a todo el país" },
+    {
+      "type": "select",
+      "id": "icon_1",
+      "label": "Ícono",
+      "options": [
+        { "value": "camion", "label": "Camión" },
+        { "value": "escudo", "label": "Escudo" },
+        { "value": "corazon", "label": "Corazón" },
+        { "value": "auriculares", "label": "Auriculares" },
+        { "value": "reloj", "label": "Reloj" },
+        { "value": "devolucion", "label": "Devolución" },
+        { "value": "estrella", "label": "Estrella" },
+        { "value": "candado", "label": "Candado" },
+        { "value": "caja", "label": "Caja" },
+        { "value": "ojo", "label": "Ojo" },
+        { "value": "check", "label": "Check" },
+        { "value": "rayo", "label": "Rayo" }
+      ],
+      "default": "camion"
+    },
+
+    { "type": "header", "content": "Beneficio 2" },
+    { "type": "text", "id": "text_2", "label": "Texto", "default": "Probalo sin riesgo por 60 días" },
+    {
+      "type": "select",
+      "id": "icon_2",
+      "label": "Ícono",
+      "options": [
+        { "value": "camion", "label": "Camión" },
+        { "value": "escudo", "label": "Escudo" },
+        { "value": "corazon", "label": "Corazón" },
+        { "value": "auriculares", "label": "Auriculares" },
+        { "value": "reloj", "label": "Reloj" },
+        { "value": "devolucion", "label": "Devolución" },
+        { "value": "estrella", "label": "Estrella" },
+        { "value": "candado", "label": "Candado" },
+        { "value": "caja", "label": "Caja" },
+        { "value": "ojo", "label": "Ojo" },
+        { "value": "check", "label": "Check" },
+        { "value": "rayo", "label": "Rayo" }
+      ],
+      "default": "devolucion"
+    },
+
+    { "type": "header", "content": "Beneficio 3" },
+    { "type": "text", "id": "text_3", "label": "Texto", "default": "Atención al cliente" },
+    {
+      "type": "select",
+      "id": "icon_3",
+      "label": "Ícono",
+      "options": [
+        { "value": "camion", "label": "Camión" },
+        { "value": "escudo", "label": "Escudo" },
+        { "value": "corazon", "label": "Corazón" },
+        { "value": "auriculares", "label": "Auriculares" },
+        { "value": "reloj", "label": "Reloj" },
+        { "value": "devolucion", "label": "Devolución" },
+        { "value": "estrella", "label": "Estrella" },
+        { "value": "candado", "label": "Candado" },
+        { "value": "caja", "label": "Caja" },
+        { "value": "ojo", "label": "Ojo" },
+        { "value": "check", "label": "Check" },
+        { "value": "rayo", "label": "Rayo" }
+      ],
+      "default": "auriculares"
+    },
+
+    { "type": "header", "content": "Beneficio 4" },
+    { "type": "text", "id": "text_4", "label": "Texto", "default": "Pagos seguros" },
+    {
+      "type": "select",
+      "id": "icon_4",
+      "label": "Ícono",
+      "options": [
+        { "value": "camion", "label": "Camión" },
+        { "value": "escudo", "label": "Escudo" },
+        { "value": "corazon", "label": "Corazón" },
+        { "value": "auriculares", "label": "Auriculares" },
+        { "value": "reloj", "label": "Reloj" },
+        { "value": "devolucion", "label": "Devolución" },
+        { "value": "estrella", "label": "Estrella" },
+        { "value": "candado", "label": "Candado" },
+        { "value": "caja", "label": "Caja" },
+        { "value": "ojo", "label": "Ojo" },
+        { "value": "check", "label": "Check" },
+        { "value": "rayo", "label": "Rayo" }
+      ],
+      "default": "escudo"
+    },
+
+    { "type": "header", "content": "Distribución" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Disposición",
+      "options": [
+        { "value": "stacked", "label": "Ícono arriba del texto" },
+        { "value": "inline", "label": "Ícono al lado del texto" }
+      ],
+      "default": "stacked"
+    },
+    { "type": "range", "id": "columns", "label": "Columnas en escritorio", "min": 1, "max": 4, "step": 1, "default": 2 },
+    { "type": "range", "id": "gap", "label": "Separación", "min": 8, "max": 48, "step": 2, "unit": "px", "default": 24 },
+
+    { "type": "header", "content": "Estilo" },
+    { "type": "range", "id": "icon_size", "label": "Tamaño del ícono", "min": 16, "max": 48, "step": 2, "unit": "px", "default": 26 },
+    { "type": "range", "id": "icon_weight", "label": "Grosor del ícono", "min": 1, "max": 2.5, "step": 0.1, "default": 1.4 },
+    { "type": "color", "id": "icon_color", "label": "Color del ícono", "default": "#111111" },
+    { "type": "range", "id": "text_size", "label": "Tamaño del texto", "min": 11, "max": 20, "step": 1, "unit": "px", "default": 13 },
+    { "type": "color", "id": "text_color", "label": "Color del texto", "default": "#111111" },
+    { "type": "checkbox", "id": "show_divider", "label": "Línea separadora arriba", "default": true },
+    { "type": "color", "id": "divider_color", "label": "Color de la línea", "default": "#E5E5E5" },
+
+    { "type": "header", "content": "Espaciado" },
+    { "type": "range", "id": "padding-block-start", "label": "Arriba", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding-block-end", "label": "Abajo", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 }
+  ],
+  "presets": [{ "name": "Beneficios MOX" }]
+}
+{% endschema %}

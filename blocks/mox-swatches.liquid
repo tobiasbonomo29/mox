@@ -1,0 +1,126 @@
+{%- liquid
+  assign s = block.settings
+  if s.align == 'center'
+    assign justify = 'center'
+  else
+    assign justify = 'flex-start'
+  endif
+-%}
+
+<div class="mox-swatches spacing-style" data-indicator="{{ s.active_style }}" data-show-name="{{ s.show_name }}" style="--mox-size: {{ s.swatch_size }}px; --mox-gap: {{ s.gap }}px; --mox-radius: {{ s.radius }}px; --mox-bg: {{ s.swatch_bg }}; --mox-active: {{ s.active_color }}; --mox-justify: {{ justify }}; --mox-title-size: {{ s.title_size }}px; {% render 'spacing-style', settings: block.settings %}" {{ block.shopify_attributes }}>
+
+  {%- if s.title != blank -%}
+    <p class="mox-swatches__title" style="color: {{ s.title_color }};">{{ s.title }}</p>
+  {%- endif -%}
+
+  <div class="mox-swatches__row" role="list">
+    {%- for i in (1..5) -%}
+      {%- liquid
+        assign k_img = 'image_' | append: i
+        assign k_name = 'name_' | append: i
+        assign k_url = 'url_' | append: i
+        assign k_cur = 'current_' | append: i
+        assign img = s[k_img]
+        assign label = s[k_name] | default: 'Modelo'
+        assign link = s[k_url] | default: '#'
+        assign is_cur = s[k_cur]
+      -%}
+      {%- if img != blank -%}
+        <a class="mox-swatch{% if is_cur %} mox-swatch--current{% endif %}" role="listitem"{% unless is_cur %} href="{{ link }}"{% endunless %}{% if is_cur %} aria-current="true"{% endif %}><span class="mox-swatch__media"><img class="mox-swatch__img" src="{{ img | image_url: width: 200 }}" width="{{ img.width }}" height="{{ img.height }}" alt="{{ label | escape }}" loading="lazy"></span><span class="mox-swatch__name">{{ label }}</span></a>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .mox-swatches__title { font-size: var(--mox-title-size); font-weight: 600; margin: 0 0 8px; }
+  .mox-swatches__row { display: flex; gap: var(--mox-gap); justify-content: var(--mox-justify); overflow-x: auto; scrollbar-width: none; }
+  .mox-swatches__row::-webkit-scrollbar { display: none; }
+  .mox-swatch { flex: 0 0 auto; width: var(--mox-size); display: block; text-decoration: none; color: inherit; padding-bottom: 3px; border-bottom: 2px solid transparent; }
+  .mox-swatch__media { display: block; width: var(--mox-size); height: var(--mox-size); background: var(--mox-bg); border-radius: var(--mox-radius); overflow: hidden; border: 1px solid transparent; transition: opacity 0.2s ease, border-color 0.2s ease; }
+  .mox-swatch__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mox-swatch:hover .mox-swatch__media { opacity: 0.72; }
+  .mox-swatches[data-indicator='underline'] .mox-swatch--current { border-bottom-color: var(--mox-active); }
+  .mox-swatches[data-indicator='border'] .mox-swatch--current .mox-swatch__media { border-color: var(--mox-active); }
+  .mox-swatch--current { cursor: default; }
+  .mox-swatch__name { display: none; font-size: 0.75rem; margin-top: 4px; text-align: center; line-height: 1.2; }
+  .mox-swatches[data-show-name='true'] .mox-swatch__name { display: block; }
+  .mox-swatch:focus-visible { outline: 2px solid var(--mox-active); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .mox-swatch__media { transition: none; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Selector de modelos",
+  "tag": null,
+  "settings": [
+    { "type": "text", "id": "title", "label": "Título", "default": "Colores" },
+    { "type": "color", "id": "title_color", "label": "Color del título", "default": "#111111" },
+    { "type": "range", "id": "title_size", "label": "Tamaño del título", "min": 10, "max": 32, "step": 1, "unit": "px", "default": 13 },
+
+    { "type": "header", "content": "Modelo 1" },
+    { "type": "image_picker", "id": "image_1", "label": "Foto" },
+    { "type": "text", "id": "name_1", "label": "Nombre" },
+    { "type": "url", "id": "url_1", "label": "Enlace" },
+    { "type": "checkbox", "id": "current_1", "label": "Es el producto actual", "default": false },
+
+    { "type": "header", "content": "Modelo 2" },
+    { "type": "image_picker", "id": "image_2", "label": "Foto" },
+    { "type": "text", "id": "name_2", "label": "Nombre" },
+    { "type": "url", "id": "url_2", "label": "Enlace" },
+    { "type": "checkbox", "id": "current_2", "label": "Es el producto actual", "default": false },
+
+    { "type": "header", "content": "Modelo 3" },
+    { "type": "image_picker", "id": "image_3", "label": "Foto" },
+    { "type": "text", "id": "name_3", "label": "Nombre" },
+    { "type": "url", "id": "url_3", "label": "Enlace" },
+    { "type": "checkbox", "id": "current_3", "label": "Es el producto actual", "default": false },
+
+    { "type": "header", "content": "Modelo 4" },
+    { "type": "image_picker", "id": "image_4", "label": "Foto" },
+    { "type": "text", "id": "name_4", "label": "Nombre" },
+    { "type": "url", "id": "url_4", "label": "Enlace" },
+    { "type": "checkbox", "id": "current_4", "label": "Es el producto actual", "default": false },
+
+    { "type": "header", "content": "Modelo 5" },
+    { "type": "image_picker", "id": "image_5", "label": "Foto" },
+    { "type": "text", "id": "name_5", "label": "Nombre" },
+    { "type": "url", "id": "url_5", "label": "Enlace" },
+    { "type": "checkbox", "id": "current_5", "label": "Es el producto actual", "default": false },
+
+    { "type": "header", "content": "Estilo" },
+    { "type": "range", "id": "swatch_size", "label": "Tamaño", "min": 48, "max": 120, "step": 4, "unit": "px", "default": 72 },
+    { "type": "range", "id": "gap", "label": "Separación", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "radius", "label": "Redondeo", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 0 },
+    {
+      "type": "select",
+      "id": "active_style",
+      "label": "Marca del modelo actual",
+      "options": [
+        { "value": "underline", "label": "Línea debajo" },
+        { "value": "border", "label": "Borde alrededor" },
+        { "value": "none", "label": "Ninguna" }
+      ],
+      "default": "underline"
+    },
+    { "type": "color", "id": "active_color", "label": "Color de la marca", "default": "#111111" },
+    { "type": "color", "id": "swatch_bg", "label": "Fondo de las miniaturas", "default": "#F2F2F2" },
+    { "type": "checkbox", "id": "show_name", "label": "Mostrar el nombre debajo", "default": false },
+    {
+      "type": "select",
+      "id": "align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" }
+      ],
+      "default": "left"
+    },
+
+    { "type": "header", "content": "Espaciado" },
+    { "type": "range", "id": "padding-block-start", "label": "Arriba", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding-block-end", "label": "Abajo", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 }
+  ],
+  "presets": [{ "name": "Selector de modelos" }]
+}
+{% endschema %}

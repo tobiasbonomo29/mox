@@ -1,0 +1,477 @@
+{%- liquid
+  assign uid = section.id
+  assign s = section.settings
+-%}
+
+<style>
+  .pg-{{ uid }} {
+    --pg-bg: {{ s.bg_color }};
+    --pg-title: {{ s.title_color }};
+    --pg-subtitle: {{ s.subtitle_color }};
+    --pg-name: {{ s.name_color }};
+    --pg-desc: {{ s.desc_color }};
+    --pg-gap: {{ s.column_gap }}px;
+    --pg-cols: {{ s.columns }};
+    --pg-cols-mobile: {{ s.columns_mobile }};
+    --pg-ratio: {{ s.image_ratio }};
+    --pg-fit: {{ s.image_fit }};
+    --pg-pad: {{ s.image_padding }}%;
+
+    background: var(--pg-bg);
+    padding: {{ s.padding_top }}px 24px {{ s.padding_bottom }}px;
+  }
+
+  .pg-{{ uid }} .pg__inner {
+    max-width: {{ s.max_width }}px;
+    margin-inline: auto;
+  }
+
+  .pg-{{ uid }} .pg__header {
+    text-align: {{ s.header_align }};
+    margin-bottom: {{ s.header_gap }}px;
+  }
+
+  .pg-{{ uid }} .pg__title {
+    margin: 0;
+    color: var(--pg-title);
+    font-size: clamp(28px, 5vw, {{ s.title_size }}px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+
+  .pg-{{ uid }} .pg__subtitle {
+    margin: 12px 0 0;
+    color: var(--pg-subtitle);
+    font-size: clamp(15px, 2.2vw, {{ s.subtitle_size }}px);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .pg-{{ uid }} .pg__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--pg-cols), minmax(0, 1fr));
+    gap: var(--pg-gap);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .pg-{{ uid }} .pg__item { min-width: 0; }
+
+  .pg-{{ uid }} .pg__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .pg-{{ uid }} .pg__link:focus-visible {
+    outline: 2px solid var(--pg-name);
+    outline-offset: 6px;
+    border-radius: 4px;
+  }
+
+  .pg-{{ uid }} .pg__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--pg-ratio);
+    padding: var(--pg-pad);
+    overflow: hidden;
+  }
+
+  .pg-{{ uid }} .pg__media img,
+  .pg-{{ uid }} .pg__media svg {
+    width: 100%;
+    height: 100%;
+    object-fit: var(--pg-fit);
+    object-position: center;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .pg-{{ uid }} .pg__link:hover .pg__media img,
+  .pg-{{ uid }} .pg__link:focus-visible .pg__media img {
+    transform: scale(1.03);
+  }
+
+  .pg-{{ uid }} .pg__name {
+    margin: 22px 0 0;
+    text-align: center;
+    color: var(--pg-name);
+    font-size: clamp(17px, 2.4vw, {{ s.name_size }}px);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .pg-{{ uid }} .pg__desc {
+    margin: 10px 0 0;
+    text-align: center;
+    color: var(--pg-desc);
+    font-size: clamp(13px, 1.8vw, {{ s.desc_size }}px);
+    font-weight: 400;
+    line-height: 1.45;
+  }
+
+  .pg-{{ uid }} .pg__warning {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    border: 1px dashed rgba(128, 128, 128, 0.6);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--pg-desc);
+  }
+
+  @media screen and (min-width: 750px) and (max-width: 1023px) {
+    .pg-{{ uid }} .pg__grid {
+      grid-template-columns: repeat(min(var(--pg-cols), 2), minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .pg-{{ uid }} .pg__grid {
+      grid-template-columns: repeat(var(--pg-cols-mobile), minmax(0, 1fr));
+      gap: calc(var(--pg-gap) * 0.6);
+    }
+    .pg-{{ uid }} .pg__name { margin-top: 14px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pg-{{ uid }} .pg__media img { transition: none; }
+    .pg-{{ uid }} .pg__link:hover .pg__media img,
+    .pg-{{ uid }} .pg__link:focus-visible .pg__media img { transform: none; }
+  }
+</style>
+
+<div class="pg-{{ uid }}">
+  <div class="pg__inner">
+    {%- if s.title != blank or s.subtitle != blank -%}
+      <div class="pg__header">
+        {%- if s.title != blank -%}
+          <h2 class="pg__title">{{ s.title | escape }}</h2>
+        {%- endif -%}
+        {%- if s.subtitle != blank -%}
+          <p class="pg__subtitle">{{ s.subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="pg__grid">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign bs = block.settings
+            assign prod = bs.product
+
+            if bs.image != blank
+              assign img = bs.image
+            elsif prod != blank
+              assign img = prod.featured_image
+            else
+              assign img = blank
+            endif
+
+            if bs.title != blank
+              assign name = bs.title
+            elsif prod != blank
+              assign name = prod.title
+            else
+              assign name = blank
+            endif
+
+            if bs.link != blank
+              assign href = bs.link
+            elsif prod != blank
+              assign href = prod.url
+            else
+              assign href = blank
+            endif
+
+            if s.disable_lazy
+              assign loading_attr = 'eager'
+            else
+              assign loading_attr = 'lazy'
+            endif
+
+            assign sizes_attr = '(max-width: 749px) 96vw, 90vw'
+          -%}
+
+          <li class="pg__item" {{ block.shopify_attributes }}>
+            {%- capture card -%}
+              <div class="pg__media">
+                {%- if img != blank -%}
+                  {{
+                    img
+                    | image_url: width: 1400
+                    | image_tag:
+                      alt: '',
+                      widths: '300, 450, 600, 800, 1000, 1400',
+                      sizes: sizes_attr,
+                      loading: loading_attr
+                  }}
+                {%- else -%}
+                  {{ 'product-1' | placeholder_svg_tag }}
+                {%- endif -%}
+              </div>
+              {%- if name != blank -%}
+                <h3 class="pg__name">{{ name | escape }}</h3>
+              {%- endif -%}
+              {%- if bs.description != blank -%}
+                <p class="pg__desc">{{ bs.description | escape }}</p>
+              {%- endif -%}
+            {%- endcapture -%}
+
+            {%- if href != blank -%}
+              <a class="pg__link" href="{{ href }}">{{ card }}</a>
+            {%- else -%}
+              <div class="pg__link">{{ card }}</div>
+            {%- endif -%}
+
+            {%- if request.design_mode and prod == blank and bs.image == blank -%}
+              <p class="pg__warning">Falta configurar esta columna: elegí un producto o cargá una imagen.</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- elsif request.design_mode -%}
+      <p class="pg__warning">Agregá al menos una columna desde los ajustes de la sección.</p>
+    {%- endif -%}
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Grilla de productos",
+  "tag": "section",
+  "class": "mox-product-grid",
+  "settings": [
+    { "type": "header", "content": "Encabezado" },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Nuestros modelos"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Tres niveles de filtrado para distintos momentos del día."
+    },
+    {
+      "type": "select",
+      "id": "header_align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centrado" }
+      ],
+      "default": "left"
+    },
+    { "type": "header", "content": "Imágenes" },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Proporción",
+      "options": [
+        { "value": "1 / 1", "label": "1:1 cuadrada" },
+        { "value": "4 / 5", "label": "4:5 vertical" },
+        { "value": "3 / 4", "label": "3:4 vertical" },
+        { "value": "16 / 10", "label": "16:10 horizontal" }
+      ],
+      "default": "1 / 1"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Ajuste",
+      "options": [
+        { "value": "contain", "label": "Mostrar completa (contain)" },
+        { "value": "cover", "label": "Recortar para llenar (cover)" }
+      ],
+      "default": "contain"
+    },
+    {
+      "type": "range",
+      "id": "image_padding",
+      "label": "Aire alrededor del producto",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "%",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "disable_lazy",
+      "label": "Cargar las imágenes de inmediato",
+      "default": false,
+      "info": "Activalo solo si esta sección está al principio de la página."
+    },
+    { "type": "header", "content": "Diseño" },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Columnas en escritorio",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columnas en celular",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho máximo del contenido",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Espacio entre columnas",
+      "min": 12,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "bg_color", "label": "Fondo", "default": "#f5f5f7" },
+    { "type": "color", "id": "title_color", "label": "Título", "default": "#111111" },
+    { "type": "color", "id": "subtitle_color", "label": "Subtítulo", "default": "#4a4a4f" },
+    { "type": "color", "id": "name_color", "label": "Nombre del producto", "default": "#111111" },
+    { "type": "color", "id": "desc_color", "label": "Descripción", "default": "#4a4a4f" },
+    { "type": "header", "content": "Tipografía" },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 24,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "subtitle_size",
+      "label": "Tamaño del subtítulo",
+      "min": 13,
+      "max": 26,
+      "step": 1,
+      "unit": "px",
+      "default": 17
+    },
+    {
+      "type": "range",
+      "id": "name_size",
+      "label": "Tamaño del nombre",
+      "min": 15,
+      "max": 34,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "desc_size",
+      "label": "Tamaño de la descripción",
+      "min": 12,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    { "type": "header", "content": "Espaciado" },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "header_gap",
+      "label": "Espacio entre encabezado y grilla",
+      "min": 16,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Columna",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Producto",
+          "info": "De acá salen el nombre y el enlace."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Imagen",
+          "info": "Opcional. Si la dejás vacía se usa la imagen destacada del producto."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título personalizado",
+          "info": "Opcional. Reemplaza el nombre del producto."
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Descripción corta",
+          "info": "Una o dos líneas."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Enlace personalizado",
+          "info": "Opcional. Tiene prioridad sobre el enlace del producto."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Grilla de productos",
+      "blocks": [{ "type": "item" }, { "type": "item" }, { "type": "item" }]
+    }
+  ]
+}
+{% endschema %}

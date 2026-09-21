@@ -1,0 +1,68 @@
+{%- liquid
+  assign s = block.settings
+  assign img = s.image
+  assign label = s.name | default: img.alt | default: 'Modelo'
+
+  if s.is_current
+    assign extra_class = ' mox-swatch--current'
+  else
+    assign extra_class = ''
+  endif
+-%}
+
+{%- if img != blank -%}
+  
+    {% unless s.is_current %}href="{{ s.url | default: '#' }}"{% endunless %}
+    class="mox-swatch{{ extra_class }}"
+    role="listitem"
+    {% if s.is_current %}aria-current="true"{% endif %}
+    {{ block.shopify_attributes }}
+  >
+    <span class="mox-swatch__media">
+      <img
+        class="mox-swatch__img"
+        src="{{ img | image_url: width: 200 }}"
+        srcset="{{ img | image_url: width: 100 }} 100w,
+                {{ img | image_url: width: 200 }} 200w,
+                {{ img | image_url: width: 300 }} 300w"
+        sizes="120px"
+        width="{{ img.width }}"
+        height="{{ img.height }}"
+        alt="{{ label | escape }}"
+        loading="lazy"
+      >
+    </span>
+    <span class="mox-swatch__name">{{ label }}</span>
+  </a>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Miniatura",
+  "tag": null,
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Foto del modelo"
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Nombre",
+      "default": "Modelo"
+    },
+    {
+      "type": "url",
+      "id": "url",
+      "label": "Enlace al producto"
+    },
+    {
+      "type": "checkbox",
+      "id": "is_current",
+      "label": "Este es el producto actual",
+      "default": false
+    }
+  ]
+}
+{% endschema %}

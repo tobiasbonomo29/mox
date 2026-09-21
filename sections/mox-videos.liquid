@@ -1,0 +1,318 @@
+{%- liquid
+  assign s = section.settings
+  assign sid = section.id
+
+  case s.ratio
+    when 'v916'
+      assign ar = '9 / 16'
+    when 'v45'
+      assign ar = '4 / 5'
+    when 'v11'
+      assign ar = '1 / 1'
+    when 'v169'
+      assign ar = '16 / 9'
+    else
+      assign ar = '9 / 16'
+  endcase
+-%}
+
+<section
+  id="mox-videos-{{ sid }}"
+  class="mox-videos mox-videos--{{ s.section_width }} mox-videos--mob-{{ s.mobile_layout }}"
+  {{ section.shopify_attributes }}
+>
+  {%- if s.title != blank or s.subtitle != blank -%}
+    <div class="mox-videos__head">
+      {%- if s.title != blank -%}
+        <h2 class="mox-videos__title">{{ s.title }}</h2>
+      {%- endif -%}
+      {%- if s.subtitle != blank -%}
+        <p class="mox-videos__sub">{{ s.subtitle }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="mox-videos__grid">
+    {%- for block in section.blocks -%}
+      {%- liquid
+        assign b = block.settings
+        assign poster = b.poster
+        if poster == blank
+          assign poster = b.video.preview_image
+        endif
+      -%}
+
+      {%- capture item -%}
+        <div class="mox-videos__media">
+          {%- if b.video != blank -%}
+            <video
+              class="mox-videos__video"
+              {% if s.autoplay %}autoplay{% endif %}
+              {% if s.loop %}loop{% endif %}
+              {% if s.muted %}muted{% endif %}
+              {% if s.controls %}controls{% endif %}
+              playsinline
+              preload="metadata"
+              {% if poster != blank %}poster="{{ poster | image_url: width: 900 }}"{% endif %}
+            >
+              {%- for source in b.video.sources -%}
+                {%- if source.format == 'mp4' or source.format == 'm3u8' -%}
+                  <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                {%- endif -%}
+              {%- endfor -%}
+            </video>
+          {%- elsif poster != blank -%}
+            <img class="mox-videos__video" src="{{ poster | image_url: width: 900 }}" alt="" loading="lazy">
+          {%- else -%}
+            <div class="mox-videos__ph">{{ 'lifestyle-1' | placeholder_svg_tag }}</div>
+          {%- endif -%}
+        </div>
+
+        {%- if b.caption != blank -%}
+          <p class="mox-videos__caption">{{ b.caption }}</p>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- if b.link != blank -%}
+        <a class="mox-videos__item" href="{{ b.link }}" {{ block.shopify_attributes }}>{{ item }}</a>
+      {%- else -%}
+        <div class="mox-videos__item" {{ block.shopify_attributes }}>{{ item }}</div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+<style>
+  #mox-videos-{{ sid }} {
+    --mv-cols: {{ s.columns }};
+    --mv-gap: {{ s.gap }}px;
+    --mv-ar: {{ ar }};
+    --mv-radius: {{ s.radius }}px;
+    background: {{ s.bg }};
+    padding-block: {{ s.padding_top }}px {{ s.padding_bottom }}px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__head {
+    text-align: {{ s.title_align }};
+    margin-bottom: {{ s.head_gap }}px;
+    padding-inline: {{ s.side_padding }}px;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__title {
+    font-size: {{ s.title_size }}px;
+    color: {{ s.title_color }};
+    margin: 0;
+    line-height: 1.15;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__sub {
+    font-size: {{ s.sub_size }}px;
+    color: {{ s.sub_color }};
+    margin: 8px 0 0;
+    line-height: 1.4;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__grid {
+    display: grid;
+    grid-template-columns: repeat(var(--mv-cols), minmax(0, 1fr));
+    gap: var(--mv-gap);
+    box-sizing: border-box;
+  }
+
+  /* Ancho de la seccion */
+  #mox-videos-{{ sid }}.mox-videos--full .mox-videos__grid {
+    width: 100%;
+    padding-inline: {{ s.side_padding }}px;
+  }
+
+  #mox-videos-{{ sid }}.mox-videos--page .mox-videos__grid {
+    max-width: {{ s.max_width }}px;
+    margin-inline: auto;
+    padding-inline: {{ s.side_padding }}px;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__item {
+    display: block;
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--mv-ar);
+    border-radius: var(--mv-radius);
+    overflow: hidden;
+    background: rgba(0, 0, 0, .04);
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__ph {
+    position: absolute;
+    inset: 0;
+    opacity: .35;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__ph svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #mox-videos-{{ sid }} .mox-videos__caption {
+    font-size: {{ s.caption_size }}px;
+    color: {{ s.caption_color }};
+    text-align: {{ s.caption_align }};
+    margin: 10px 0 0;
+    line-height: 1.35;
+  }
+
+  /* ---------- Movil ---------- */
+  @media screen and (max-width: 749px) {
+
+    #mox-videos-{{ sid }}.mox-videos--mob-stack .mox-videos__grid {
+      grid-template-columns: 1fr;
+    }
+
+    #mox-videos-{{ sid }}.mox-videos--mob-carousel .mox-videos__grid {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    #mox-videos-{{ sid }}.mox-videos--mob-carousel .mox-videos__grid::-webkit-scrollbar {
+      display: none;
+    }
+
+    #mox-videos-{{ sid }}.mox-videos--mob-carousel .mox-videos__item {
+      flex: 0 0 {{ s.mobile_card_width }}%;
+      scroll-snap-align: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #mox-videos-{{ sid }} .mox-videos__video {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var root = document.getElementById('mox-videos-{{ sid }}');
+    if (!root) return;
+
+    /* Respeta la preferencia de animaciones reducidas del usuario.
+       Solo mira adentro de esta seccion, nada mas. */
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reduce.matches) {
+      root.querySelectorAll('video').forEach(function (v) {
+        v.removeAttribute('autoplay');
+        v.setAttribute('controls', '');
+        v.pause();
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Videos MOX",
+  "tag": "section",
+  "class": "mox-videos-section",
+  "blocks": [
+    {
+      "type": "video_item",
+      "name": "Video",
+      "settings": [
+        { "type": "video", "id": "video", "label": "Video" },
+        { "type": "image_picker", "id": "poster", "label": "Imagen de portada", "info": "Se ve mientras carga el video. Si la dejás vacía usa la miniatura del propio video." },
+        { "type": "text", "id": "caption", "label": "Texto debajo del video" },
+        { "type": "url", "id": "link", "label": "Enlace al hacer clic" }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "settings": [
+    { "type": "header", "content": "Encabezado" },
+    { "type": "text", "id": "title", "label": "Título", "info": "Dejalo vacío para ocultarlo." },
+    { "type": "text", "id": "subtitle", "label": "Subtítulo" },
+    { "type": "range", "id": "title_size", "label": "Tamaño del título", "min": 14, "max": 64, "step": 1, "unit": "px", "default": 32 },
+    { "type": "color", "id": "title_color", "label": "Color del título", "default": "#111111" },
+    { "type": "range", "id": "sub_size", "label": "Tamaño del subtítulo", "min": 10, "max": 28, "step": 1, "unit": "px", "default": 15 },
+    { "type": "color", "id": "sub_color", "label": "Color del subtítulo", "default": "#666666" },
+    { "type": "select", "id": "title_align", "label": "Alineación", "default": "left", "options": [
+      { "value": "left", "label": "Izquierda" },
+      { "value": "center", "label": "Centro" },
+      { "value": "right", "label": "Derecha" }
+    ]},
+    { "type": "range", "id": "head_gap", "label": "Espacio bajo el encabezado", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 28 },
+
+    { "type": "header", "content": "Diseño" },
+    { "type": "select", "id": "section_width", "label": "Ancho de la sección", "default": "page", "options": [
+      { "value": "full", "label": "Borde a borde" },
+      { "value": "page", "label": "Ancho de página" }
+    ]},
+    { "type": "range", "id": "max_width", "label": "Ancho máximo (modo página)", "min": 800, "max": 1800, "step": 20, "unit": "px", "default": 1300 },
+    { "type": "range", "id": "side_padding", "label": "Margen lateral", "min": 0, "max": 80, "step": 2, "unit": "px", "default": 20 },
+    { "type": "range", "id": "columns", "label": "Cantidad de columnas", "min": 1, "max": 5, "step": 1, "default": 3 },
+    { "type": "range", "id": "gap", "label": "Espacio entre columnas", "min": 0, "max": 60, "step": 2, "unit": "px", "default": 16 },
+    { "type": "select", "id": "ratio", "label": "Formato del video", "default": "v916", "options": [
+      { "value": "v916", "label": "Vertical 9:16" },
+      { "value": "v45", "label": "Retrato 4:5" },
+      { "value": "v11", "label": "Cuadrado 1:1" },
+      { "value": "v169", "label": "Horizontal 16:9" }
+    ]},
+    { "type": "range", "id": "radius", "label": "Redondeo de esquinas", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 8 },
+    { "type": "color", "id": "bg", "label": "Color de fondo", "default": "#FFFFFF" },
+    { "type": "range", "id": "padding_top", "label": "Espacio arriba", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Espacio abajo", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+
+    { "type": "header", "content": "Reproducción" },
+    { "type": "checkbox", "id": "autoplay", "label": "Reproducir automáticamente", "default": true },
+    { "type": "checkbox", "id": "loop", "label": "Repetir en bucle", "default": true },
+    { "type": "checkbox", "id": "muted", "label": "Sin sonido", "default": true, "info": "El autoplay solo funciona con el video en silencio." },
+    { "type": "checkbox", "id": "controls", "label": "Mostrar controles", "default": false },
+
+    { "type": "header", "content": "Texto de cada video" },
+    { "type": "range", "id": "caption_size", "label": "Tamaño", "min": 10, "max": 24, "step": 1, "unit": "px", "default": 13 },
+    { "type": "color", "id": "caption_color", "label": "Color", "default": "#111111" },
+    { "type": "select", "id": "caption_align", "label": "Alineación", "default": "left", "options": [
+      { "value": "left", "label": "Izquierda" },
+      { "value": "center", "label": "Centro" },
+      { "value": "right", "label": "Derecha" }
+    ]},
+
+    { "type": "header", "content": "En celular" },
+    { "type": "select", "id": "mobile_layout", "label": "Cómo se ven", "default": "carousel", "options": [
+      { "value": "carousel", "label": "Carrusel deslizable" },
+      { "value": "stack", "label": "Uno debajo del otro" },
+      { "value": "keep", "label": "Mantener las columnas" }
+    ]},
+    { "type": "range", "id": "mobile_card_width", "label": "Ancho de cada video en el carrusel", "min": 40, "max": 100, "step": 5, "unit": "%", "default": 75 }
+  ],
+  "presets": [
+    {
+      "name": "Videos MOX",
+      "blocks": [
+        { "type": "video_item" },
+        { "type": "video_item" },
+        { "type": "video_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

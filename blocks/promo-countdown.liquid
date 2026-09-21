@@ -1,0 +1,314 @@
+{%- liquid
+  assign uid = block.id
+  assign s = block.settings
+
+  comment
+    La fecha se resuelve en Liquid con el huso de Argentina (-03:00, sin
+    horario de verano) para que el contador no se desfase segun donde este
+    el visitante. Si el formato es invalido, date devuelve algo no numerico
+    y plus: 0 lo vuelve 0, con lo cual nunca supera a now_ts y no se muestra.
+  endcomment
+
+  assign end_ts = 0
+  if s.end_date != blank
+    assign end_iso = s.end_date | strip | replace: ' ', 'T' | append: '-03:00'
+    assign end_ts = end_iso | date: '%s' | plus: 0
+  endif
+
+  assign now_ts = 'now' | date: '%s' | plus: 0
+  assign is_live = true
+-%}
+
+<style>
+  .pc-{{ uid }} {
+    --pc-fg: {{ s.text_color }};
+    display: block;
+    margin-top: {{ s.offset_y }}px;
+    color: var(--pc-fg);
+    text-align: {{ s.align }};
+    text-wrap: balance;
+  }
+
+  .pc-{{ uid }} .pc__top {
+    display: block;
+    margin: 0;
+    font-size: clamp(15px, 3.2vw, {{ s.top_size }}px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    {% if s.uppercase %}text-transform: uppercase;{% endif %}
+  }
+
+  .pc-{{ uid }} .pc__discount {
+    display: block;
+    margin: clamp(2px, 0.8vw, 8px) 0;
+    font-size: clamp(40px, 11vw, {{ s.discount_size }}px);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    {% if s.uppercase %}text-transform: uppercase;{% endif %}
+  }
+
+  .pc-{{ uid }} .pc__countdown {
+    display: block;
+    margin: 0;
+    font-size: clamp(13px, 2.4vw, {{ s.bottom_size }}px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    {% if s.uppercase %}text-transform: uppercase;{% endif %}
+  }
+
+  .pc-{{ uid }} .pc__time { font-variant-numeric: tabular-nums; }
+
+  .pc-{{ uid }} .pc__bottom {
+    display: block;
+    margin: {{ s.bottom_gap }}px 0 0;
+    font-size: clamp(12px, 2.2vw, {{ s.bottom_text_size }}px);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
+    max-width: 38ch;
+    {% if s.align == 'center' %}margin-inline: auto;{% endif %}
+  }
+
+  .pc-{{ uid }}-hint {
+    display: block;
+    font-size: 12px;
+    line-height: 1.35;
+    opacity: 0.75;
+    color: {{ s.text_color }};
+  }
+</style>
+
+{%- if is_live -%}
+  <div class="pc-{{ uid }}" data-pc data-end="{{ end_ts }}" {{ block.shopify_attributes }}>
+    {%- if s.text_top != blank -%}
+      <span class="pc__top">{{ s.text_top | escape }}</span>
+    {%- endif -%}
+
+    {%- if s.text_discount != blank -%}
+      <span class="pc__discount">{{ s.text_discount | escape }}</span>
+    {%- endif -%}
+
+    {%- if s.show_countdown -%}
+      <span class="pc__countdown" aria-live="polite">
+        {%- if s.countdown_prefix != blank -%}{{ s.countdown_prefix | escape }} {% endif -%}
+        <span class="pc__time" data-pc-time></span>
+      </span>
+    {%- endif -%}
+
+    {%- if s.text_bottom != blank -%}
+      <span class="pc__bottom">{{ s.text_bottom | escape }}</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+<script>
+  (function () {
+    if (window.__moxPromoCountdown) return;
+    window.__moxPromoCountdown = true;
+
+    function format(ms) {
+      var total = Math.floor(ms / 1000);
+      var d = Math.floor(total / 86400);
+      var h = Math.floor((total % 86400) / 3600);
+      var m = Math.floor((total % 3600) / 60);
+
+      if (d > 0) return d + 'd ' + h + 'h ' + m + 'm';
+      if (h > 0) return h + 'h ' + m + 'm';
+      return m + 'm';
+    }
+
+    function init(root) {
+      if (root.dataset.pcReady) return;
+      root.dataset.pcReady = '1';
+
+      var out = root.querySelector('[data-pc-time]');
+      var endSec = parseInt(root.dataset.end, 10);
+      if (!endSec) return;
+
+      var endMs = endSec * 1000;
+
+      function stop() {
+        if (root.__pcTimer) {
+          clearInterval(root.__pcTimer);
+          root.__pcTimer = null;
+        }
+      }
+
+      function tick() {
+        var left = endMs - Date.now();
+
+        if (left <= 0) {
+          root.style.display = 'none';
+          stop();
+          return;
+        }
+
+        if (out) {
+          var next = format(left);
+          if (out.textContent !== next) out.textContent = next;
+        }
+      }
+
+      stop();
+      tick();
+      root.__pcTimer = setInterval(tick, 30000);
+      root.__pcStop = stop;
+    }
+
+    function scan(scope) {
+      var nodes = (scope || document).querySelectorAll('[data-pc]');
+      for (var i = 0; i < nodes.length; i++) init(nodes[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { scan(); });
+    } else {
+      scan();
+    }
+
+    document.addEventListener('shopify:section:load', function (e) { scan(e.target); });
+    document.addEventListener('shopify:block:select', function (e) { scan(e.target); });
+
+    document.addEventListener('shopify:section:unload', function (e) {
+      var nodes = e.target.querySelectorAll('[data-pc]');
+      for (var i = 0; i < nodes.length; i++) {
+        if (typeof nodes[i].__pcStop === 'function') nodes[i].__pcStop();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Título promo con contador",
+  "settings": [
+    { "type": "header", "content": "Contenido" },
+    {
+      "type": "text",
+      "id": "text_top",
+      "label": "Texto superior",
+      "default": "Hasta"
+    },
+    {
+      "type": "text",
+      "id": "text_discount",
+      "label": "Descuento",
+      "default": "50% OFF"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "Fecha y hora de cierre",
+      "info": "Formato AAAA-MM-DD HH:MM, hora de Argentina. Ejemplo: 2026-09-15 23:59. Si está vacía o ya pasó, no se muestra nada."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Mostrar el contador",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "countdown_prefix",
+      "label": "Texto antes del contador",
+      "default": "Termina en"
+    },
+    {
+      "type": "text",
+      "id": "text_bottom",
+      "label": "Texto sobre el botón",
+      "info": "Aparece justo arriba del botón. Dejalo vacío para no mostrar nada."
+    },
+    { "type": "header", "content": "Posición" },
+    {
+      "type": "range",
+      "id": "offset_y",
+      "label": "Desplazamiento vertical",
+      "min": -320,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 0,
+      "info": "Los valores negativos suben el bloque."
+    },
+    {
+      "type": "range",
+      "id": "bottom_gap",
+      "label": "Espacio antes del texto del botón",
+      "min": 4,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    { "type": "header", "content": "Estilo" },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centrado" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "uppercase",
+      "label": "Texto en mayúsculas",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "top_size",
+      "label": "Tamaño del texto superior",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "discount_size",
+      "label": "Tamaño del descuento",
+      "min": 40,
+      "max": 180,
+      "step": 4,
+      "unit": "px",
+      "default": 104
+    },
+    {
+      "type": "range",
+      "id": "bottom_size",
+      "label": "Tamaño del contador",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "bottom_text_size",
+      "label": "Tamaño del texto sobre el botón",
+      "min": 11,
+      "max": 26,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    }
+  ],
+  "presets": [{ "name": "Título promo con contador" }]
+}
+{% endschema %}

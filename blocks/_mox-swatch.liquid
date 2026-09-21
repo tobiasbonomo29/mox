@@ -1,0 +1,289 @@
+{%- comment -%}
+  SELECTOR DE MODELOS (contenedor)
+  Fila de miniaturas cuadradas, estilo selector de colores de Adidas.
+  Cada miniatura es un bloque anidado que se agrega desde el editor.
+{%- endcomment -%}
+
+{%- liquid
+  assign s = block.settings
+
+  # Alineación de la fila
+  if s.align == 'center'
+    assign justify = 'center'
+  else
+    assign justify = 'flex-start'
+  endif
+-%}
+
+<div
+  class="mox-swatches spacing-style"
+  data-indicator="{{ s.active_style }}"
+  data-show-name="{{ s.show_name }}"
+  style="
+    --mox-size: {{ s.swatch_size }}px;
+    --mox-gap: {{ s.gap }}px;
+    --mox-radius: {{ s.radius }}px;
+    --mox-bg: {{ s.swatch_bg }};
+    --mox-active: {{ s.active_color }};
+    --mox-justify: {{ justify }};
+    {% render 'spacing-style', settings: block.settings %}
+  "
+  {{ block.shopify_attributes }}
+>
+  {%- if s.title != blank -%}
+    <p class="mox-swatches__title" style="color: {{ s.title_color }};">
+      {{ s.title }}
+    </p>
+  {%- endif -%}
+
+  {%- comment -%} Acá se insertan las miniaturas (bloques anidados) {%- endcomment -%}
+  <div
+    class="mox-swatches__row"
+    role="list"
+    aria-label="{{ s.title | default: 'Modelos disponibles' | escape }}"
+  >
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+{% stylesheet %}
+  /* Clases propias con prefijo mox- : no pisan nada del tema */
+
+  .mox-swatches__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+
+  .mox-swatches__row {
+    display: flex;
+    gap: var(--mox-gap);
+    justify-content: var(--mox-justify);
+    /* Scroll lateral en celular sin romper el ancho de la página */
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mox-swatches__row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mox-swatch {
+    flex: 0 0 auto;
+    width: var(--mox-size);
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding-bottom: 3px;
+    border-bottom: 2px solid transparent;
+  }
+
+  .mox-swatch__media {
+    width: var(--mox-size);
+    height: var(--mox-size);
+    background: var(--mox-bg);
+    border-radius: var(--mox-radius);
+    overflow: hidden;
+    border: 1px solid transparent;
+    transition: opacity 0.2s ease, border-color 0.2s ease;
+  }
+
+  .mox-swatch__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .mox-swatch:hover .mox-swatch__media {
+    opacity: 0.72;
+  }
+
+  /* Indicador de la miniatura activa */
+  .mox-swatches[data-indicator='underline'] .mox-swatch--current {
+    border-bottom-color: var(--mox-active);
+  }
+
+  .mox-swatches[data-indicator='border'] .mox-swatch--current .mox-swatch__media {
+    border-color: var(--mox-active);
+  }
+
+  .mox-swatch--current {
+    cursor: default;
+  }
+
+  /* Nombre debajo de cada miniatura */
+  .mox-swatch__name {
+    display: none;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .mox-swatches[data-show-name='true'] .mox-swatch__name {
+    display: block;
+  }
+
+  .mox-swatch:focus-visible {
+    outline: 2px solid var(--mox-active);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mox-swatch__media {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Selector de modelos",
+  "tag": null,
+  "blocks": [
+    {
+      "type": "mox-swatch"
+    }
+  ],
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Colores",
+      "info": "Dejalo vacío para ocultarlo."
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del título",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "swatch_size",
+      "label": "Tamaño de la miniatura",
+      "min": 48,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Separación entre miniaturas",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "radius",
+      "label": "Redondeo de esquinas",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "active_style",
+      "label": "Marca del modelo actual",
+      "options": [
+        { "value": "underline", "label": "Línea debajo" },
+        { "value": "border", "label": "Borde alrededor" },
+        { "value": "none", "label": "Ninguna" }
+      ],
+      "default": "underline"
+    },
+    {
+      "type": "color",
+      "id": "active_color",
+      "label": "Color de la marca",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "swatch_bg",
+      "label": "Fondo de las miniaturas",
+      "default": "#F2F2F2"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_name",
+      "label": "Mostrar el nombre debajo",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Espaciado"
+    },
+    {
+      "type": "range",
+      "id": "padding-block-start",
+      "label": "Arriba",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding-block-end",
+      "label": "Abajo",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-start",
+      "label": "Izquierda",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding-inline-end",
+      "label": "Derecha",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Selector de modelos",
+      "blocks": [
+        { "type": "mox-swatch" },
+        { "type": "mox-swatch" },
+        { "type": "mox-swatch" }
+      ]
+    }
+  ]
+}
+{% endschema %}

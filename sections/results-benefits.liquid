@@ -1,0 +1,709 @@
+{%- liquid
+  assign uid = section.id
+  assign s = section.settings
+  assign result_blocks = section.blocks | where: 'type', 'result'
+  assign benefit_blocks = section.blocks | where: 'type', 'benefit'
+-%}
+
+<style>
+  .rb-{{ uid }} {
+    --rb-bg: {{ s.bg_color }};
+    --rb-heading: {{ s.heading_color }};
+    --rb-text: {{ s.text_color }};
+    --rb-ring: {{ s.ring_color }};
+    --rb-ring-track: {{ s.ring_color | color_modify: 'alpha', 0.25 }};
+    --rb-pct: {{ s.pct_color }};
+    --rb-sep: {{ s.separator_color | color_modify: 'alpha', 0.25 }};
+    --rb-ring-size: clamp(64px, 13vw, {{ s.ring_size }}px);
+    --rb-max: {{ s.max_width }}px;
+    --rb-wave-h: clamp(28px, 5.5vw, {{ s.wave_height }}px);
+    --rb-benefits-bg: {{ s.benefits_bg }};
+    --rb-benefits-heading: {{ s.benefits_heading_color }};
+    --rb-icon: {{ s.icon_color }};
+    --rb-benefit-text: {{ s.benefit_text_color }};
+    --rb-arc-w: {{ s.arc_width }};
+  }
+
+  .rb-{{ uid }} .rb__survey {
+    position: relative;
+    background: var(--rb-bg);
+    padding-top: calc({{ s.pad_top }}px + var(--rb-wave-h));
+    padding-bottom: calc({{ s.pad_bottom }}px + var(--rb-wave-h));
+    overflow: hidden;
+  }
+
+  .rb-{{ uid }} .rb__wave {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    line-height: 0;
+    pointer-events: none;
+  }
+
+  .rb-{{ uid }} .rb__wave--top { top: 0; }
+  .rb-{{ uid }} .rb__wave--bottom { bottom: 0; }
+
+  .rb-{{ uid }} .rb__wave svg {
+    display: block;
+    width: 100%;
+    height: var(--rb-wave-h);
+  }
+
+  .rb-{{ uid }} .rb__grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 45fr 55fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+    max-width: var(--rb-max);
+    margin-inline: auto;
+    padding-inline: 24px;
+  }
+
+  .rb-{{ uid }} .rb__intro { text-align: {{ s.intro_align }}; }
+
+  .rb-{{ uid }} .rb__title {
+    margin: 0;
+    color: var(--rb-heading);
+    font-size: clamp(30px, 4.4vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .rb-{{ uid }} .rb__subtitle {
+    margin: {{ s.title_gap }}px 0 0;
+    color: var(--rb-text);
+    font-size: clamp(15px, 1.6vw, 19px);
+    font-weight: 400;
+    line-height: 1.5;
+    max-width: 34ch;
+    {% if s.intro_align == 'center' %}margin-inline: auto;{% endif %}
+  }
+
+  .rb-{{ uid }} .rb__results-title {
+    margin: 0 0 {{ s.title_gap }}px;
+    padding-bottom: {{ s.result_gap }}px;
+    border-bottom: 1px solid var(--rb-sep);
+    color: var(--rb-heading);
+    font-size: clamp(22px, 2.6vw, 32px);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .rb-{{ uid }} .rb__result {
+    display: flex;
+    align-items: center;
+    gap: clamp(16px, 2.6vw, 30px);
+    padding-block: {{ s.result_gap }}px;
+    border-bottom: 1px solid var(--rb-sep);
+  }
+
+  .rb-{{ uid }} .rb__ring {
+    flex: 0 0 auto;
+    width: var(--rb-ring-size);
+    height: var(--rb-ring-size);
+  }
+
+  .rb-{{ uid }} .rb__ring-arc { transition: stroke-dashoffset 1.1s ease-out; }
+
+  .rb-{{ uid }}[data-animate] .rb__ring-arc { stroke-dashoffset: 283; }
+  .rb-{{ uid }}[data-animate] .is-visible .rb__ring-arc { stroke-dashoffset: var(--rb-offset); }
+
+  .rb-{{ uid }} .rb__result-text {
+    margin: 0;
+    color: var(--rb-text);
+    font-size: clamp(14px, 1.5vw, 17px);
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .rb-{{ uid }} .rb__benefits {
+    background: var(--rb-benefits-bg);
+    padding: {{ s.benefits_pad_top }}px 24px {{ s.benefits_pad_bottom }}px;
+  }
+
+  .rb-{{ uid }} .rb__benefits-title {
+    margin: 0 auto {{ s.benefits_title_gap }}px;
+    max-width: var(--rb-max);
+    text-align: center;
+    color: var(--rb-benefits-heading);
+    font-size: clamp(26px, 3.4vw, 42px);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .rb-{{ uid }} .rb__benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(24px, 3vw, 40px);
+    max-width: var(--rb-max);
+    margin-inline: auto;
+  }
+
+  .rb-{{ uid }} .rb__benefit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: {{ s.icon_gap }}px;
+  }
+
+  .rb-{{ uid }} .rb__icon {
+    width: clamp(36px, 5vw, 52px);
+    height: clamp(36px, 5vw, 52px);
+    color: var(--rb-icon);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .rb-{{ uid }} .rb__benefit-title {
+    margin: 0;
+    color: var(--rb-benefit-text);
+    font-size: clamp(15px, 1.6vw, 18px);
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .rb-{{ uid }} .rb__benefit-text {
+    margin: 4px 0 0;
+    color: var(--rb-benefit-text);
+    font-size: clamp(13px, 1.4vw, 15px);
+    font-weight: 400;
+    line-height: 1.45;
+    opacity: 0.75;
+  }
+
+  @media screen and (max-width: 989px) {
+    .rb-{{ uid }} .rb__benefits-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media screen and (max-width: 749px) {
+    .rb-{{ uid }} .rb__grid { grid-template-columns: 1fr; }
+    .rb-{{ uid }} .rb__subtitle { max-width: none; }
+    .rb-{{ uid }} .rb__benefits-grid {
+      grid-template-columns: repeat({{ s.benefits_mobile_cols }}, minmax(0, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rb-{{ uid }} .rb__ring-arc { transition: none; }
+    .rb-{{ uid }}[data-animate] .rb__ring-arc { stroke-dashoffset: var(--rb-offset); }
+  }
+</style>
+
+<div class="rb-{{ uid }}" data-rb>
+  <section class="rb__survey">
+    {%- if s.show_top_wave -%}
+      <div class="rb__wave rb__wave--top" aria-hidden="true">
+        <svg viewBox="0 0 1440 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0 H1440 V52 C1150 116 950 30 640 70 C400 100 190 46 0 80 Z" fill="{{ s.benefits_bg }}" opacity="0.32"/>
+          <path d="M0 0 H1440 V20 C1150 84 950 0 640 40 C400 70 190 16 0 50 Z" fill="{{ s.benefits_bg }}"/>
+        </svg>
+      </div>
+    {%- endif -%}
+
+    <div class="rb__grid">
+      <div class="rb__intro">
+        {%- if s.title != blank -%}
+          <h2 class="rb__title">{{ s.title | escape }}</h2>
+        {%- endif -%}
+        {%- if s.subtitle != blank -%}
+          <p class="rb__subtitle">{{ s.subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="rb__results">
+        {%- if s.results_title != blank -%}
+          <h3 class="rb__results-title">{{ s.results_title | escape }}</h3>
+        {%- endif -%}
+
+        {%- for block in result_blocks -%}
+          {%- liquid
+            assign pct = block.settings.percent | at_least: 0 | at_most: 100
+            assign dash = pct | times: 2.83
+            assign offset = 283 | minus: dash
+          -%}
+          <div class="rb__result" data-rb-result {{ block.shopify_attributes }}>
+            <svg
+              class="rb__ring"
+              viewBox="0 0 100 100"
+              role="img"
+              aria-label="{{ pct }}%"
+              style="--rb-offset: {{ offset }}"
+            >
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--rb-ring-track)" stroke-width="var(--rb-arc-w)"/>
+              <circle
+                class="rb__ring-arc"
+                cx="50" cy="50" r="45"
+                fill="none"
+                stroke="var(--rb-ring)"
+                stroke-width="var(--rb-arc-w)"
+                stroke-linecap="round"
+                stroke-dasharray="283"
+                stroke-dashoffset="{{ offset }}"
+                transform="rotate(-90 50 50)"
+              />
+              <text
+                x="50" y="50"
+                text-anchor="middle"
+                dominant-baseline="central"
+                fill="var(--rb-pct)"
+                font-size="25"
+                font-weight="600"
+              >{{ pct }}%</text>
+            </svg>
+            {%- if block.settings.text != blank -%}
+              <p class="rb__result-text">{{ block.settings.text | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- if s.show_bottom_wave -%}
+      <div class="rb__wave rb__wave--bottom" aria-hidden="true">
+        <svg viewBox="0 0 1440 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 140 H1440 V64 C1150 8 950 92 640 56 C400 28 190 78 0 48 Z" fill="{{ s.benefits_bg }}" opacity="0.32"/>
+          <path d="M0 140 H1440 V96 C1150 40 950 124 640 88 C400 60 190 110 0 80 Z" fill="{{ s.benefits_bg }}"/>
+        </svg>
+      </div>
+    {%- endif -%}
+  </section>
+
+  <section class="rb__benefits">
+    {%- if s.benefits_title != blank -%}
+      <h2 class="rb__benefits-title">{{ s.benefits_title | escape }}</h2>
+    {%- endif -%}
+
+    {%- if benefit_blocks.size > 0 -%}
+      <div class="rb__benefits-grid">
+        {%- for block in benefit_blocks -%}
+          <div class="rb__benefit" {{ block.shopify_attributes }}>
+            <svg class="rb__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              {%- case block.settings.icon -%}
+                {%- when 'truck' -%}
+                  <path d="M2 7h11v9H2z"/><path d="M13 10h4l3 3v3h-7z"/>
+                  <circle cx="6.5" cy="18" r="1.8"/><circle cx="16.5" cy="18" r="1.8"/>
+                {%- when 'heart' -%}
+                  <path d="M12 20s-7-4.5-7-9.2A3.9 3.9 0 0 1 12 8.4 3.9 3.9 0 0 1 19 10.8C19 15.5 12 20 12 20z"/>
+                {%- when 'support' -%}
+                  <path d="M4 13a8 8 0 0 1 16 0"/>
+                  <path d="M4 13v3a2 2 0 0 0 2 2h1v-5H6a2 2 0 0 0-2 2z"/>
+                  <path d="M20 13v3a2 2 0 0 1-2 2h-1v-5h1a2 2 0 0 1 2 2z"/>
+                {%- when 'shield' -%}
+                  <path d="M12 3l7 3v5.5c0 4.2-2.9 7.6-7 8.5-4.1-.9-7-4.3-7-8.5V6z"/>
+                  <path d="M9 12l2.2 2.2L15.5 10"/>
+                {%- when 'clock' -%}
+                  <circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.2l3.2 2"/>
+                {%- when 'star' -%}
+                  <path d="M12 4l2.4 5 5.5.8-4 3.8 1 5.4-4.9-2.6L7.1 19l1-5.4-4-3.8 5.5-.8z"/>
+                {%- when 'package' -%}
+                  <path d="M12 3l8 4.2v9.6L12 21l-8-4.2V7.2z"/><path d="M4 7.2l8 4.3 8-4.3"/><path d="M12 11.5V21"/>
+                {%- when 'leaf' -%}
+                  <path d="M20 4c0 8.5-4.6 13-11 13a5 5 0 0 1 0-10c4.5 0 7.5-1 11-3z"/><path d="M14 10L5 19"/>
+              {%- endcase -%}
+            </svg>
+            {%- if block.settings.title != blank -%}
+              <h3 class="rb__benefit-title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <p class="rb__benefit-text">{{ block.settings.text | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </section>
+</div>
+
+<script>
+  (function () {
+    if (window.__moxResultsBenefits) return;
+    window.__moxResultsBenefits = true;
+
+    function init(root) {
+      if (root.dataset.rbReady) return;
+      root.dataset.rbReady = '1';
+
+      var items = root.querySelectorAll('[data-rb-result]');
+      if (!items.length || !('IntersectionObserver' in window)) return;
+
+      root.setAttribute('data-animate', '');
+
+      var observer = new IntersectionObserver(
+        function (entries) {
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].isIntersecting) {
+              entries[i].target.classList.add('is-visible');
+              observer.unobserve(entries[i].target);
+            }
+          }
+        },
+        { threshold: 0.35 }
+      );
+
+      for (var j = 0; j < items.length; j++) observer.observe(items[j]);
+    }
+
+    function scan(scope) {
+      var nodes = (scope || document).querySelectorAll('[data-rb]');
+      for (var i = 0; i < nodes.length; i++) init(nodes[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        scan();
+      });
+    } else {
+      scan();
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      scan(event.target);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Resultados y beneficios",
+  "tag": "section",
+  "class": "mox-results-benefits",
+  "settings": [
+    { "type": "header", "content": "Encuesta" },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "Encuesta realizada"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Describí acá a quién le hiciste la encuesta y cuándo."
+    },
+    {
+      "type": "select",
+      "id": "intro_align",
+      "label": "Alineación de la columna izquierda",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centrada" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "text",
+      "id": "results_title",
+      "label": "Título de la columna derecha",
+      "default": "Resultados"
+    },
+    { "type": "header", "content": "Beneficios" },
+    {
+      "type": "text",
+      "id": "benefits_title",
+      "label": "Título",
+      "default": "¿Por qué elegirnos?"
+    },
+    {
+      "type": "select",
+      "id": "benefits_mobile_cols",
+      "label": "Columnas en celular",
+      "options": [
+        { "value": "1", "label": "1 columna" },
+        { "value": "2", "label": "2 columnas" }
+      ],
+      "default": "2"
+    },
+    { "type": "header", "content": "Ondas" },
+    {
+      "type": "checkbox",
+      "id": "show_top_wave",
+      "label": "Onda superior",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_bottom_wave",
+      "label": "Onda inferior",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "wave_height",
+      "label": "Altura de la onda",
+      "min": 30,
+      "max": 140,
+      "step": 5,
+      "unit": "px",
+      "default": 80
+    },
+    { "type": "header", "content": "Colores" },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fondo de la encuesta",
+      "default": "#8f4a20"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Títulos de la encuesta",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Texto de la encuesta",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "ring_color",
+      "label": "Arco del porcentaje",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "pct_color",
+      "label": "Número del porcentaje",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "separator_color",
+      "label": "Separadores",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "benefits_bg",
+      "label": "Fondo de beneficios y de las ondas",
+      "default": "#ffffff",
+      "info": "Las ondas usan este color para fundirse con la sección de abajo."
+    },
+    {
+      "type": "color",
+      "id": "benefits_heading_color",
+      "label": "Título de beneficios",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Iconos",
+      "default": "#8f4a20"
+    },
+    {
+      "type": "color",
+      "id": "benefit_text_color",
+      "label": "Texto de beneficios",
+      "default": "#111111"
+    },
+    { "type": "header", "content": "Tamaños y espaciado" },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho del contenido",
+      "min": 800,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1200
+    },
+    {
+      "type": "range",
+      "id": "ring_size",
+      "label": "Tamaño de los círculos",
+      "min": 64,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "arc_width",
+      "label": "Grosor del arco",
+      "min": 3,
+      "max": 14,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "pad_top",
+      "label": "Padding superior de la encuesta",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "pad_bottom",
+      "label": "Padding inferior de la encuesta",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "title_gap",
+      "label": "Espacio bajo los títulos",
+      "min": 4,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "result_gap",
+      "label": "Espacio entre resultados",
+      "min": 8,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "benefits_pad_top",
+      "label": "Padding superior de beneficios",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "benefits_pad_bottom",
+      "label": "Padding inferior de beneficios",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "benefits_title_gap",
+      "label": "Espacio bajo el título de beneficios",
+      "min": 12,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 44
+    },
+    {
+      "type": "range",
+      "id": "icon_gap",
+      "label": "Espacio entre icono y texto",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "blocks": [
+    {
+      "type": "result",
+      "name": "Resultado",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "number",
+          "id": "percent",
+          "label": "Porcentaje",
+          "default": 0,
+          "info": "Solo el número, sin el símbolo %."
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Texto del resultado"
+        }
+      ]
+    },
+    {
+      "type": "benefit",
+      "name": "Beneficio",
+      "limit": 8,
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icono",
+          "options": [
+            { "value": "truck", "label": "Camión" },
+            { "value": "heart", "label": "Corazón" },
+            { "value": "support", "label": "Atención al cliente" },
+            { "value": "shield", "label": "Escudo" },
+            { "value": "clock", "label": "Reloj" },
+            { "value": "star", "label": "Estrella" },
+            { "value": "package", "label": "Paquete" },
+            { "value": "leaf", "label": "Hoja" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Título"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Texto secundario"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Resultados y beneficios",
+      "blocks": [
+        {
+          "type": "result",
+          "settings": { "percent": 0, "text": "Escribí acá el primer resultado real de tu encuesta." }
+        },
+        {
+          "type": "result",
+          "settings": { "percent": 0, "text": "Escribí acá el segundo resultado real de tu encuesta." }
+        },
+        {
+          "type": "result",
+          "settings": { "percent": 0, "text": "Escribí acá el tercer resultado real de tu encuesta." }
+        },
+        {
+          "type": "benefit",
+          "settings": { "icon": "truck", "title": "Envío gratis a todo el país" }
+        },
+        {
+          "type": "benefit",
+          "settings": { "icon": "heart", "title": "Probalo sin riesgo por 60 días" }
+        },
+        {
+          "type": "benefit",
+          "settings": { "icon": "support", "title": "Atención al cliente" }
+        },
+        {
+          "type": "benefit",
+          "settings": { "icon": "shield", "title": "Pagos seguros" }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

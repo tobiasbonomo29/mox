@@ -1,0 +1,140 @@
+<div class="mox-lens" id="mox-lens-{{ block.id }}" data-option-name="{{ block.settings.option_name }}" data-show-name="{{ block.settings.show_name }}" {{ block.shopify_attributes }}>
+  {%- if block.settings.title != blank -%}
+    <p class="mox-lens__title">{{ block.settings.title }}</p>
+  {%- endif -%}
+
+  <div class="mox-lens__row" role="radiogroup" aria-label="{{ block.settings.title | default: 'Color de cristal' }}">
+    {% content_for 'blocks' %}
+  </div>
+</div>
+
+<style>
+  #mox-lens-{{ block.id }} {
+    --mox-lens-size: {{ block.settings.swatch_size }}px;
+    --mox-lens-gap: {{ block.settings.swatch_gap }}px;
+    margin: 16px 0;
+  }
+  #mox-lens-{{ block.id }} .mox-lens__title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+  }
+  #mox-lens-{{ block.id }} .mox-lens__row {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--mox-lens-gap);
+    flex-wrap: wrap;
+  }
+  #mox-lens-{{ block.id }} .mox-lens__swatch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #mox-lens-{{ block.id }} .mox-lens__circle {
+    width: var(--mox-lens-size);
+    height: var(--mox-lens-size);
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.15);
+    box-sizing: border-box;
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
+  }
+  #mox-lens-{{ block.id }} .mox-lens__swatch:hover .mox-lens__circle {
+    transform: scale(1.06);
+  }
+  #mox-lens-{{ block.id }} .mox-lens__swatch[aria-checked="true"] .mox-lens__circle {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px #111;
+  }
+  #mox-lens-{{ block.id }} .mox-lens__name {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: #111;
+  }
+  #mox-lens-{{ block.id }}[data-show-name="false"] .mox-lens__name {
+    display: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #mox-lens-{{ block.id }} .mox-lens__swatch:hover .mox-lens__circle {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  var root = document.getElementById('mox-lens-{{ block.id }}');
+  if (!root || root.dataset.moxLensInit) return;
+  root.dataset.moxLensInit = 'true';
+
+  var optionName = root.getAttribute('data-option-name');
+  var swatches = root.querySelectorAll('.mox-lens__swatch');
+  var form = root.closest('form') || document.querySelector('form[action*="/cart/add"]');
+
+  function findVariantInput(value) {
+    if (!form || !optionName) return null;
+    return form.querySelector(
+      '[name="options[' + optionName + ']"][value="' + value + '"], ' +
+      'input[name="' + optionName + '"][value="' + value + '"], ' +
+      'select[name="options[' + optionName + ']"] option[value="' + value + '"]'
+    );
+  }
+
+  function setActive(target) {
+    swatches.forEach(function (el) {
+      el.setAttribute('aria-checked', el === target ? 'true' : 'false');
+    });
+  }
+
+  swatches.forEach(function (el) {
+    el.addEventListener('click', function () {
+      setActive(el);
+      var value = el.getAttribute('data-value');
+      var input = findVariantInput(value);
+      if (input) {
+        if (input.tagName === 'INPUT') {
+          input.checked = true;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        } else if (input.tagName === 'OPTION') {
+          input.selected = true;
+          input.parentElement.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }
+    });
+  });
+
+  var defaultEl = root.querySelector('[data-default="true"]') || swatches[0];
+  if (defaultEl) setActive(defaultEl);
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Color de cristal",
+  "tag": null,
+  "blocks": [
+    { "type": "mox-lens-swatch" }
+  ],
+  "settings": [
+    { "type": "text", "id": "title", "label": "Título", "default": "Color de cristal" },
+    { "type": "text", "id": "option_name", "label": "Nombre exacto de la opción de variante", "default": "Color de cristal", "info": "Tiene que coincidir con el nombre de la opción que crees en Shopify (Ajustes de variantes > Opciones)." },
+    { "type": "checkbox", "id": "show_name", "label": "Mostrar nombre debajo del círculo", "default": true },
+    { "type": "range", "id": "swatch_size", "label": "Tamaño del círculo", "min": 24, "max": 64, "step": 2, "unit": "px", "default": 40 },
+    { "type": "range", "id": "swatch_gap", "label": "Espacio entre círculos", "min": 4, "max": 32, "step": 2, "unit": "px", "default": 10 }
+  ],
+  "presets": [
+    {
+      "name": "Color de cristal",
+      "blocks": [
+        { "type": "mox-lens-swatch", "settings": { "label": "Amarillo", "swatch_color": "#F5E050", "option_value": "Amarillo", "is_default": true } },
+        { "type": "mox-lens-swatch", "settings": { "label": "Naranja", "swatch_color": "#F4922A", "option_value": "Naranja" } },
+        { "type": "mox-lens-swatch", "settings": { "label": "Rojo", "swatch_color": "#D1372B", "option_value": "Rojo" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

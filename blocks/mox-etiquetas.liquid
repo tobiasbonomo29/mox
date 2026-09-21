@@ -1,0 +1,161 @@
+{%- liquid
+  assign s = block.settings
+  assign gid = block.id
+  assign p = closest.product
+
+  assign pct = 0
+  if p.compare_at_price_max > p.price_min
+    assign diff = p.compare_at_price_max | minus: p.price_min
+    assign pct = diff | times: 100 | divided_by: p.compare_at_price_max
+  endif
+
+  assign cuota = p.price_min | divided_by: s.cuotas | money
+  assign precio = p.price_min | money
+-%}
+
+<div id="mox-tags-{{ gid }}" class="mox-tags" {{ block.shopify_attributes }}>
+  {%- for i in (1..4) -%}
+    {%- liquid
+      assign k_text = 'text_' | append: i
+      assign k_bg = 'bg_' | append: i
+      assign k_fg = 'fg_' | append: i
+      assign k_cond = 'cond_' | append: i
+      assign k_tag = 'tag_' | append: i
+
+      assign txt = s[k_text]
+      assign cond = s[k_cond]
+      assign tagv = s[k_tag]
+      assign show = false
+
+      if txt != blank
+        case cond
+          when 'always'
+            assign show = true
+          when 'tag'
+            if tagv != blank and p.tags contains tagv
+              assign show = true
+            endif
+          when 'sale'
+            if pct > 0
+              assign show = true
+            endif
+          when 'instock'
+            if p.available
+              assign show = true
+            endif
+          when 'soldout'
+            unless p.available
+              assign show = true
+            endunless
+        endcase
+      endif
+
+      assign final = txt | replace: '{descuento}', pct | replace: '{cuota}', cuota | replace: '{precio}', precio
+    -%}
+    {%- if show -%}
+      <span class="mox-tag" style="background: {{ s[k_bg] }}; color: {{ s[k_fg] }};">{{ final }}</span>
+    {%- endif -%}
+  {%- endfor -%}
+</div>
+
+<style>
+  #mox-tags-{{ gid }} {
+    display: flex;
+    flex-direction: column;
+    align-items: {% if s.align == 'center' %}center{% elsif s.align == 'right' %}flex-end{% else %}flex-start{% endif %};
+    gap: {{ s.gap }}px;
+    width: 100%;
+    margin-top: {{ s.margin_top }}px;
+  }
+  #mox-tags-{{ gid }} .mox-tag {
+    display: inline-block;
+    width: auto;
+    max-width: 100%;
+    padding: {{ s.pad_y }}px {{ s.pad_x }}px;
+    border-radius: {{ s.radius }}px;
+    font-size: {{ s.font_size }}px;
+    line-height: 1.25;
+    font-weight: {% if s.bold %}600{% else %}400{% endif %};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    box-sizing: border-box;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Etiquetas MOX",
+  "tag": null,
+  "settings": [
+    { "type": "range", "id": "cuotas", "label": "Cuotas", "min": 1, "max": 12, "step": 1, "default": 3 },
+
+    { "type": "header", "content": "Etiqueta 1" },
+    { "type": "text", "id": "text_1", "label": "Texto", "default": "3 cuotas sin interés de {cuota}" },
+    { "type": "select", "id": "cond_1", "label": "Cuándo se muestra", "default": "always", "options": [
+      { "value": "always", "label": "Siempre" },
+      { "value": "tag", "label": "Si tiene el tag" },
+      { "value": "sale", "label": "Si está en oferta" },
+      { "value": "instock", "label": "Si hay stock" },
+      { "value": "soldout", "label": "Si está agotado" }
+    ]},
+    { "type": "text", "id": "tag_1", "label": "Tag" },
+    { "type": "color", "id": "bg_1", "label": "Fondo", "default": "#EDE7FF" },
+    { "type": "color", "id": "fg_1", "label": "Texto", "default": "#5B2EC4" },
+
+    { "type": "header", "content": "Etiqueta 2" },
+    { "type": "text", "id": "text_2", "label": "Texto", "default": "20% pagando en efectivo" },
+    { "type": "select", "id": "cond_2", "label": "Cuándo se muestra", "default": "always", "options": [
+      { "value": "always", "label": "Siempre" },
+      { "value": "tag", "label": "Si tiene el tag" },
+      { "value": "sale", "label": "Si está en oferta" },
+      { "value": "instock", "label": "Si hay stock" },
+      { "value": "soldout", "label": "Si está agotado" }
+    ]},
+    { "type": "text", "id": "tag_2", "label": "Tag" },
+    { "type": "color", "id": "bg_2", "label": "Fondo", "default": "#D6F5DC" },
+    { "type": "color", "id": "fg_2", "label": "Texto", "default": "#1A7A33" },
+
+    { "type": "header", "content": "Etiqueta 3" },
+    { "type": "text", "id": "text_3", "label": "Texto", "default": "{descuento}% OFF" },
+    { "type": "select", "id": "cond_3", "label": "Cuándo se muestra", "default": "sale", "options": [
+      { "value": "always", "label": "Siempre" },
+      { "value": "tag", "label": "Si tiene el tag" },
+      { "value": "sale", "label": "Si está en oferta" },
+      { "value": "instock", "label": "Si hay stock" },
+      { "value": "soldout", "label": "Si está agotado" }
+    ]},
+    { "type": "text", "id": "tag_3", "label": "Tag" },
+    { "type": "color", "id": "bg_3", "label": "Fondo", "default": "#00A650" },
+    { "type": "color", "id": "fg_3", "label": "Texto", "default": "#FFFFFF" },
+
+    { "type": "header", "content": "Etiqueta 4" },
+    { "type": "text", "id": "text_4", "label": "Texto", "default": "Más vendido" },
+    { "type": "select", "id": "cond_4", "label": "Cuándo se muestra", "default": "tag", "options": [
+      { "value": "always", "label": "Siempre" },
+      { "value": "tag", "label": "Si tiene el tag" },
+      { "value": "sale", "label": "Si está en oferta" },
+      { "value": "instock", "label": "Si hay stock" },
+      { "value": "soldout", "label": "Si está agotado" }
+    ]},
+    { "type": "text", "id": "tag_4", "label": "Tag", "default": "mas-vendido" },
+    { "type": "color", "id": "bg_4", "label": "Fondo", "default": "#FFF1CC" },
+    { "type": "color", "id": "fg_4", "label": "Texto", "default": "#8A5B00" },
+
+    { "type": "header", "content": "Estilo" },
+    { "type": "select", "id": "align", "label": "Alineación", "default": "left", "options": [
+      { "value": "left", "label": "Izquierda" },
+      { "value": "center", "label": "Centro" },
+      { "value": "right", "label": "Derecha" }
+    ]},
+    { "type": "range", "id": "font_size", "label": "Tamaño de letra", "min": 9, "max": 18, "step": 1, "unit": "px", "default": 12 },
+    { "type": "checkbox", "id": "bold", "label": "Negrita", "default": true },
+    { "type": "range", "id": "radius", "label": "Redondeo", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 3 },
+    { "type": "range", "id": "pad_y", "label": "Alto interno", "min": 0, "max": 14, "step": 1, "unit": "px", "default": 4 },
+    { "type": "range", "id": "pad_x", "label": "Ancho interno", "min": 2, "max": 20, "step": 1, "unit": "px", "default": 8 },
+    { "type": "range", "id": "gap", "label": "Separación", "min": 2, "max": 16, "step": 1, "unit": "px", "default": 6 },
+    { "type": "range", "id": "margin_top", "label": "Espacio arriba", "min": 0, "max": 40, "step": 1, "unit": "px", "default": 6 }
+  ],
+  "presets": [{ "name": "Etiquetas MOX" }]
+}
+{% endschema %}

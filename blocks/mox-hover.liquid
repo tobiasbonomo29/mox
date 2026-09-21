@@ -1,0 +1,53 @@
+{%- liquid
+  assign s = block.settings
+  assign gid = block.id
+  assign p = closest.product
+  assign img2 = p.images[1]
+-%}
+
+{%- if s.enable_swap and img2 != blank -%}
+  <img class="mox-hv-alt-{{ gid }} mox-hv-alt" src="{{ img2 | image_url: width: 900 }}" alt="" loading="lazy">
+{%- endif -%}
+
+<style>
+  @media screen and (min-width: 750px) {
+    .mox-hv-alt {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 3;
+      transition: opacity {{ s.swap_duration }}ms {{ s.easing }};
+    }
+
+    .product-card:hover .mox-hv-alt,
+    .card:hover .mox-hv-alt,
+    [class*="product-card"]:hover .mox-hv-alt {
+      opacity: 1;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .mox-hv-alt { display: none; }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Hover MOX",
+  "tag": null,
+  "settings": [
+    { "type": "checkbox", "id": "enable_swap", "label": "Activar cambio de imagen", "default": true },
+    { "type": "range", "id": "swap_duration", "label": "Duración", "min": 0, "max": 1200, "step": 50, "unit": "ms", "default": 400 },
+    { "type": "select", "id": "easing", "label": "Curva", "default": "ease", "options": [
+      { "value": "linear", "label": "Lineal" },
+      { "value": "ease", "label": "Suave" },
+      { "value": "ease-out", "label": "Desacelera al final" }
+    ]}
+  ],
+  "presets": [{ "name": "Hover MOX" }]
+}
+{% endschema %}

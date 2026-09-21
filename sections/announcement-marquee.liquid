@@ -1,0 +1,371 @@
+{%- liquid
+  assign uid = section.id
+  assign s = section.settings
+-%}
+
+<style>
+  .mq-{{ uid }} {
+    --mq-bg: {{ s.bg_color }};
+    --mq-fg: {{ s.text_color }};
+    --mq-hover: {{ s.link_hover_color }};
+    --mq-gap: {{ s.gap }}px;
+    --mq-h: {{ s.bar_height }}px;
+    --mq-duration: 40s;
+
+    width: 100%;
+    background: var(--mq-bg);
+    color: var(--mq-fg);
+    overflow: hidden;
+  }
+
+  .mq-{{ uid }} .mq__viewport {
+    display: flex;
+    align-items: center;
+    min-height: var(--mq-h);
+    overflow: hidden;
+  }
+
+  .mq-{{ uid }} .mq__track {
+    display: flex;
+    flex: 0 0 auto;
+    width: max-content;
+    will-change: transform;
+  }
+
+  .mq-{{ uid }}.is-running .mq__track {
+    animation: mq-scroll-{{ uid }} var(--mq-duration) linear infinite;
+  }
+
+  .mq-{{ uid }}.is-reverse .mq__track { animation-direction: reverse; }
+
+  .mq-{{ uid }}.is-pausable:hover .mq__track,
+  .mq-{{ uid }}.is-pausable:focus-within .mq__track {
+    animation-play-state: paused;
+  }
+
+  @keyframes mq-scroll-{{ uid }} {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .mq-{{ uid }} .mq__group {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    gap: var(--mq-gap);
+    padding-right: var(--mq-gap);
+  }
+
+  .mq-{{ uid }} .mq__item {
+    flex: 0 0 auto;
+    font-size: clamp(11px, 2.6vw, {{ s.font_size }}px);
+    font-weight: {{ s.font_weight }};
+    letter-spacing: calc({{ s.letter_spacing }} / 100 * 1em);
+    line-height: 1;
+    white-space: nowrap;
+    {% if s.uppercase %}text-transform: uppercase;{% endif %}
+  }
+
+  .mq-{{ uid }} a.mq__item {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .mq-{{ uid }} a.mq__item:hover { color: var(--mq-hover); }
+
+  .mq-{{ uid }} .mq__sep {
+    flex: 0 0 auto;
+    font-size: clamp(11px, 2.6vw, {{ s.font_size }}px);
+    line-height: 1;
+    opacity: 0.55;
+    white-space: nowrap;
+  }
+
+  .mq-{{ uid }}.is-static .mq__viewport {
+    justify-content: center;
+    padding-inline: 16px;
+  }
+
+  .mq-{{ uid }}.is-static .mq__track {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: none;
+    transform: none;
+  }
+
+  .mq-{{ uid }}.is-static .mq__group {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-right: 0;
+    padding-block: 8px;
+  }
+
+  .mq-{{ uid }}.is-static .mq__item { white-space: normal; text-align: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mq-{{ uid }} .mq__track {
+      animation: none !important;
+      transform: none !important;
+    }
+  }
+</style>
+
+{%- if section.blocks.size > 0 -%}
+  <div
+    class="mq-{{ uid }} mq{% if s.pause_on_hover %} is-pausable{% endif %}{% if s.direction == 'right' %} is-reverse{% endif %}"
+    data-mq
+    data-speed="{{ s.speed }}"
+    data-animate="{% if s.animate %}true{% else %}false{% endif %}"
+    role="region"
+    aria-label="{{ s.aria_label | escape }}"
+  >
+    <div class="mq__viewport">
+      <div class="mq__track" data-mq-track>
+        <div class="mq__group" data-mq-group>
+          {%- for block in section.blocks -%}
+            {%- if block.settings.text != blank -%}
+              {%- if block.settings.link != blank -%}
+                <a class="mq__item" href="{{ block.settings.link }}" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</a>
+              {%- else -%}
+                <span class="mq__item" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</span>
+              {%- endif -%}
+              {%- if s.separator != blank -%}
+                <span class="mq__sep" aria-hidden="true">{{ s.separator | escape }}</span>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+<script>
+  (function () {
+    if (window.__moxMarquee) return;
+    window.__moxMarquee = true;
+
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function init(root) {
+      if (root.dataset.mqReady) return;
+      root.dataset.mqReady = '1';
+
+      var track = root.querySelector('[data-mq-track]');
+      var group = root.querySelector('[data-mq-group]');
+      if (!track || !group) return;
+
+      var speed = parseFloat(root.dataset.speed) || 60;
+      var animate = root.dataset.animate === 'true';
+      var timer = null;
+      var observer = null;
+
+      function clearClones() {
+        var clones = track.querySelectorAll('[data-mq-clone]');
+        for (var i = 0; i < clones.length; i++) {
+          clones[i].parentNode.removeChild(clones[i]);
+        }
+      }
+
+      function build() {
+        if (!animate || reduce.matches) {
+          clearClones();
+          root.classList.remove('is-running');
+          root.classList.add('is-static');
+          return;
+        }
+
+        root.classList.remove('is-static');
+        root.classList.remove('is-running');
+        clearClones();
+
+        var groupW = group.getBoundingClientRect().width;
+        var viewW = root.getBoundingClientRect().width;
+        if (!groupW || !viewW) return;
+
+        // k copias cubren la pantalla; duplicamos el set para que -50% cierre exacto
+        var k = Math.max(1, Math.ceil(viewW / groupW));
+        var total = k * 2;
+
+        var frag = document.createDocumentFragment();
+        for (var i = 1; i < total; i++) {
+          var copy = group.cloneNode(true);
+          copy.setAttribute('aria-hidden', 'true');
+          copy.setAttribute('data-mq-clone', '');
+          copy.removeAttribute('data-mq-group');
+          var links = copy.querySelectorAll('a');
+          for (var j = 0; j < links.length; j++) {
+            links[j].setAttribute('tabindex', '-1');
+          }
+          frag.appendChild(copy);
+        }
+        track.appendChild(frag);
+
+        root.style.setProperty('--mq-duration', (k * groupW) / speed + 's');
+        void track.offsetWidth;
+        root.classList.add('is-running');
+      }
+
+      function schedule() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(build, 180);
+      }
+
+      build();
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(build).catch(function () {});
+      }
+
+      if ('ResizeObserver' in window) {
+        observer = new ResizeObserver(schedule);
+        observer.observe(root);
+      } else {
+        window.addEventListener('resize', schedule);
+      }
+
+      if (reduce.addEventListener) {
+        reduce.addEventListener('change', build);
+      }
+
+      root.__mqCleanup = function () {
+        if (timer) clearTimeout(timer);
+        if (observer) observer.disconnect();
+        window.removeEventListener('resize', schedule);
+        if (reduce.removeEventListener) reduce.removeEventListener('change', build);
+      };
+    }
+
+    function scan(scope) {
+      var nodes = (scope || document).querySelectorAll('[data-mq]');
+      for (var i = 0; i < nodes.length; i++) init(nodes[i]);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () { scan(); });
+    } else {
+      scan();
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      scan(event.target);
+    });
+
+    document.addEventListener('shopify:section:unload', function (event) {
+      var nodes = event.target.querySelectorAll('[data-mq]');
+      for (var i = 0; i < nodes.length; i++) {
+        if (typeof nodes[i].__mqCleanup === 'function') nodes[i].__mqCleanup();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Barra desplazante",
+  "tag": "section",
+  "class": "mox-marquee",
+  "settings": [
+    { "type": "header", "content": "Contenido" },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Separador entre mensajes",
+      "default": "·",
+      "info": "Dejalo vacío para no mostrar separador."
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Descripción para lectores de pantalla",
+      "default": "Anuncios de la tienda"
+    },
+    { "type": "header", "content": "Movimiento" },
+    { "type": "checkbox", "id": "animate", "label": "Activar el desplazamiento", "default": true },
+    {
+      "type": "range",
+      "id": "speed",
+      "label": "Velocidad",
+      "min": 20, "max": 200, "step": 5, "unit": "px", "default": 60,
+      "info": "Píxeles por segundo. Más bajo, más lento."
+    },
+    {
+      "type": "select",
+      "id": "direction",
+      "label": "Dirección",
+      "options": [
+        { "value": "left", "label": "Hacia la izquierda" },
+        { "value": "right", "label": "Hacia la derecha" }
+      ],
+      "default": "left"
+    },
+    { "type": "checkbox", "id": "pause_on_hover", "label": "Pausar al pasar el mouse", "default": true },
+    { "type": "header", "content": "Estilo" },
+    { "type": "color", "id": "bg_color", "label": "Fondo", "default": "#0a2540" },
+    { "type": "color", "id": "text_color", "label": "Texto", "default": "#ffffff" },
+    { "type": "color", "id": "link_hover_color", "label": "Enlace al pasar el mouse", "default": "#c9d6e3" },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamaño de fuente",
+      "min": 10, "max": 20, "step": 1, "unit": "px", "default": 13
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "500", "label": "Medio" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+      {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaciado entre letras",
+      "min": 0, "max": 30, "step": 1, "default": 8,
+      "info": "En centésimas de em. 8 equivale a 0.08em."
+    },
+    { "type": "checkbox", "id": "uppercase", "label": "Texto en mayúsculas", "default": true },
+    {
+      "type": "range",
+      "id": "bar_height",
+      "label": "Altura de la barra",
+      "min": 28, "max": 72, "step": 2, "unit": "px", "default": 40
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Espacio entre elementos",
+      "min": 12, "max": 80, "step": 2, "unit": "px", "default": 28
+    }
+  ],
+  "blocks": [
+    {
+      "type": "message",
+      "name": "Mensaje",
+      "limit": 12,
+      "settings": [
+        { "type": "text", "id": "text", "label": "Texto" },
+        { "type": "url", "id": "link", "label": "Enlace (opcional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barra desplazante",
+      "blocks": [
+        { "type": "message", "settings": { "text": "PACKS" } },
+        { "type": "message", "settings": { "text": "HASTA 50% OFF" } },
+        { "type": "message", "settings": { "text": "6 CUOTAS SIN INTERÉS" } },
+        { "type": "message", "settings": { "text": "ENVÍO GRATIS A TODO EL PAÍS" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

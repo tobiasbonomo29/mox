@@ -1,0 +1,934 @@
+{%- comment -%}
+  MOX — Info del producto (acordeón) — versión SECCIÓN
+{%- endcomment -%}
+
+{%- assign uid = section.id -%}
+{%- assign score = section.settings.rating_score | plus: 0 -%}
+{%- assign filled = score | round -%}
+
+<div id="mox-faq-{{ uid }}" class="mox-faq">
+  <div class="mox-faq__container">
+
+  <style>
+    #mox-faq-{{ uid }} {
+      background: {{ section.settings.bg_color }};
+      color: {{ section.settings.text_color }};
+      padding: {{ section.settings.padding_top }}px 20px {{ section.settings.padding_bottom }}px;
+    }
+    #mox-faq-{{ uid }} * { box-sizing: border-box; }
+    #mox-faq-{{ uid }} .mox-faq__container {
+      max-width: {{ section.settings.max_width }}px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Encabezado ---------- */
+    #mox-faq-{{ uid }} .mox-faq__head {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: {{ section.settings.head_gap }}px;
+    }
+    #mox-faq-{{ uid }} .mox-faq__icon {
+      width: {{ section.settings.icon_size }}px;
+      height: {{ section.settings.icon_size }}px;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #mox-faq-{{ uid }} .mox-faq__icon img,
+    #mox-faq-{{ uid }} .mox-faq__icon svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    #mox-faq-{{ uid }} .mox-faq__kicker {
+      font-size: 15px;
+      line-height: 1.3;
+      margin: 0 0 2px;
+      opacity: .85;
+    }
+    #mox-faq-{{ uid }} .mox-faq__best {
+      font-size: 21px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    /* ---------- Acordeón ---------- */
+    #mox-faq-{{ uid }} .mox-faq__list {
+      border-top: 1px solid {{ section.settings.border_color }};
+    }
+    #mox-faq-{{ uid }} .mox-faq__item {
+      border-bottom: 1px solid {{ section.settings.border_color }};
+    }
+    #mox-faq-{{ uid }} .mox-faq__trigger {
+      width: 100%;
+      background: none;
+      border: 0;
+      margin: 0;
+      padding: {{ section.settings.row_padding }}px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      cursor: pointer;
+      color: inherit;
+      font-family: inherit;
+      text-align: left;
+    }
+    #mox-faq-{{ uid }} .mox-faq__trigger:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: -2px;
+    }
+    #mox-faq-{{ uid }} .mox-faq__label {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    #mox-faq-{{ uid }} .mox-faq__right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 0 0 auto;
+    }
+    #mox-faq-{{ uid }} .mox-faq__chev {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
+      transition: transform .3s ease;
+    }
+    #mox-faq-{{ uid }} .mox-faq__trigger[aria-expanded="true"] .mox-faq__chev {
+      transform: rotate(180deg);
+    }
+    #mox-faq-{{ uid }} .mox-faq__panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows .32s ease;
+    }
+    #mox-faq-{{ uid }} .mox-faq__panel[data-open="true"] {
+      grid-template-rows: 1fr;
+    }
+    #mox-faq-{{ uid }} .mox-faq__panel > .mox-faq__panel-inner {
+      overflow: hidden;
+      min-height: 0;
+    }
+    #mox-faq-{{ uid }} .mox-faq__content {
+      padding: 4px 4px {{ section.settings.row_padding }}px;
+      font-size: 15px;
+      line-height: 1.65;
+      max-width: 70ch;
+    }
+    #mox-faq-{{ uid }} .mox-faq__content p:first-child { margin-top: 0; }
+    #mox-faq-{{ uid }} .mox-faq__content p:last-child { margin-bottom: 0; }
+    #mox-faq-{{ uid }} .mox-faq__content ul,
+    #mox-faq-{{ uid }} .mox-faq__content ol { padding-left: 20px; }
+
+    /* ---------- Estrellas ---------- */
+    #mox-faq-{{ uid }} .mox-faq__stars {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    #mox-faq-{{ uid }} .mox-faq__star {
+      width: 15px;
+      height: 15px;
+      display: block;
+    }
+    #mox-faq-{{ uid }} .mox-faq__star--off { opacity: .22; }
+
+    /* ---------- Panel de valoraciones ---------- */
+    #mox-faq-{{ uid }} .mox-rev__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      padding: 18px 4px 30px;
+    }
+    #mox-faq-{{ uid }} .mox-rev__scorebox {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #mox-faq-{{ uid }} .mox-rev__score {
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+    #mox-faq-{{ uid }} .mox-rev__scorebox .mox-faq__star {
+      width: 19px;
+      height: 19px;
+    }
+    #mox-faq-{{ uid }} .mox-rev__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 26px;
+      border: 1px solid {{ section.settings.border_color }};
+      color: inherit;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1;
+      transition: background-color .2s ease, color .2s ease;
+    }
+    #mox-faq-{{ uid }} .mox-rev__cta:hover {
+      background: {{ section.settings.text_color }};
+      color: {{ section.settings.bg_color }};
+    }
+    #mox-faq-{{ uid }} .mox-rev__cta:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 3px;
+    }
+    #mox-faq-{{ uid }} .mox-rev__cta svg {
+      width: 22px;
+      height: 10px;
+      flex: 0 0 auto;
+    }
+    #mox-faq-{{ uid }} .mox-rev__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px 48px;
+      padding: 0 4px {{ section.settings.row_padding }}px;
+    }
+    #mox-faq-{{ uid }} .mox-bar__title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 14px;
+    }
+    #mox-faq-{{ uid }} .mox-bar__track {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    #mox-faq-{{ uid }} .mox-bar__seg {
+      height: 3px;
+      background: {{ section.settings.border_color }};
+      border-radius: 2px;
+    }
+    #mox-faq-{{ uid }} .mox-bar__seg--on {
+      height: 5px;
+      margin-top: -1px;
+      background: {{ section.settings.accent_color }};
+    }
+    #mox-faq-{{ uid }} .mox-bar__labels {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      font-size: 13.5px;
+      line-height: 1.3;
+    }
+    #mox-faq-{{ uid }} .mox-bar__labels span:nth-child(1) { text-align: left; }
+    #mox-faq-{{ uid }} .mox-bar__labels span:nth-child(2) { text-align: center; }
+    #mox-faq-{{ uid }} .mox-bar__labels span:nth-child(3) { text-align: right; }
+    #mox-faq-{{ uid }} .mox-bar__labels .is-muted { opacity: .5; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 749px) {
+      #mox-faq-{{ uid }} .mox-rev__grid {
+        grid-template-columns: 1fr;
+        gap: 26px;
+      }
+      #mox-faq-{{ uid }} .mox-rev__top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+      }
+      #mox-faq-{{ uid }} .mox-rev__cta {
+        width: 100%;
+        justify-content: center;
+      }
+      #mox-faq-{{ uid }} .mox-faq__best { font-size: 19px; }
+      #mox-faq-{{ uid }} .mox-rev__score { font-size: 36px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #mox-faq-{{ uid }} .mox-faq__panel,
+      #mox-faq-{{ uid }} .mox-faq__chev,
+      #mox-faq-{{ uid }} .mox-rev__cta {
+        transition: none;
+      }
+    }
+  </style>
+
+  {%- comment -%} ================= ENCABEZADO ================= {%- endcomment -%}
+  {%- if section.settings.show_head -%}
+    <div class="mox-faq__head">
+      {%- if section.settings.icon != blank -%}
+        <div class="mox-faq__icon">
+          {{ section.settings.icon | image_url: width: 160 | image_tag: loading: 'lazy', alt: section.settings.best_for }}
+        </div>
+      {%- endif -%}
+      <div>
+        {%- if section.settings.kicker != blank -%}
+          <p class="mox-faq__kicker">{{ section.settings.kicker }}</p>
+        {%- endif -%}
+        {%- if section.settings.best_for != blank -%}
+          <p class="mox-faq__best">{{ section.settings.best_for }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- comment -%} ================= ACORDEÓN ================= {%- endcomment -%}
+  <div class="mox-faq__list">
+
+    {%- comment -%} ---- Fila 1: Valoraciones ---- {%- endcomment -%}
+    {%- if section.settings.show_reviews -%}
+      <div class="mox-faq__item">
+        <button
+          class="mox-faq__trigger"
+          type="button"
+          aria-expanded="false"
+          aria-controls="mox-panel-rev-{{ uid }}"
+          id="mox-trigger-rev-{{ uid }}"
+          data-mox-trigger>
+          <span class="mox-faq__label">
+            {{ section.settings.reviews_title }}{% if section.settings.reviews_count > 0 %} ({{ section.settings.reviews_count }}){% endif %}
+          </span>
+          <span class="mox-faq__right">
+            {%- if section.settings.rating_score != blank -%}
+              <span class="mox-faq__stars" role="img" aria-label="{{ section.settings.rating_score }} de 5">
+                {%- for i in (1..5) -%}
+                  <svg class="mox-faq__star{% if forloop.index > filled %} mox-faq__star--off{% endif %}" viewBox="0 0 20 19" fill="currentColor" aria-hidden="true"><path d="M10 0l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L10 15.2 3.9 18.6l1.4-6.8L.2 7.1l6.9-.8z"/></svg>
+                {%- endfor -%}
+              </span>
+            {%- endif -%}
+            <svg class="mox-faq__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 9l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </button>
+
+        <div class="mox-faq__panel" id="mox-panel-rev-{{ uid }}" role="region" aria-labelledby="mox-trigger-rev-{{ uid }}" data-open="false">
+          <div class="mox-faq__panel-inner">
+
+            <div class="mox-rev__top">
+              <div class="mox-rev__scorebox">
+                {%- if section.settings.rating_score != blank -%}
+                  <span class="mox-rev__score">{{ section.settings.rating_score }}</span>
+                  <span class="mox-faq__stars" role="img" aria-label="{{ section.settings.rating_score }} de 5">
+                    {%- for i in (1..5) -%}
+                      <svg class="mox-faq__star{% if forloop.index > filled %} mox-faq__star--off{% endif %}" viewBox="0 0 20 19" fill="currentColor" aria-hidden="true"><path d="M10 0l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L10 15.2 3.9 18.6l1.4-6.8L.2 7.1l6.9-.8z"/></svg>
+                    {%- endfor -%}
+                  </span>
+                {%- endif -%}
+              </div>
+              {%- if section.settings.review_cta_label != blank -%}
+                <a class="mox-rev__cta" href="{% if section.settings.review_cta_url != blank %}{{ section.settings.review_cta_url }}{% else %}#{% endif %}">
+                  {{ section.settings.review_cta_label }}
+                  <svg viewBox="0 0 40 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M0 6h37M32 1l6 5-6 5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              {%- endif -%}
+            </div>
+
+            <div class="mox-rev__grid">
+              {%- for n in (1..4) -%}
+                {%- case n -%}
+                  {%- when 1 -%}
+                    {%- assign b_show = section.settings.bar1_show -%}
+                    {%- assign b_title = section.settings.bar1_title -%}
+                    {%- assign b_left = section.settings.bar1_left -%}
+                    {%- assign b_center = section.settings.bar1_center -%}
+                    {%- assign b_right = section.settings.bar1_right -%}
+                    {%- assign b_pos = section.settings.bar1_pos -%}
+                  {%- when 2 -%}
+                    {%- assign b_show = section.settings.bar2_show -%}
+                    {%- assign b_title = section.settings.bar2_title -%}
+                    {%- assign b_left = section.settings.bar2_left -%}
+                    {%- assign b_center = section.settings.bar2_center -%}
+                    {%- assign b_right = section.settings.bar2_right -%}
+                    {%- assign b_pos = section.settings.bar2_pos -%}
+                  {%- when 3 -%}
+                    {%- assign b_show = section.settings.bar3_show -%}
+                    {%- assign b_title = section.settings.bar3_title -%}
+                    {%- assign b_left = section.settings.bar3_left -%}
+                    {%- assign b_center = section.settings.bar3_center -%}
+                    {%- assign b_right = section.settings.bar3_right -%}
+                    {%- assign b_pos = section.settings.bar3_pos -%}
+                  {%- when 4 -%}
+                    {%- assign b_show = section.settings.bar4_show -%}
+                    {%- assign b_title = section.settings.bar4_title -%}
+                    {%- assign b_left = section.settings.bar4_left -%}
+                    {%- assign b_center = section.settings.bar4_center -%}
+                    {%- assign b_right = section.settings.bar4_right -%}
+                    {%- assign b_pos = section.settings.bar4_pos -%}
+                {%- endcase -%}
+
+                {%- if b_show -%}
+                  <div class="mox-bar">
+                    {%- if b_title != blank -%}
+                      <p class="mox-bar__title">{{ b_title }}</p>
+                    {%- endif -%}
+                    <div class="mox-bar__track">
+                      {%- for s in (1..3) -%}
+                        <span class="mox-bar__seg{% if b_pos == s %} mox-bar__seg--on{% endif %}"></span>
+                      {%- endfor -%}
+                    </div>
+                    <div class="mox-bar__labels">
+                      <span class="{% if b_pos != 1 %}is-muted{% endif %}">{{ b_left }}</span>
+                      <span class="{% if b_pos != 2 %}is-muted{% endif %}">{{ b_center }}</span>
+                      <span class="{% if b_pos != 3 %}is-muted{% endif %}">{{ b_right }}</span>
+                    </div>
+                  </div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ---- Filas 2 a 6: contenido de texto ---- {%- endcomment -%}
+    {%- for n in (1..5) -%}
+      {%- case n -%}
+        {%- when 1 -%}
+          {%- assign r_show = section.settings.row1_show -%}
+          {%- assign r_title = section.settings.row1_title -%}
+          {%- assign r_content = section.settings.row1_content -%}
+        {%- when 2 -%}
+          {%- assign r_show = section.settings.row2_show -%}
+          {%- assign r_title = section.settings.row2_title -%}
+          {%- assign r_content = section.settings.row2_content -%}
+        {%- when 3 -%}
+          {%- assign r_show = section.settings.row3_show -%}
+          {%- assign r_title = section.settings.row3_title -%}
+          {%- assign r_content = section.settings.row3_content -%}
+        {%- when 4 -%}
+          {%- assign r_show = section.settings.row4_show -%}
+          {%- assign r_title = section.settings.row4_title -%}
+          {%- assign r_content = section.settings.row4_content -%}
+        {%- when 5 -%}
+          {%- assign r_show = section.settings.row5_show -%}
+          {%- assign r_title = section.settings.row5_title -%}
+          {%- assign r_content = section.settings.row5_content -%}
+      {%- endcase -%}
+
+      {%- if r_show and r_title != blank -%}
+        <div class="mox-faq__item">
+          <button
+            class="mox-faq__trigger"
+            type="button"
+            aria-expanded="false"
+            aria-controls="mox-panel-{{ n }}-{{ uid }}"
+            id="mox-trigger-{{ n }}-{{ uid }}"
+            data-mox-trigger>
+            <span class="mox-faq__label">{{ r_title }}</span>
+            <span class="mox-faq__right">
+              <svg class="mox-faq__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 9l7 7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+          <div class="mox-faq__panel" id="mox-panel-{{ n }}-{{ uid }}" role="region" aria-labelledby="mox-trigger-{{ n }}-{{ uid }}" data-open="false">
+            <div class="mox-faq__panel-inner">
+              <div class="mox-faq__content">{{ r_content }}</div>
+            </div>
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('mox-faq-{{ uid }}');
+      if (!root || root.dataset.moxReady === 'true') return;
+      root.dataset.moxReady = 'true';
+
+      var closeOthers = {% if section.settings.one_at_a_time %}true{% else %}false{% endif %};
+
+      root.querySelectorAll('[data-mox-trigger]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var panel = document.getElementById(btn.getAttribute('aria-controls'));
+          var isOpen = btn.getAttribute('aria-expanded') === 'true';
+
+          if (closeOthers && !isOpen) {
+            root.querySelectorAll('[data-mox-trigger]').forEach(function (other) {
+              if (other === btn) return;
+              other.setAttribute('aria-expanded', 'false');
+              var op = document.getElementById(other.getAttribute('aria-controls'));
+              if (op) op.setAttribute('data-open', 'false');
+            });
+          }
+
+          btn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+          if (panel) panel.setAttribute('data-open', isOpen ? 'false' : 'true');
+        });
+      });
+    })();
+  </script>
+
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Info producto (acordeón)",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Encabezado"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_head",
+      "label": "Mostrar encabezado",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "icon",
+      "label": "Ícono"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Tamaño del ícono",
+      "min": 24,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Texto chico de arriba",
+      "default": "Lo mejor para"
+    },
+    {
+      "type": "text",
+      "id": "best_for",
+      "label": "Texto destacado",
+      "info": "Ej: PANTALLAS, GAMING, CONDUCCIÓN NOCTURNA",
+      "default": "PANTALLAS"
+    },
+    {
+      "type": "range",
+      "id": "head_gap",
+      "label": "Espacio debajo del encabezado",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+
+    {
+      "type": "header",
+      "content": "Fila 1 — Valoraciones"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reviews",
+      "label": "Mostrar la fila de valoraciones",
+      "info": "Activala solo cuando tengas reseñas reales.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "reviews_title",
+      "label": "Título de la fila",
+      "default": "Valoraciones"
+    },
+    {
+      "type": "number",
+      "id": "reviews_count",
+      "label": "Cantidad de valoraciones",
+      "default": 0
+    },
+    {
+      "type": "text",
+      "id": "rating_score",
+      "label": "Puntaje (0 a 5)",
+      "info": "Dejalo vacío para no mostrar puntaje ni estrellas."
+    },
+    {
+      "type": "text",
+      "id": "review_cta_label",
+      "label": "Texto del botón",
+      "default": "Escribir una reseña"
+    },
+    {
+      "type": "url",
+      "id": "review_cta_url",
+      "label": "Enlace del botón"
+    },
+
+    {
+      "type": "header",
+      "content": "Barra 1"
+    },
+    {
+      "type": "checkbox",
+      "id": "bar1_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "bar1_title",
+      "label": "Título",
+      "default": "Comodidad"
+    },
+    {
+      "type": "text",
+      "id": "bar1_left",
+      "label": "Etiqueta izquierda",
+      "default": "Deficiente"
+    },
+    {
+      "type": "text",
+      "id": "bar1_center",
+      "label": "Etiqueta centro"
+    },
+    {
+      "type": "text",
+      "id": "bar1_right",
+      "label": "Etiqueta derecha",
+      "default": "Excelente"
+    },
+    {
+      "type": "range",
+      "id": "bar1_pos",
+      "label": "Resultado",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 3
+    },
+
+    {
+      "type": "header",
+      "content": "Barra 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "bar2_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "bar2_title",
+      "label": "Título",
+      "default": "Calidad"
+    },
+    {
+      "type": "text",
+      "id": "bar2_left",
+      "label": "Etiqueta izquierda",
+      "default": "Deficiente"
+    },
+    {
+      "type": "text",
+      "id": "bar2_center",
+      "label": "Etiqueta centro"
+    },
+    {
+      "type": "text",
+      "id": "bar2_right",
+      "label": "Etiqueta derecha",
+      "default": "Excelente"
+    },
+    {
+      "type": "range",
+      "id": "bar2_pos",
+      "label": "Resultado",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 3
+    },
+
+    {
+      "type": "header",
+      "content": "Barra 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "bar3_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "bar3_title",
+      "label": "Título",
+      "default": "Tamaño del armazón"
+    },
+    {
+      "type": "text",
+      "id": "bar3_left",
+      "label": "Etiqueta izquierda",
+      "default": "Pequeño"
+    },
+    {
+      "type": "text",
+      "id": "bar3_center",
+      "label": "Etiqueta centro",
+      "default": "Perfecto"
+    },
+    {
+      "type": "text",
+      "id": "bar3_right",
+      "label": "Etiqueta derecha",
+      "default": "Grande"
+    },
+    {
+      "type": "range",
+      "id": "bar3_pos",
+      "label": "Resultado",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+
+    {
+      "type": "header",
+      "content": "Barra 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "bar4_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "bar4_title",
+      "label": "Título",
+      "default": "Ancho"
+    },
+    {
+      "type": "text",
+      "id": "bar4_left",
+      "label": "Etiqueta izquierda",
+      "default": "Estrecho"
+    },
+    {
+      "type": "text",
+      "id": "bar4_center",
+      "label": "Etiqueta centro",
+      "default": "Perfecto"
+    },
+    {
+      "type": "text",
+      "id": "bar4_right",
+      "label": "Etiqueta derecha",
+      "default": "Ancho"
+    },
+    {
+      "type": "range",
+      "id": "bar4_pos",
+      "label": "Resultado",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+
+    {
+      "type": "header",
+      "content": "Fila 2"
+    },
+    {
+      "type": "checkbox",
+      "id": "row1_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "row1_title",
+      "label": "Título",
+      "default": "Ajuste y medidas"
+    },
+    {
+      "type": "richtext",
+      "id": "row1_content",
+      "label": "Contenido",
+      "default": "<p>Medidas del armazón: ancho del frente, largo de las patillas y puente. Modelo unisex, pensado para uso prolongado.</p>"
+    },
+
+    {
+      "type": "header",
+      "content": "Fila 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "row2_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "row2_title",
+      "label": "Título",
+      "default": "Descripción"
+    },
+    {
+      "type": "richtext",
+      "id": "row2_content",
+      "label": "Contenido",
+      "default": "<p>Contá acá para qué momento sirve este modelo y qué resuelve.</p>"
+    },
+
+    {
+      "type": "header",
+      "content": "Fila 4"
+    },
+    {
+      "type": "checkbox",
+      "id": "row3_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "row3_title",
+      "label": "Título",
+      "default": "Detalles"
+    },
+    {
+      "type": "richtext",
+      "id": "row3_content",
+      "label": "Contenido",
+      "default": "<p>Material del armazón, color, peso y qué incluye la compra.</p>"
+    },
+
+    {
+      "type": "header",
+      "content": "Fila 5"
+    },
+    {
+      "type": "checkbox",
+      "id": "row4_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "row4_title",
+      "label": "Título",
+      "default": "Cristales y tecnología"
+    },
+    {
+      "type": "richtext",
+      "id": "row4_content",
+      "label": "Contenido",
+      "default": "<p>Qué hace el cristal, en qué se diferencia del amarillo, naranja y rojo, y cuándo conviene cada uno.</p>"
+    },
+
+    {
+      "type": "header",
+      "content": "Fila 6"
+    },
+    {
+      "type": "checkbox",
+      "id": "row5_show",
+      "label": "Mostrar",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "row5_title",
+      "label": "Título",
+      "default": "Envíos y devoluciones"
+    },
+    {
+      "type": "richtext",
+      "id": "row5_content",
+      "label": "Contenido",
+      "default": "<p>Plazos de envío, costos y cómo funciona el cambio o la devolución.</p>"
+    },
+
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho máximo del contenido",
+      "min": 600,
+      "max": 1600,
+      "step": 20,
+      "unit": "px",
+      "default": 1100
+    },
+    {
+      "type": "checkbox",
+      "id": "one_at_a_time",
+      "label": "Abrir una sola fila por vez",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Fondo",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Texto",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Líneas divisorias",
+      "default": "#D8D8D8"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Color del resultado en las barras",
+      "default": "#111111"
+    },
+    {
+      "type": "range",
+      "id": "row_padding",
+      "label": "Alto de cada fila",
+      "min": 12,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Espacio arriba",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Espacio abajo",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "Info producto (acordeón)"
+    }
+  ]
+}
+{% endschema %}

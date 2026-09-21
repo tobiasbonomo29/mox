@@ -1,0 +1,880 @@
+{%- liquid
+  assign s = block.settings
+  assign uid = block.id
+
+  assign p = product
+
+  assign current = p.selected_or_first_available_variant
+  assign tax_divisor = s.tax_rate | plus: 100
+  assign transfer_factor = 100 | minus: s.transfer_discount
+-%}
+
+<style>
+  .pi-{{ uid }} {
+    --pi-fg: {{ s.color_text }};
+    --pi-muted: {{ s.color_muted }};
+    --pi-border: {{ s.color_border }};
+    --pi-bg: {{ s.color_bg }};
+    --pi-btn-bg: {{ s.color_button_bg }};
+    --pi-btn-fg: {{ s.color_button_text }};
+    --pi-thumb: {{ s.thumb_size }}px;
+    --pi-thumb-radius: {{ s.thumb_radius }}px;
+
+    max-width: {{ s.max_width }}px;
+    background: var(--pi-bg);
+    color: var(--pi-fg);
+  }
+
+  .pi-{{ uid }} * { box-sizing: border-box; }
+
+  .pi-{{ uid }} .pi__title {
+    margin: 0 0 10px;
+    font-size: clamp(22px, 3.2vw, {{ s.title_size }}px);
+    font-weight: {{ s.title_weight }};
+    line-height: 1.15;
+    color: var(--pi-fg);
+  }
+
+  .pi-{{ uid }} .pi__rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .pi-{{ uid }} .pi__stars {
+    position: relative;
+    display: inline-block;
+    line-height: 0;
+  }
+
+  .pi-{{ uid }} .pi__stars-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    line-height: 0;
+  }
+
+  .pi-{{ uid }} .pi__star {
+    width: {{ s.star_size }}px;
+    height: {{ s.star_size }}px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .pi-{{ uid }} .pi__star--empty { fill: none; stroke: var(--pi-fg); stroke-width: 1.5; }
+  .pi-{{ uid }} .pi__star--full { fill: var(--pi-fg); stroke: none; }
+
+  .pi-{{ uid }} .pi__reviews {
+    font-size: 14px;
+    color: var(--pi-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .pi-{{ uid }} .pi__compare {
+    display: block;
+    font-size: 15px;
+    color: var(--pi-muted);
+    text-decoration: line-through;
+    margin-bottom: 2px;
+  }
+
+  .pi-{{ uid }} .pi__price-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .pi-{{ uid }} .pi__price {
+    font-size: clamp(26px, 4vw, {{ s.price_size }}px);
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .pi-{{ uid }} .pi__discount {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--pi-muted);
+  }
+
+  .pi-{{ uid }} .pi__tax {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--pi-muted);
+  }
+
+  .pi-{{ uid }} .pi__benefits {
+    list-style: none;
+    margin: 22px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .pi-{{ uid }} .pi__benefit {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: {{ s.benefit_size }}px;
+    line-height: 1.4;
+  }
+
+  .pi-{{ uid }} .pi__check {
+    flex: 0 0 auto;
+    width: {{ s.check_size }}px;
+    height: {{ s.check_size }}px;
+    margin-top: 1px;
+    fill: none;
+    stroke: var(--pi-fg);
+    stroke-width: {{ s.check_weight }};
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .pi-{{ uid }} .pi__payments { margin-top: 22px; }
+
+  .pi-{{ uid }} .pi__transfer,
+  .pi-{{ uid }} .pi__installments {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .pi-{{ uid }} .pi__transfer strong,
+  .pi-{{ uid }} .pi__installments strong { font-weight: 600; }
+
+  .pi-{{ uid }} .pi__gateway {
+    height: 20px;
+    width: auto;
+    margin-left: 2px;
+  }
+
+  .pi-{{ uid }} .pi__option-label {
+    margin: 26px 0 10px;
+    font-size: 15px;
+    color: var(--pi-muted);
+  }
+
+  .pi-{{ uid }} .pi__option-label strong {
+    color: var(--pi-fg);
+    font-weight: 600;
+  }
+
+  .pi-{{ uid }} .pi__variants {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .pi-{{ uid }} .pi__variant {
+    position: relative;
+    width: var(--pi-thumb);
+    height: var(--pi-thumb);
+    padding: 4px;
+    background: var(--pi-bg);
+    border: 1px solid var(--pi-border);
+    border-radius: var(--pi-thumb-radius);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+
+  .pi-{{ uid }} .pi__variant img,
+  .pi-{{ uid }} .pi__variant svg.pi__ph {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .pi-{{ uid }} .pi__variant:hover { border-color: var(--pi-fg); }
+
+  .pi-{{ uid }} .pi__variant[aria-pressed="true"] {
+    border-color: var(--pi-fg);
+    border-width: 2px;
+    padding: 3px;
+  }
+
+  .pi-{{ uid }} .pi__variant:focus-visible {
+    outline: 2px solid var(--pi-fg);
+    outline-offset: 2px;
+  }
+
+  .pi-{{ uid }} .pi__variant--soldout { cursor: not-allowed; opacity: 0.55; }
+
+  .pi-{{ uid }} .pi__variant--soldout::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top right,
+      transparent calc(50% - 0.6px),
+      var(--pi-fg) calc(50% - 0.6px),
+      var(--pi-fg) calc(50% + 0.6px),
+      transparent calc(50% + 0.6px)
+    );
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  /* Estos estilos siguen al bloque aunque se mueva a otro lugar
+     de la página, porque no dependen del contenedor padre. */
+  .pi__actions {
+    display: flex;
+    align-items: stretch;
+    gap: 14px;
+    margin-top: 28px;
+  }
+
+  .pi__qty {
+    display: flex;
+    align-items: center;
+    border: 1px solid {{ s.color_border }};
+    border-radius: {{ s.button_radius }}px;
+    flex: 0 0 auto;
+  }
+
+  .pi__qty button {
+    width: 40px;
+    height: 100%;
+    min-height: 52px;
+    background: none;
+    border: 0;
+    color: {{ s.color_text }};
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .pi__qty button:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .pi__qty input {
+    width: 44px;
+    height: 100%;
+    min-height: 52px;
+    text-align: center;
+    border: 0;
+    background: none;
+    color: {{ s.color_text }};
+    font-size: 16px;
+    font-family: inherit;
+    -moz-appearance: textfield;
+  }
+
+  .pi__qty input::-webkit-outer-spin-button,
+  .pi__qty input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .pi__submit {
+    flex: 1 1 auto;
+    min-height: 52px;
+    padding: 14px 24px;
+    background: {{ s.color_button_bg }};
+    color: {{ s.color_button_text }};
+    border: 1px solid {{ s.color_button_bg }};
+    border-radius: {{ s.button_radius }}px;
+    font-family: inherit;
+    font-size: {{ s.button_size }}px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+
+  .pi__submit:hover:not(:disabled) { opacity: 0.85; }
+  .pi__submit:active:not(:disabled) { transform: scale(0.99); }
+  .pi__submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .pi-{{ uid }} .pi__empty {
+    padding: 28px;
+    border: 1px dashed var(--pi-border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--pi-muted);
+  }
+
+  .pi-{{ uid }} [hidden] { display: none !important; }
+
+  @media screen and (max-width: 749px) {
+    .pi-{{ uid }} { --pi-thumb: {{ s.thumb_size_mobile }}px; }
+    .pi__actions { flex-wrap: wrap; }
+    .pi__submit { flex: 1 1 100%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pi-{{ uid }} * { transition: none !important; }
+  }
+</style>
+<div class="pi-{{ uid }}" data-pi {{ block.shopify_attributes }}>
+  {%- if p == blank -%}
+    {%- if request.design_mode -%}
+      <div class="pi__empty">Este bloque necesita una página de producto para funcionar.</div>
+    {%- endif -%}
+  {%- else -%}
+
+    <script type="application/json" data-pi-variants>
+      [
+        {%- for v in p.variants -%}
+          {%- liquid
+            assign net = v.price | times: 100 | divided_by: tax_divisor
+            assign transfer = v.price | times: transfer_factor | divided_by: 100
+            assign quota = v.price | divided_by: s.installments
+            assign has_compare = false
+            if v.compare_at_price > v.price
+              assign has_compare = true
+              assign off = v.compare_at_price | minus: v.price | times: 100 | divided_by: v.compare_at_price
+            endif
+          -%}
+          {
+            "id": {{ v.id }},
+            "available": {{ v.available }},
+            "price": {{ v.price | money | json }},
+            "compare": {% if has_compare %}{{ v.compare_at_price | money | json }}{% else %}null{% endif %},
+            "off": {% if has_compare %}{{ off }}{% else %}null{% endif %},
+            "net": {{ net | money | json }},
+            "transfer": {{ transfer | money | json }},
+            "quota": {{ quota | money | json }},
+            "title": {{ v.title | json }},
+            "options": {{ v.options | json }}
+          }{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    </script>
+
+    {%- if s.show_title -%}
+      <h2 class="pi__title" data-pi-title>{{ p.title }}</h2>
+    {%- endif -%}
+
+    {%- if s.show_rating -%}
+      {%- assign star_pct = s.rating | times: 100 | divided_by: s.rating_max -%}
+      <div class="pi__rating">
+        <span class="pi__stars" role="img" aria-label="{{ s.rating }} de {{ s.rating_max }} estrellas">
+          {%- for i in (1..s.rating_max) -%}
+            <svg class="pi__star pi__star--empty" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.85-4.25 4.1 1 5.85L12 17l-5.25 2.7 1-5.85L3.5 9.75l5.9-.85z"/></svg>
+          {%- endfor -%}
+          <span class="pi__stars-fill" style="width: {{ star_pct }}%" aria-hidden="true">
+            {%- for i in (1..s.rating_max) -%}
+              <svg class="pi__star pi__star--full" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.85-4.25 4.1 1 5.85L12 17l-5.25 2.7 1-5.85L3.5 9.75l5.9-.85z"/></svg>
+            {%- endfor -%}
+          </span>
+        </span>
+        {%- if s.show_reviews_count -%}
+          <span class="pi__reviews">({{ s.reviews_count }})</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="pi__pricing">
+      {%- if s.show_compare -%}
+        <s class="pi__compare" data-pi-compare {% unless current.compare_at_price > current.price %}hidden{% endunless %}>
+          {{ current.compare_at_price | money }}
+        </s>
+      {%- endif -%}
+
+      <div class="pi__price-row">
+        <span class="pi__price" data-pi-price>{{ current.price | money }}</span>
+        {%- if s.show_discount -%}
+          {%- if current.compare_at_price > current.price -%}
+            {%- assign off_now = current.compare_at_price | minus: current.price | times: 100 | divided_by: current.compare_at_price -%}
+          {%- endif -%}
+          <span class="pi__discount" data-pi-discount {% unless current.compare_at_price > current.price %}hidden{% endunless %}>
+            <span data-pi-off>{{ off_now }}</span>% {{ s.discount_label | escape }}
+          </span>
+        {%- endif -%}
+      </div>
+
+      {%- if s.show_tax_line -%}
+        {%- assign net_now = current.price | times: 100 | divided_by: tax_divisor -%}
+        <p class="pi__tax">{{ s.tax_label | escape }} <span data-pi-net>{{ net_now | money }}</span></p>
+      {%- endif -%}
+    </div>
+
+    {%- assign benefit_lines = s.benefits | strip | newline_to_br | split: '<br />' -%}
+    {%- if s.benefits != blank -%}
+      <ul class="pi__benefits">
+        {%- for line in benefit_lines -%}
+          {%- assign clean = line | strip -%}
+          {%- if clean != blank -%}
+            <li class="pi__benefit">
+              <svg class="pi__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M4.5 12.5l5 5 10-11"/>
+              </svg>
+              <span>{{ clean | escape }}</span>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if s.show_transfer or s.show_installments -%}
+      <div class="pi__payments">
+        {%- if s.show_transfer -%}
+          {%- assign transfer_now = current.price | times: transfer_factor | divided_by: 100 -%}
+          <p class="pi__transfer">
+            <strong data-pi-transfer>{{ transfer_now | money }}</strong>
+            <span>{{ s.transfer_label | escape }}</span>
+          </p>
+        {%- endif -%}
+
+        {%- if s.show_installments -%}
+          {%- assign quota_now = current.price | divided_by: s.installments -%}
+          <p class="pi__installments">
+            <span>{{ s.installments }} {{ s.installments_label | escape }}</span>
+            <strong data-pi-quota>{{ quota_now | money }}</strong>
+            <span>{{ s.installments_suffix | escape }}</span>
+            {%- if s.gateway_logo != blank -%}
+              {{
+                s.gateway_logo
+                | image_url: height: 60
+                | image_tag: class: 'pi__gateway', alt: s.gateway_alt, loading: 'lazy'
+              }}
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <form
+      method="post"
+      action="{{ routes.cart_add_url }}"
+      accept-charset="UTF-8"
+      enctype="multipart/form-data"
+      data-pi-form
+      id="pi-form-{{ uid }}"
+    >
+      <input type="hidden" name="form_type" value="product">
+      <input type="hidden" name="utf8" value="✓">
+      <input type="hidden" name="id" value="{{ current.id }}" data-pi-id>
+
+      {%- if s.show_variants and p.variants.size > 1 -%}
+        <p class="pi__option-label">
+          {{ p.options.first | escape }}: <strong data-pi-variant-title>{{ current.title }}</strong>
+        </p>
+
+        <fieldset class="pi__variants">
+          <legend class="visually-hidden">{{ p.options.first | escape }}</legend>
+          {%- for v in p.variants -%}
+            <button
+              type="button"
+              class="pi__variant{% unless v.available %} pi__variant--soldout{% endunless %}"
+              data-pi-variant="{{ v.id }}"
+              aria-pressed="{% if v.id == current.id %}true{% else %}false{% endif %}"
+              {% unless v.available %}aria-disabled="true"{% endunless %}
+              aria-label="{{ v.title | escape }}{% unless v.available %} — agotado{% endunless %}"
+            >
+              {%- if v.image != blank -%}
+                {{ v.image | image_url: width: 160 | image_tag: alt: v.title, loading: 'lazy', widths: '80, 120, 160' }}
+              {%- elsif p.featured_image != blank -%}
+                {{ p.featured_image | image_url: width: 160 | image_tag: alt: v.title, loading: 'lazy', widths: '80, 120, 160' }}
+              {%- else -%}
+                <svg class="pi__ph" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-4 4 3 3-2 6 4"/></svg>
+              {%- endif -%}
+            </button>
+          {%- endfor -%}
+        </fieldset>
+      {%- endif -%}
+
+      {%- comment -%}
+        Esta fila lleva data-pi-actions para que el bloque de Kits
+        pueda moverla debajo de las tarjetas. El atributo form= en
+        cada control la mantiene conectada a este formulario aunque
+        quede en otro lugar del HTML.
+      {%- endcomment -%}
+      <div class="pi__actions" data-pi-actions data-pi-owner="{{ uid }}">
+        {%- if s.show_quantity -%}
+          <div class="pi__qty">
+            <button type="button" data-pi-minus aria-label="Restar uno">&minus;</button>
+            <input
+              type="number"
+              name="quantity"
+              value="1"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              data-pi-qty
+              form="pi-form-{{ uid }}"
+              aria-label="Cantidad"
+            >
+            <button type="button" data-pi-plus aria-label="Sumar uno">&plus;</button>
+          </div>
+        {%- else -%}
+          <input type="hidden" name="quantity" value="1" form="pi-form-{{ uid }}">
+        {%- endif -%}
+
+        <button
+          type="submit"
+          class="pi__submit"
+          data-pi-submit
+          form="pi-form-{{ uid }}"
+          data-label-add="{{ s.button_text | escape }}"
+          data-label-loading="{{ s.button_loading | escape }}"
+          data-label-added="{{ s.button_added | escape }}"
+          data-label-soldout="{{ s.button_soldout | escape }}"
+          {% unless current.available %}disabled{% endunless %}
+        >
+          {% if current.available %}{{ s.button_text | escape }}{% else %}{{ s.button_soldout | escape }}{% endif %}
+        </button>
+      </div>
+    </form>
+  {%- endif -%}
+</div>
+<script>
+  (function () {
+    if (window.__moxProductInfo) return;
+    window.__moxProductInfo = true;
+
+    function buscarCajon() {
+      return document.querySelector('cart-drawer-component') ||
+             document.querySelector('cart-drawer');
+    }
+
+    /* Avisa al tema que el carrito cambió */
+    function avisar() {
+      document.dispatchEvent(new CustomEvent('cart:update', {
+        bubbles: true,
+        detail: { source: 'product-form-component', didError: false }
+      }));
+      document.dispatchEvent(new CustomEvent('cart:refresh', { bubbles: true }));
+    }
+
+    function abrir(drawer) {
+      if (!drawer) return;
+      if (typeof drawer.open === 'function') {
+        drawer.open();
+      } else if (typeof drawer.showDialog === 'function') {
+        drawer.showDialog();
+      } else {
+        var dialog = drawer.querySelector('dialog');
+        if (dialog && typeof dialog.showModal === 'function') dialog.showModal();
+      }
+    }
+
+    /* Refresca el contenido del cajón y recién entonces lo abre.
+       Si se abre antes de refrescar, muestra el carrito viejo.
+       El nombre de la sección se detecta solo, así que funciona
+       tanto si el cajón es una sección propia como si vive
+       adentro del header. */
+    function abrirCarrito() {
+      var drawer = buscarCajon();
+
+      if (!drawer) {
+        avisar();
+        return;
+      }
+
+      var wrapper = drawer.closest('.shopify-section');
+      var sectionId = wrapper && wrapper.id ? wrapper.id.replace('shopify-section-', '') : null;
+
+      if (!sectionId) {
+        avisar();
+        setTimeout(function () { abrir(buscarCajon()); }, 400);
+        return;
+      }
+
+      var rootUrl = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+
+      fetch(rootUrl + '?sections=' + encodeURIComponent(sectionId), {
+        headers: { Accept: 'application/json' }
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (sections) {
+          var html = sections[sectionId];
+          if (html) {
+            var parsed = new DOMParser().parseFromString(html, 'text/html');
+            var incoming = parsed.getElementById('shopify-section-' + sectionId);
+            wrapper.innerHTML = incoming ? incoming.innerHTML : html;
+          }
+          avisar();
+          abrir(buscarCajon());
+        })
+        .catch(function () {
+          avisar();
+          setTimeout(function () { abrir(buscarCajon()); }, 400);
+        });
+    }
+
+    function init(root) {
+      if (root.dataset.piReady) return;
+      root.dataset.piReady = '1';
+
+      var dataEl = root.querySelector('[data-pi-variants]');
+      var form = root.querySelector('[data-pi-form]');
+      if (!dataEl || !form) return;
+
+      var variants;
+      try {
+        variants = JSON.parse(dataEl.textContent);
+      } catch (err) {
+        return;
+      }
+
+      var idInput = root.querySelector('[data-pi-id]');
+
+      /* La fila de cantidad + botón puede haber sido movida fuera
+         de este contenedor, así que se busca en toda la página
+         usando el identificador del bloque. */
+      var uid = root.className.replace('pi-', '');
+      var actions = document.querySelector('[data-pi-owner="' + uid + '"]') ||
+                    root.querySelector('[data-pi-actions]');
+      var scope = actions || root;
+
+      var submit = scope.querySelector('[data-pi-submit]');
+      var qty = scope.querySelector('[data-pi-qty]');
+      var minus = scope.querySelector('[data-pi-minus]');
+      var plus = scope.querySelector('[data-pi-plus]');
+
+      function el(name) { return root.querySelector('[data-pi-' + name + ']'); }
+
+      function show(node, on) {
+        if (node) node.hidden = !on;
+      }
+
+      function apply(v) {
+        if (!v) return;
+        if (idInput) idInput.value = v.id;
+
+        var price = el('price');
+        if (price) price.textContent = v.price;
+
+        var compare = el('compare');
+        if (compare) {
+          compare.textContent = v.compare || '';
+          show(compare, !!v.compare);
+        }
+
+        var discount = el('discount');
+        if (discount) {
+          var off = el('off');
+          if (off && v.off !== null) off.textContent = v.off;
+          show(discount, v.off !== null);
+        }
+
+        var net = el('net');
+        if (net) net.textContent = v.net;
+
+        var transfer = el('transfer');
+        if (transfer) transfer.textContent = v.transfer;
+
+        var quota = el('quota');
+        if (quota) quota.textContent = v.quota;
+
+        var vTitle = el('variant-title');
+        if (vTitle) vTitle.textContent = v.title;
+
+        var buttons = root.querySelectorAll('[data-pi-variant]');
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].setAttribute(
+            'aria-pressed',
+            String(Number(buttons[i].dataset.piVariant) === v.id)
+          );
+        }
+
+        if (submit) {
+          submit.disabled = !v.available;
+          submit.textContent = v.available
+            ? submit.dataset.labelAdd
+            : submit.dataset.labelSoldout;
+        }
+
+        if (window.history && window.history.replaceState) {
+          var url = new URL(window.location.href);
+          url.searchParams.set('variant', v.id);
+          window.history.replaceState({}, '', url.toString());
+        }
+
+        document.dispatchEvent(
+          new CustomEvent('mox:variant:change', { detail: { variantId: v.id } })
+        );
+      }
+
+      root.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-pi-variant]');
+        if (!button || !root.contains(button)) return;
+        if (button.getAttribute('aria-disabled') === 'true') return;
+
+        var id = Number(button.dataset.piVariant);
+        for (var i = 0; i < variants.length; i++) {
+          if (variants[i].id === id) {
+            apply(variants[i]);
+            break;
+          }
+        }
+      });
+
+      function step(delta) {
+        if (!qty) return;
+        var next = (parseInt(qty.value, 10) || 1) + delta;
+        qty.value = next < 1 ? 1 : next;
+        if (minus) minus.disabled = Number(qty.value) <= 1;
+      }
+
+      if (minus) {
+        minus.disabled = true;
+        minus.addEventListener('click', function () { step(-1); });
+      }
+      if (plus) plus.addEventListener('click', function () { step(1); });
+      if (qty) {
+        qty.addEventListener('change', function () {
+          if (!qty.value || parseInt(qty.value, 10) < 1) qty.value = 1;
+          if (minus) minus.disabled = Number(qty.value) <= 1;
+        });
+      }
+
+      /* Siempre por AJAX contra /cart/add.js, que es el endpoint que
+         devuelve JSON. Nunca se reenvía el formulario a mano: eso era
+         lo que sacaba al usuario de la página. */
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!submit || submit.disabled) return;
+
+        var original = submit.dataset.labelAdd || submit.textContent;
+
+        function reset() {
+          submit.textContent = original;
+          submit.disabled = false;
+        }
+
+        submit.disabled = true;
+        submit.textContent = submit.dataset.labelLoading;
+
+        var rootUrl = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+
+        fetch(rootUrl + 'cart/add.js', {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' }
+        })
+          .then(function (res) {
+            return res.json().then(function (data) {
+              return { ok: res.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            if (!result.ok) {
+              submit.textContent = (result.data && result.data.description) || 'No se pudo agregar';
+              setTimeout(reset, 2600);
+              return;
+            }
+
+            submit.textContent = submit.dataset.labelAdded;
+            abrirCarrito();
+            setTimeout(reset, 1800);
+          })
+          .catch(function () {
+            reset();
+          });
+      });
+    }
+
+    function scan(scope) {
+      var nodes = (scope || document).querySelectorAll('[data-pi]');
+      for (var i = 0; i < nodes.length; i++) init(nodes[i]);
+    }
+
+    /* Se espera un instante para que el bloque de Kits termine de
+       mover la fila antes de conectar los botones. */
+    function arrancar() {
+      setTimeout(function () { scan(); }, 60);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', arrancar);
+    } else {
+      arrancar();
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      scan(event.target);
+    });
+
+    document.addEventListener('shopify:block:select', function (event) {
+      scan(event.target);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Info de producto",
+  "settings": [
+    { "type": "header", "content": "Título" },
+    { "type": "checkbox", "id": "show_title", "label": "Mostrar título", "default": true },
+    { "type": "range", "id": "title_size", "label": "Tamaño del título", "min": 20, "max": 56, "step": 2, "unit": "px", "default": 32 },
+    {
+      "type": "select",
+      "id": "title_weight",
+      "label": "Peso del título",
+      "options": [
+        { "value": "400", "label": "Normal" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "700"
+    },
+    { "type": "header", "content": "Valoración" },
+    { "type": "paragraph", "content": "Shopify no expone la valoración sin una app de reseñas, así que estos valores se cargan a mano." },
+    { "type": "checkbox", "id": "show_rating", "label": "Mostrar valoración", "default": true },
+    { "type": "range", "id": "rating", "label": "Puntaje", "min": 0, "max": 5, "step": 0.1, "default": 5.0 },
+    { "type": "range", "id": "rating_max", "label": "Estrellas totales", "min": 3, "max": 10, "step": 1, "default": 5 },
+    { "type": "range", "id": "star_size", "label": "Tamaño de las estrellas", "min": 12, "max": 32, "step": 1, "unit": "px", "default": 18 },
+    { "type": "checkbox", "id": "show_reviews_count", "label": "Mostrar cantidad de reseñas", "default": true },
+    { "type": "text", "id": "reviews_count", "label": "Cantidad de reseñas", "default": "7" },
+    { "type": "header", "content": "Precio" },
+    { "type": "checkbox", "id": "show_compare", "label": "Mostrar precio anterior tachado", "default": true },
+    { "type": "checkbox", "id": "show_discount", "label": "Mostrar porcentaje de descuento", "default": true },
+    { "type": "text", "id": "discount_label", "label": "Texto del descuento", "default": "OFF" },
+    { "type": "range", "id": "price_size", "label": "Tamaño del precio", "min": 22, "max": 56, "step": 2, "unit": "px", "default": 38 },
+    { "type": "checkbox", "id": "show_tax_line", "label": "Mostrar precio sin impuestos", "default": true },
+    { "type": "text", "id": "tax_label", "label": "Texto del precio sin impuestos", "default": "Precio sin impuestos" },
+    { "type": "range", "id": "tax_rate", "label": "IVA incluido en el precio (%)", "min": 0, "max": 40, "step": 1, "unit": "%", "default": 21, "info": "Shopify no expone la tasa al theme. Si tus precios no incluyen IVA, apagá la línea de arriba." },
+    { "type": "header", "content": "Transferencia y cuotas" },
+    { "type": "checkbox", "id": "show_transfer", "label": "Mostrar precio por transferencia", "default": true },
+    { "type": "range", "id": "transfer_discount", "label": "Descuento por transferencia", "min": 0, "max": 40, "step": 1, "unit": "%", "default": 10 },
+    { "type": "text", "id": "transfer_label", "label": "Texto de transferencia", "default": "por transferencia" },
+    { "type": "checkbox", "id": "show_installments", "label": "Mostrar cuotas", "default": true },
+    { "type": "range", "id": "installments", "label": "Cantidad de cuotas", "min": 2, "max": 24, "step": 1, "default": 3 },
+    { "type": "text", "id": "installments_label", "label": "Texto antes del monto", "default": "cuotas de" },
+    { "type": "text", "id": "installments_suffix", "label": "Texto después del monto", "default": "sin interés con" },
+    { "type": "image_picker", "id": "gateway_logo", "label": "Logo del medio de pago", "info": "Subí el logo oficial desde el kit de marca del proveedor." },
+    { "type": "text", "id": "gateway_alt", "label": "Texto alternativo del logo", "default": "Medio de pago" },
+    { "type": "header", "content": "Variantes" },
+    { "type": "checkbox", "id": "show_variants", "label": "Mostrar selector de variantes", "default": true },
+    { "type": "range", "id": "thumb_size", "label": "Miniatura en escritorio", "min": 48, "max": 120, "step": 4, "unit": "px", "default": 72 },
+    { "type": "range", "id": "thumb_size_mobile", "label": "Miniatura en celular", "min": 40, "max": 100, "step": 4, "unit": "px", "default": 60 },
+    { "type": "range", "id": "thumb_radius", "label": "Redondeo de las miniaturas", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 4 },
+    { "type": "header", "content": "Cantidad y botón" },
+    { "type": "checkbox", "id": "show_quantity", "label": "Mostrar selector de cantidad", "default": true },
+    { "type": "text", "id": "button_text", "label": "Texto del botón", "default": "Agregar al carrito" },
+    { "type": "text", "id": "button_loading", "label": "Texto mientras agrega", "default": "Agregando..." },
+    { "type": "text", "id": "button_added", "label": "Texto al agregar", "default": "Agregado" },
+    { "type": "text", "id": "button_soldout", "label": "Texto sin stock", "default": "Agotado" },
+    { "type": "range", "id": "button_size", "label": "Tamaño del texto del botón", "min": 13, "max": 22, "step": 1, "unit": "px", "default": 16 },
+    { "type": "range", "id": "button_radius", "label": "Redondeo del botón", "min": 0, "max": 32, "step": 2, "unit": "px", "default": 6 },
+    { "type": "header", "content": "Beneficios" },
+    { "type": "textarea", "id": "benefits", "label": "Beneficios", "info": "Uno por línea. Cada línea aparece con su check.", "default": "Mayor protección frente a luz azul\nNo altera los colores de la pantalla\nMayor confort visual frente a pantallas" },
+    { "type": "range", "id": "benefit_size", "label": "Tamaño del texto", "min": 13, "max": 22, "step": 1, "unit": "px", "default": 16 },
+    { "type": "range", "id": "check_size", "label": "Tamaño del check", "min": 12, "max": 32, "step": 1, "unit": "px", "default": 20 },
+    { "type": "range", "id": "check_weight", "label": "Grosor del check", "min": 1, "max": 4, "step": 0.5, "default": 2 },
+    { "type": "header", "content": "Colores" },
+    { "type": "color", "id": "color_text", "label": "Texto principal", "default": "#000000" },
+    { "type": "color", "id": "color_muted", "label": "Texto secundario", "default": "#6b6b6b" },
+    { "type": "color", "id": "color_border", "label": "Bordes", "default": "#d9d9d9" },
+    { "type": "color", "id": "color_bg", "label": "Fondo", "default": "#ffffff" },
+    { "type": "color", "id": "color_button_bg", "label": "Fondo del botón", "default": "#000000" },
+    { "type": "color", "id": "color_button_text", "label": "Texto del botón", "default": "#ffffff" },
+    { "type": "header", "content": "Diseño" },
+    { "type": "range", "id": "max_width", "label": "Ancho máximo", "min": 320, "max": 900, "step": 10, "unit": "px", "default": 620 }
+  ]
+}
+{% endschema %}

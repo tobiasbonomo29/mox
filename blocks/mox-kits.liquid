@@ -1,0 +1,1166 @@
+{%- liquid
+  # Busca la opción de variante llamada "Kit" en este producto,
+  # y a partir de ahí resuelve la variante real de cada tarjeta
+  # por su nombre. No hace falta cargar ningún ID a mano: si el
+  # producto tiene una variante "Llevando 2", esa tarjeta usa su
+  # precio real — el precio POR UNIDAD que el cliente ve.
+  #
+  # Al agregar al carrito, cada anteojo elegido (color de cristal +
+  # armazón) se agrega como su PROPIO producto real, buscado por su
+  # handle: {handle-del-color}-armazon-{handle-del-armazón}. Se
+  # busca, en ESE producto real, la variante que corresponde al
+  # MISMO nivel elegido (Llevando 1 / 2 / 3), así el precio por
+  # unidad que se cobra es el mismo que se prometió en la tarjeta.
+  #
+  # Cada anteojo agregado junto queda marcado por dentro con una
+  # etiqueta invisible ("_moxKit") que identifica a qué kit
+  # pertenece. Apenas el cliente toca +, − o el tacho dentro del
+  # carrito, el sitio corrige el precio de los que quedaron casi al
+  # instante. Además revisa el carrito cada 2 segundos como red de
+  # respaldo, por si el cambio vino de otro lado.
+  assign s = block.settings
+  assign gid = block.id
+
+  assign kit_index = -1
+  for opt in product.options_with_values
+    if opt.name == 'Kit'
+      assign kit_index = forloop.index0
+    endif
+  endfor
+
+  assign chosen = 0
+  assign chosen_explicit = 0
+  assign any_shown = false
+
+  if kit_index > -1
+    for i in (1..3)
+      assign k_label = 'label_' | append: i
+      assign k_sel = 'selected_' | append: i
+      assign label = s[k_label]
+
+      if label != blank
+        assign found = blank
+        for v in product.variants
+          if v.options[kit_index] == label
+            assign found = v
+          endif
+        endfor
+
+        if found != blank
+          assign any_shown = true
+          if chosen == 0
+            assign chosen = i
+          endif
+          if s[k_sel] and chosen_explicit == 0
+            assign chosen_explicit = i
+          endif
+        endif
+      endif
+    endfor
+
+    if chosen_explicit != 0
+      assign chosen = chosen_explicit
+    endif
+  endif
+
+  assign f1_list = s.color_1_frames | split: ','
+  assign f1_first = f1_list[0] | strip
+  assign f1_key = 'armazon_' | append: f1_first | append: '_name'
+  assign default_frame = s[f1_key]
+  assign f1_handle_key = 'armazon_' | append: f1_first | append: '_handle'
+  assign default_frame_handle = s[f1_handle_key]
+-%}
+
+{%- if any_shown -%}
+<div id="mox-kits-{{ gid }}" class="mox-kits spacing-style" style="--mk-radius: {{ s.radius }}px; --mk-border: {{ s.border_color }}; --mk-bg: {{ s.bg }}; --mk-fg: {{ s.fg }}; --mk-sel-bg: {{ s.selected_bg }}; --mk-sel-fg: {{ s.selected_fg }}; --mk-muted: {{ s.muted }}; --mk-badge-bg: {{ s.badge_bg }}; --mk-badge-fg: {{ s.badge_fg }}; --mk-cbox-bg: {{ s.color_box_bg }}; --mk-cbox-fg: {{ s.color_box_fg }}; --mk-cbox-border: {{ s.color_box_border }}; --mk-cbox-radius: {{ s.color_box_radius }}px; --mk-fdot: {{ s.frame_dot_size }}px; {% render 'spacing-style', settings: block.settings %}" {{ block.shopify_attributes }}>
+
+  {%- if s.title != blank -%}
+    <p class="mox-kits__title" style="font-size: {{ s.title_size }}px;">{{ s.title }}</p>
+  {%- endif -%}
+
+  <div class="mox-kits__list" role="radiogroup" aria-label="{{ s.title | default: 'Opciones' | escape }}">
+    {%- for i in (1..3) -%}
+      {%- liquid
+        assign k_label = 'label_' | append: i
+        assign k_note = 'note_' | append: i
+        assign k_badge = 'badge_' | append: i
+        assign k_units = 'units_' | append: i
+
+        assign label = s[k_label]
+        assign note = s[k_note]
+        assign badge = s[k_badge]
+        assign units = s[k_units]
+        assign is_sel = false
+        if chosen == i
+          assign is_sel = true
+        endif
+        assign uid = 'mox-kit-' | append: gid | append: '-' | append: i
+
+        assign kit_variant = blank
+        if label != blank
+          for v in product.variants
+            if v.options[kit_index] == label
+              assign kit_variant = v
+            endif
+          endfor
+        endif
+      -%}
+      {%- if label != blank and kit_variant != blank -%}
+        <div class="mox-kit-row">
+          <input class="mox-kit__input" type="radio" name="mox-kits-{{ gid }}" id="{{ uid }}" data-variant-id="{{ kit_variant.id }}" data-tier="{{ label | escape }}"{% if is_sel %} checked{% endif %}>
+
+          <div class="mox-kit{% if is_sel %} is-selected{% endif %}">
+            <label class="mox-kit__head" for="{{ uid }}"><span class="mox-kit__mark" aria-hidden="true"></span><span class="mox-kit__body"><span class="mox-kit__label">{{ label }}</span>{% if note != blank %}<span class="mox-kit__note">{{ note }}</span>{% endif %}</span><span class="mox-kit__prices"><span class="mox-kit__price">{{ kit_variant.price | money }}</span>{% if kit_variant.compare_at_price > kit_variant.price %}<span class="mox-kit__compare">{{ kit_variant.compare_at_price | money }}</span>{% endif %}</span></label>
+
+            {%- if badge != blank -%}<span class="mox-kit__badge">{{ badge }}</span>{%- endif -%}
+
+            {%- if s.show_colors and units > 0 -%}
+              <div class="mox-kit__colors">
+                <div class="mox-kit__colors-inner">
+                  {%- if s.colors_title != blank -%}
+                    <p class="mox-kit__colors-title">{{ s.colors_title }}</p>
+                  {%- endif -%}
+
+                  <div class="mox-kit__units">
+                    {%- for u in (1..units) -%}
+                      {%- liquid
+                        if units > 1
+                          assign prop_name = s.prop_label_multi | append: ' ' | append: u
+                        else
+                          assign prop_name = s.prop_label_single
+                        endif
+                      -%}
+                      <div class="mox-unit">
+                        {%- if units > 1 -%}
+                          <span class="mox-unit__label">{{ prop_name }}</span>
+                        {%- endif -%}
+
+                        <div class="mox-color" data-prop="{{ prop_name | escape }}" data-value="{{ s.color_1_name | escape }}" data-frame="{{ default_frame | escape }}" data-color-handle="{{ s.color_1_handle | escape }}" data-frame-handle="{{ default_frame_handle | escape }}">
+                          <button type="button" class="mox-color__trigger" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="mox-color__dot" style="background: {{ s.color_1_hex }};"></span>
+                            <span class="mox-color__name">{{ s.color_1_name }}</span>
+                            {%- if s.show_frames and default_frame != blank -%}
+                              <span class="mox-color__frame">· {{ default_frame }}</span>
+                            {%- endif -%}
+                            <svg class="mox-color__chev" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          </button>
+
+                          <div class="mox-color__panel" role="listbox">
+                            {%- for c in (1..4) -%}
+                              {%- liquid
+                                assign c_name_key = 'color_' | append: c | append: '_name'
+                                assign c_hex_key = 'color_' | append: c | append: '_hex'
+                                assign c_frames_key = 'color_' | append: c | append: '_frames'
+                                assign c_handle_key = 'color_' | append: c | append: '_handle'
+                                assign c_name = s[c_name_key]
+                                assign c_hex = s[c_hex_key]
+                                assign c_frames = s[c_frames_key] | split: ','
+                                assign c_handle = s[c_handle_key]
+                              -%}
+                              {%- if c_name != blank -%}
+                                <div class="mox-optwrap">
+                                  <button type="button" class="mox-color__opt" role="option" data-name="{{ c_name | escape }}" data-hex="{{ c_hex }}" data-handle="{{ c_handle | escape }}">
+                                    <span class="mox-color__dot" style="background: {{ c_hex }};"></span>
+                                    <span class="mox-color__optname">{{ c_name }}</span>
+                                    {%- if s.show_frames and c_frames.size > 0 -%}
+                                      <svg class="mox-optwrap__arrow" width="6" height="10" viewBox="0 0 6 10" fill="none" aria-hidden="true"><path d="M1 1l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    {%- endif -%}
+                                  </button>
+
+                                  {%- if s.show_frames and c_frames.size > 0 -%}
+                                    <div class="mox-frames">
+                                      {%- if s.frames_title != blank -%}
+                                        <p class="mox-frames__title">{{ s.frames_title }}</p>
+                                      {%- endif -%}
+                                      {%- for f in c_frames -%}
+                                        {%- liquid
+                                          assign fn = f | strip
+                                          assign f_name_key = 'armazon_' | append: fn | append: '_name'
+                                          assign f_img_key = 'armazon_' | append: fn | append: '_img'
+                                          assign f_handle_key = 'armazon_' | append: fn | append: '_handle'
+                                          assign f_name = s[f_name_key]
+                                          assign f_img = s[f_img_key]
+                                          assign f_handle = s[f_handle_key]
+                                        -%}
+                                        {%- if f_name != blank -%}
+                                          <button type="button" class="mox-frame" data-frame="{{ f_name | escape }}" data-handle="{{ f_handle | escape }}">
+                                            <span class="mox-frame__img"{% if f_img != blank %} style="background-image: url({{ f_img | image_url: width: 120 }});"{% endif %}></span>
+                                            <span class="mox-frame__name">{{ f_name }}</span>
+                                          </button>
+                                        {%- endif -%}
+                                      {%- endfor -%}
+                                    </div>
+                                  {%- endif -%}
+                                </div>
+                              {%- endif -%}
+                            {%- endfor -%}
+                          </div>
+                        </div>
+                      </div>
+                    {%- endfor -%}
+                  </div>
+                </div>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <p class="mox-kits__msg" data-mox-kits-msg hidden></p>
+
+  {%- if s.footnote != blank -%}
+    <p class="mox-kits__footnote">{{ s.footnote }}</p>
+  {%- endif -%}
+
+  {%- comment -%} Acá aterriza la fila de cantidad + botón {%- endcomment -%}
+  <div class="mox-kits__anchor"></div>
+</div>
+
+<style>
+  #mox-kits-{{ gid }} { width: 100%; box-sizing: border-box; }
+
+  #mox-kits-{{ gid }} .mox-kits__title { font-weight: 600; margin: 0 0 16px; letter-spacing: 0.02em; }
+
+  #mox-kits-{{ gid }} .mox-kit-row { position: relative; margin-bottom: 14px; }
+
+  #mox-kits-{{ gid }} .mox-kit__input { position: absolute !important; opacity: 0 !important; width: 1px !important; height: 1px !important; margin: 0 !important; padding: 0 !important; border: 0 !important; overflow: hidden; clip: rect(0 0 0 0); pointer-events: none; }
+
+  #mox-kits-{{ gid }} .mox-kit { --mk-line: var(--mk-border); position: relative; width: 100%; box-sizing: border-box; border: 1px solid var(--mk-border); border-radius: var(--mk-radius); background: var(--mk-bg); color: var(--mk-fg); transition: border-color .2s ease, background-color .22s ease, color .22s ease; }
+
+  #mox-kits-{{ gid }} .mox-kit:hover { border-color: var(--mk-fg); }
+
+  #mox-kits-{{ gid }} .mox-kit.is-selected { --mk-line: rgba(255,255,255,.34); background: var(--mk-sel-bg); color: var(--mk-sel-fg); border-color: var(--mk-sel-bg); animation: mox-in-{{ gid }} .3s ease-out; }
+
+  @keyframes mox-in-{{ gid }} { from { transform: scale(.985); } to { transform: scale(1); } }
+
+  #mox-kits-{{ gid }} .mox-kit__head { display: flex; align-items: center; gap: 14px; width: 100%; box-sizing: border-box; padding: 18px 20px; cursor: pointer; transition: transform .18s ease; }
+  #mox-kits-{{ gid }} .mox-kit__head:active { transform: scale(.995); }
+
+  #mox-kits-{{ gid }} .mox-kit__mark { flex: 0 0 auto; width: 15px; height: 15px; border-radius: 50%; border: 1px solid currentColor; position: relative; }
+
+  #mox-kits-{{ gid }} .mox-kit__mark::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: currentColor; transform: scale(0); transition: transform .2s ease; }
+
+  #mox-kits-{{ gid }} .mox-kit.is-selected .mox-kit__mark::after { animation: mox-mark-{{ gid }} .34s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  @keyframes mox-mark-{{ gid }} { from { transform: scale(0); } to { transform: scale(1); } }
+
+  #mox-kits-{{ gid }} .mox-kit__body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  #mox-kits-{{ gid }} .mox-kit__label { font-weight: 600; font-size: 1rem; line-height: 1.2; }
+  #mox-kits-{{ gid }} .mox-kit__note { font-size: .6875rem; text-transform: uppercase; letter-spacing: .14em; opacity: .7; }
+
+  #mox-kits-{{ gid }} .mox-kit__prices { flex: 0 0 auto; text-align: right; display: flex; flex-direction: column; gap: 2px; }
+  #mox-kits-{{ gid }} .mox-kit__price { font-weight: 600; font-size: 1rem; line-height: 1.2; }
+  #mox-kits-{{ gid }} .mox-kit__compare { font-size: .8125rem; text-decoration: line-through; opacity: .55; }
+
+  #mox-kits-{{ gid }} .mox-kit__badge { position: absolute; top: 0; right: 18px; transform: translateY(-50%) scale(.9); opacity: 0; pointer-events: none; font-size: .625rem; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; padding: 5px 12px; border-radius: 999px; background: var(--mk-badge-bg); color: var(--mk-badge-fg); white-space: nowrap; transition: transform .28s cubic-bezier(.34,1.4,.64,1), opacity .22s ease; }
+
+  #mox-kits-{{ gid }} .mox-kit:hover .mox-kit__badge,
+  #mox-kits-{{ gid }} .mox-kit.is-selected .mox-kit__badge { opacity: 1; transform: translateY(-50%) scale(1); }
+
+  #mox-kits-{{ gid }} .mox-kit__colors { max-height: 0; opacity: 0; overflow: hidden; transition: max-height .32s ease, opacity .24s ease; }
+  #mox-kits-{{ gid }} .mox-kit.is-selected .mox-kit__colors { max-height: 600px; opacity: 1; }
+
+  #mox-kits-{{ gid }} .mox-kit__colors-inner { padding: 0 20px 18px; border-top: 1px solid var(--mk-line); margin-top: 2px; padding-top: 14px; }
+
+  #mox-kits-{{ gid }} .mox-kit__colors-title { font-size: .6875rem; text-transform: uppercase; letter-spacing: .14em; opacity: .7; margin: 0 0 10px; }
+
+  #mox-kits-{{ gid }} .mox-kit__units { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+
+  #mox-kits-{{ gid }} .mox-unit { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  #mox-kits-{{ gid }} .mox-unit__label { font-size: .6875rem; opacity: .65; }
+
+  #mox-kits-{{ gid }} .mox-color { position: relative; }
+
+  #mox-kits-{{ gid }} .mox-color__trigger { display: flex; align-items: center; gap: 7px; width: 100%; box-sizing: border-box; padding: 9px 11px; border: 1px solid var(--mk-cbox-border); border-radius: var(--mk-cbox-radius); background: var(--mk-cbox-bg); color: var(--mk-cbox-fg); font: inherit; font-size: .8125rem; line-height: 1.2; cursor: pointer; text-align: left; transition: border-color .18s ease, filter .18s ease; }
+  #mox-kits-{{ gid }} .mox-color__trigger:hover { filter: brightness(1.18); }
+  #mox-kits-{{ gid }} .mox-color.is-open .mox-color__trigger { border-color: currentColor; }
+
+  #mox-kits-{{ gid }} .mox-color__name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #mox-kits-{{ gid }} .mox-color__frame { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .62; font-size: .75rem; }
+  #mox-kits-{{ gid }} .mox-color__chev { flex: 0 0 auto; opacity: .7; transition: transform .2s ease; }
+  #mox-kits-{{ gid }} .mox-color.is-open .mox-color__chev { transform: rotate(180deg); }
+
+  #mox-kits-{{ gid }} .mox-color__dot { flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%; border: 1px solid rgba(0,0,0,.16); box-sizing: border-box; }
+
+  #mox-kits-{{ gid }} .mox-color__panel { display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 20; background: #fff; color: #111; border: 1px solid #e4e4e4; border-radius: var(--mk-cbox-radius); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+  #mox-kits-{{ gid }} .mox-color.is-open .mox-color__panel { display: block; }
+
+  #mox-kits-{{ gid }} .mox-optwrap { position: relative; }
+
+  #mox-kits-{{ gid }} .mox-color__opt { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 9px 11px; border: 0; background: transparent; color: inherit; font: inherit; font-size: .8125rem; cursor: pointer; text-align: left; }
+  #mox-kits-{{ gid }} .mox-color__opt:hover,
+  #mox-kits-{{ gid }} .mox-optwrap.is-open .mox-color__opt { background: #f4f4f4; }
+
+  #mox-kits-{{ gid }} .mox-optwrap:first-child .mox-color__opt { border-radius: var(--mk-cbox-radius) var(--mk-cbox-radius) 0 0; }
+  #mox-kits-{{ gid }} .mox-optwrap:last-child .mox-color__opt { border-radius: 0 0 var(--mk-cbox-radius) var(--mk-cbox-radius); }
+
+  #mox-kits-{{ gid }} .mox-color__optname { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #mox-kits-{{ gid }} .mox-optwrap__arrow { flex: 0 0 auto; opacity: .45; }
+
+  #mox-kits-{{ gid }} .mox-frames { display: none; position: absolute; top: -1px; left: calc(100% + 6px); z-index: 30; min-width: 158px; padding: 6px 0; background: #fff; color: #111; border: 1px solid #e4e4e4; border-radius: var(--mk-cbox-radius); box-shadow: 0 10px 28px rgba(0,0,0,.14); }
+  #mox-kits-{{ gid }} .mox-optwrap.is-open .mox-frames { display: block; }
+  #mox-kits-{{ gid }} .mox-optwrap.flip-left .mox-frames { left: auto; right: calc(100% + 6px); }
+
+  #mox-kits-{{ gid }} .mox-frames__title { font-size: .625rem; text-transform: uppercase; letter-spacing: .12em; opacity: .5; margin: 2px 0 4px; padding: 0 11px; }
+
+  #mox-kits-{{ gid }} .mox-frame { display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 7px 11px; border: 0; background: transparent; color: inherit; font: inherit; font-size: .8125rem; cursor: pointer; text-align: left; }
+  #mox-kits-{{ gid }} .mox-frame:hover { background: #f4f4f4; }
+
+  #mox-kits-{{ gid }} .mox-frame__img { flex: 0 0 auto; width: var(--mk-fdot); height: var(--mk-fdot); border-radius: 50%; border: 1px solid rgba(0,0,0,.14); box-sizing: border-box; background-color: #f0f0f0; background-size: cover; background-position: center; }
+
+  #mox-kits-{{ gid }} .mox-frame__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  #mox-kits-{{ gid }} .mox-kits__msg { margin: 12px 0 0; padding: 10px 14px; font-size: .8125rem; line-height: 1.4; background: #fdecec; color: #8a1c1c; border-radius: 4px; }
+  #mox-kits-{{ gid }} .mox-kits__msg[hidden] { display: none; }
+
+  #mox-kits-{{ gid }} .mox-kits__footnote { font-size: .75rem; color: var(--mk-muted); margin: 12px 0 0; }
+
+  #mox-kits-{{ gid }} .mox-kits__anchor:not(:empty) { margin-top: 8px; }
+
+  @media screen and (max-width: 749px) {
+    #mox-kits-{{ gid }} .mox-kit__badge { opacity: 1; transform: translateY(-50%) scale(1); }
+    #mox-kits-{{ gid }} .mox-kit__units { grid-template-columns: 1fr; }
+
+    #mox-kits-{{ gid }} .mox-frames { position: static; left: auto; right: auto; min-width: 0; margin: 0; border: 0; border-radius: 0; box-shadow: none; background: #f7f7f7; padding: 4px 0 8px; }
+    #mox-kits-{{ gid }} .mox-optwrap.flip-left .mox-frames { right: auto; }
+    #mox-kits-{{ gid }} .mox-frame { padding-left: 22px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #mox-kits-{{ gid }} .mox-kit__colors { transition: none; }
+  }
+</style>
+
+<script>
+  (function () {
+    var kits = document.getElementById('mox-kits-{{ gid }}');
+    if (!kits) return;
+    var anchor = kits.querySelector('.mox-kits__anchor');
+    var msgEl = kits.querySelector('[data-mox-kits-msg]');
+    var union = {{ s.prop_join | default: ' · ' | json }};
+    var propMulti = {{ s.prop_label_multi | default: 'Anteojo' | json }};
+    var propSingle = {{ s.prop_label_single | default: 'Anteojo' | json }};
+    var rootUrl = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+    var cacheProductos = {};
+    var busy = false;
+    var seccionesIds = null;
+
+    /* ---------- visual: elegir tarjeta, colores y armazones ---------- */
+
+    function pintar() {
+      kits.querySelectorAll('.mox-kit-row').forEach(function (row) {
+        var input = row.querySelector('.mox-kit__input');
+        var card = row.querySelector('.mox-kit');
+        var colors = row.querySelector('.mox-kit__colors');
+        if (!input || !card) return;
+        card.classList.toggle('is-selected', input.checked);
+        if (colors && !input.checked) {
+          colors.style.overflow = 'hidden';
+          cerrarPaneles(row);
+        }
+      });
+    }
+
+    function cerrarSubmenus(scope) {
+      (scope || kits).querySelectorAll('.mox-optwrap.is-open').forEach(function (w) {
+        w.classList.remove('is-open', 'flip-left');
+      });
+    }
+
+    function cerrarPaneles(scope) {
+      cerrarSubmenus(scope);
+      (scope || kits).querySelectorAll('.mox-color.is-open').forEach(function (c) {
+        c.classList.remove('is-open');
+        var t = c.querySelector('.mox-color__trigger');
+        if (t) t.setAttribute('aria-expanded', 'false');
+      });
+    }
+
+    kits.querySelectorAll('.mox-kit__colors').forEach(function (el) {
+      el.addEventListener('transitionend', function (e) {
+        if (e.propertyName !== 'max-height') return;
+        var card = el.closest('.mox-kit');
+        if (card && card.classList.contains('is-selected')) el.style.overflow = 'visible';
+      });
+    });
+
+    function ubicarSubmenu(wrap) {
+      wrap.classList.remove('flip-left');
+      if (window.innerWidth < 750) return;
+      var panel = wrap.querySelector('.mox-frames');
+      if (!panel) return;
+      var r = panel.getBoundingClientRect();
+      if (r.right > window.innerWidth - 8) wrap.classList.add('flip-left');
+    }
+
+    function refrescarTrigger(cont) {
+      var nombre = cont.getAttribute('data-value') || '';
+      var armazon = cont.getAttribute('data-frame') || '';
+      var elName = cont.querySelector('.mox-color__name');
+      var elFrame = cont.querySelector('.mox-color__frame');
+      if (elName) elName.textContent = nombre;
+      if (elFrame) elFrame.textContent = armazon ? '· ' + armazon : '';
+    }
+
+    kits.addEventListener('click', function (e) {
+
+      var trigger = e.target.closest('.mox-color__trigger');
+      if (trigger) {
+        e.preventDefault();
+        var wrapC = trigger.closest('.mox-color');
+        var abierto = wrapC.classList.contains('is-open');
+        cerrarPaneles();
+        if (!abierto) {
+          wrapC.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+        return;
+      }
+
+      var opt = e.target.closest('.mox-color__opt');
+      if (opt) {
+        e.preventDefault();
+        var cont = opt.closest('.mox-color');
+        var wrap = opt.closest('.mox-optwrap');
+
+        cont.setAttribute('data-value', opt.dataset.name);
+        cont.setAttribute('data-color-handle', opt.dataset.handle || '');
+        cont.querySelector('.mox-color__trigger .mox-color__dot').style.background = opt.dataset.hex;
+
+        var primer = wrap.querySelector('.mox-frame');
+        if (primer) {
+          cont.setAttribute('data-frame', primer.dataset.frame);
+          cont.setAttribute('data-frame-handle', primer.dataset.handle || '');
+          refrescarTrigger(cont);
+          var yaAbierto = wrap.classList.contains('is-open');
+          cerrarSubmenus(cont);
+          if (!yaAbierto) {
+            wrap.classList.add('is-open');
+            ubicarSubmenu(wrap);
+          }
+        } else {
+          cont.setAttribute('data-frame', '');
+          cont.setAttribute('data-frame-handle', '');
+          refrescarTrigger(cont);
+          cerrarPaneles();
+        }
+        clearMsg();
+        return;
+      }
+
+      var frame = e.target.closest('.mox-frame');
+      if (frame) {
+        e.preventDefault();
+        var cont2 = frame.closest('.mox-color');
+        cont2.setAttribute('data-frame', frame.dataset.frame);
+        cont2.setAttribute('data-frame-handle', frame.dataset.handle || '');
+        refrescarTrigger(cont2);
+        cerrarPaneles();
+        clearMsg();
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!kits.contains(e.target)) cerrarPaneles();
+    });
+
+    /* ---------- muestra el precio y las cuotas de la tarjeta elegida arriba de todo ---------- */
+
+    function aplicar(id) {
+      if (!id) return;
+      var campo = document.querySelector('[data-pi-id]');
+      if (!campo) return;
+      campo.value = id;
+      campo.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    /* ---------- trae la fila de cantidad + botón hasta acá abajo ---------- */
+
+    function mover(intentos) {
+      var fila = document.querySelector('[data-pi-actions]');
+
+      if (!fila) {
+        if (intentos > 0) setTimeout(function () { mover(intentos - 1); }, 200);
+        return;
+      }
+
+      if (anchor.contains(fila)) return;
+      anchor.appendChild(fila);
+    }
+
+    kits.addEventListener('change', function (e) {
+      if (!e.target.classList.contains('mox-kit__input')) return;
+      pintar();
+      aplicar(e.target.dataset.variantId);
+      clearMsg();
+    });
+
+    pintar();
+
+    /* ---------- mensajes de error ---------- */
+
+    function mostrarMsg(texto) {
+      if (!msgEl) return;
+      msgEl.textContent = texto;
+      msgEl.hidden = false;
+    }
+
+    function clearMsg() {
+      if (!msgEl) return;
+      msgEl.textContent = '';
+      msgEl.hidden = true;
+    }
+
+    /* ---------- estado del botón ---------- */
+
+    function setBoton(estado) {
+      var btn = document.querySelector('[data-pi-submit]');
+      if (!btn) return;
+      if (estado === 'cargando') {
+        btn.disabled = true;
+        btn.textContent = btn.dataset.labelLoading || btn.textContent;
+      } else if (estado === 'agregado') {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.labelAdded || btn.textContent;
+        setTimeout(function () {
+          btn.textContent = btn.dataset.labelAdd || btn.textContent;
+        }, 1800);
+      } else {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.labelAdd || btn.textContent;
+      }
+    }
+
+    /* ---------- carrito y encabezado: siempre en la MISMA llamada que agrega
+       o corrige el pedido, nunca en un pedido aparte ---------- */
+
+    function drawerActual() {
+      return document.querySelector('cart-drawer-component') || document.querySelector('cart-drawer');
+    }
+
+    function headerActual() {
+      return document.getElementById('header-component') || document.querySelector('header-component');
+    }
+
+    function idsDeSecciones() {
+      if (seccionesIds) return seccionesIds;
+      var drawer = drawerActual();
+      var header = headerActual();
+      var ids = [];
+      var dWrap = drawer && drawer.closest('.shopify-section');
+      var hWrap = header && header.closest('.shopify-section');
+      if (dWrap && dWrap.id) ids.push(dWrap.id.replace('shopify-section-', ''));
+      if (hWrap && hWrap.id) ids.push(hWrap.id.replace('shopify-section-', ''));
+      if (!ids.length) {
+        console.error('[MOX kits] no encontré el carrito ni el encabezado en la página para pedirle a Shopify que los actualice junto con el pedido');
+        return null;
+      }
+      seccionesIds = ids.join(',');
+      return seccionesIds;
+    }
+
+    function estabaAbierto() {
+      var drawer = drawerActual();
+      if (!drawer) return false;
+      if (drawer.hasAttribute('open')) return true;
+      var dialog = drawer.querySelector('dialog');
+      if (dialog && dialog.open) return true;
+      var estilo = window.getComputedStyle(drawer);
+      return estilo.display !== 'none' && estilo.visibility !== 'hidden' && drawer.offsetParent !== null;
+    }
+
+    function abrir(drawer) {
+      if (!drawer) return;
+      try {
+        if (typeof drawer.open === 'function') {
+          drawer.open();
+        } else if (typeof drawer.showDialog === 'function') {
+          drawer.showDialog();
+        } else {
+          var dialog = drawer.querySelector('dialog');
+          if (dialog && typeof dialog.showModal === 'function') {
+            dialog.showModal();
+          } else {
+            drawer.setAttribute('open', '');
+          }
+        }
+      } catch (err) {
+        console.error('[MOX kits] no pude abrir/reabrir el carrito', err);
+      }
+    }
+
+    /* Reemplaza el HTML de las secciones que Shopify ya nos mandó junto
+       con la respuesta del pedido. Si el carrito estaba abierto antes de
+       refrescar, lo vuelve a abrir después. */
+    function aplicarSecciones(secciones, preservarAbierto) {
+      if (!secciones) return;
+      var abiertoAntes = preservarAbierto && estabaAbierto();
+
+      Object.keys(secciones).forEach(function (id) {
+        var wrapper = document.getElementById('shopify-section-' + id);
+        if (!wrapper) return;
+        var html = secciones[id];
+        var parsed = new DOMParser().parseFromString(html, 'text/html');
+        var incoming = parsed.getElementById('shopify-section-' + id);
+        wrapper.innerHTML = incoming ? incoming.innerHTML : html;
+      });
+
+      if (abiertoAntes) abrir(drawerActual());
+    }
+
+    /* Camino de respaldo, solo por si Shopify no devolviera las secciones
+       junto con el pedido. */
+    function refrescarSeccionesAparte(preservarAbierto) {
+      var ids = idsDeSecciones();
+      if (!ids) return Promise.resolve();
+
+      return fetch(rootUrl + '?sections=' + encodeURIComponent(ids), {
+        headers: { Accept: 'application/json' }
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (secciones) {
+          aplicarSecciones(secciones, preservarAbierto);
+        })
+        .catch(function (err) {
+          console.error('[MOX kits] no pude refrescar el carrito por separado', err);
+        });
+    }
+
+    /* ---------- busca el producto real de cada anteojo por su handle ---------- */
+
+    function fetchProducto(handle) {
+      if (!cacheProductos[handle]) {
+        cacheProductos[handle] = fetch(rootUrl + 'products/' + handle + '.js', {
+          headers: { Accept: 'application/json' }
+        })
+          .then(function (res) {
+            return res.ok ? res.json() : null;
+          })
+          .catch(function () {
+            return null;
+          });
+      }
+      return cacheProductos[handle];
+    }
+
+    /* Busca, en el producto real de cada anteojo, la variante del
+       MISMO nivel elegido (Llevando 1 / 2 / 3). */
+    function variantePorNivel(producto, nivel) {
+      if (!producto || !producto.variants || !producto.variants.length) return null;
+      for (var i = 0; i < producto.variants.length; i++) {
+        var v = producto.variants[i];
+        if (v.options && v.options.indexOf(nivel) > -1) return v;
+      }
+      return null;
+    }
+
+    function recolectarAnteojos() {
+      var checked = kits.querySelector('.mox-kit__input:checked');
+      if (!checked) return [];
+      var row = checked.closest('.mox-kit-row');
+      if (!row) return [];
+
+      var lista = [];
+      row.querySelectorAll('.mox-color').forEach(function (c) {
+        lista.push({
+          propName: c.getAttribute('data-prop') || propSingle,
+          colorName: c.getAttribute('data-value') || '',
+          frameName: c.getAttribute('data-frame') || '',
+          colorHandle: c.getAttribute('data-color-handle') || '',
+          frameHandle: c.getAttribute('data-frame-handle') || ''
+        });
+      });
+      return lista;
+    }
+
+    function handleDe(entrada) {
+      return entrada.colorHandle + '-armazon-' + entrada.frameHandle;
+    }
+
+    function generarGrupoId() {
+      return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    /* ---------- agregar al carrito ---------- */
+
+    function agregarSimple(checked) {
+      var id = checked.dataset.variantId;
+      if (!id) return;
+
+      setBoton('cargando');
+
+      var body = { items: [{ id: parseInt(id, 10), quantity: 1 }] };
+      var secIds = idsDeSecciones();
+      if (secIds) body.sections = secIds;
+
+      fetch(rootUrl + 'cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body)
+      })
+        .then(function (res) {
+          return res.json().then(function (data) {
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          busy = false;
+          if (!result.ok) {
+            setBoton('normal');
+            mostrarMsg((result.data && result.data.description) || 'No pudimos agregar el producto.');
+            return;
+          }
+          setBoton('agregado');
+          if (result.data.sections) {
+            aplicarSecciones(result.data.sections, false);
+            abrir(drawerActual());
+          } else {
+            refrescarSeccionesAparte(false).then(function () { abrir(drawerActual()); });
+          }
+        })
+        .catch(function (err) {
+          busy = false;
+          setBoton('normal');
+          mostrarMsg('No pudimos agregar el producto. Probá de nuevo.');
+          console.error('[MOX kits] error agregando producto simple', err);
+        });
+    }
+
+    function agregarKit() {
+      if (busy) return;
+
+      var checked = kits.querySelector('.mox-kit__input:checked');
+      if (!checked) return;
+
+      var nivel = checked.dataset.tier || '';
+      var entradas = recolectarAnteojos();
+
+      if (!entradas.length) {
+        busy = true;
+        agregarSimple(checked);
+        return;
+      }
+
+      busy = true;
+      clearMsg();
+      setBoton('cargando');
+
+      var grupoId = generarGrupoId();
+
+      var handles = [];
+      entradas.forEach(function (e) {
+        var h = handleDe(e);
+        if (handles.indexOf(h) === -1) handles.push(h);
+      });
+
+      Promise.all(handles.map(fetchProducto))
+        .then(function (productos) {
+          var mapa = {};
+          handles.forEach(function (h, i) { mapa[h] = productos[i]; });
+
+          var items = [];
+          var faltantes = [];
+
+          entradas.forEach(function (e, idx) {
+            var handle = handleDe(e);
+            var producto = mapa[handle];
+            var variante = variantePorNivel(producto, nivel);
+
+            if (!e.colorHandle || !e.frameHandle || !producto || !variante || !variante.available) {
+              var etiqueta = [e.colorName, e.frameName].filter(Boolean).join(' · ') || ('anteojo ' + (idx + 1));
+              faltantes.push(etiqueta);
+              return;
+            }
+
+            var nombreProp = entradas.length > 1 ? (propMulti + ' ' + (idx + 1)) : propSingle;
+            var valorProp = e.frameName ? (e.colorName + union + e.frameName) : e.colorName;
+            var props = {};
+            props[nombreProp] = valorProp;
+            props['_moxKit'] = grupoId;
+
+            items.push({ id: variante.id, quantity: 1, properties: props });
+          });
+
+          if (faltantes.length) {
+            busy = false;
+            setBoton('normal');
+            mostrarMsg('No encontramos "' + nivel + '" para: ' + faltantes.join(', ') + '. Elegí otra combinación.');
+            return;
+          }
+
+          var body = { items: items };
+          var secIds = idsDeSecciones();
+          if (secIds) body.sections = secIds;
+
+          return fetch(rootUrl + 'cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+            body: JSON.stringify(body)
+          })
+            .then(function (res) {
+              return res.json().then(function (data) {
+                return { ok: res.ok, data: data };
+              });
+            })
+            .then(function (result) {
+              busy = false;
+              if (!result.ok) {
+                setBoton('normal');
+                mostrarMsg((result.data && result.data.description) || 'No pudimos agregar el kit. Probá de nuevo.');
+                return;
+              }
+              setBoton('agregado');
+              if (result.data.sections) {
+                aplicarSecciones(result.data.sections, false);
+                abrir(drawerActual());
+              } else {
+                refrescarSeccionesAparte(false).then(function () { abrir(drawerActual()); });
+              }
+            });
+        })
+        .catch(function (err) {
+          busy = false;
+          setBoton('normal');
+          mostrarMsg('No pudimos agregar el kit. Probá de nuevo.');
+          console.error('[MOX kits] error agregando kit', err);
+        });
+    }
+
+    if (!window['__moxKitsBound_{{ gid }}']) {
+      window['__moxKitsBound_{{ gid }}'] = true;
+
+      document.addEventListener('submit', function (event) {
+        var path = typeof event.composedPath === 'function' ? event.composedPath() : [event.target];
+        var form = null;
+        for (var i = 0; i < path.length; i++) {
+          var node = path[i];
+          if (node && node.nodeType === 1 && node.hasAttribute && node.hasAttribute('data-pi-form')) {
+            form = node;
+            break;
+          }
+        }
+        if (!form) return;
+        if (!document.getElementById('mox-kits-{{ gid }}')) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+
+        agregarKit();
+      }, true);
+    }
+
+    /* ---------- vigilancia: si a un kit le cambió la cantidad de
+       anteojos, les corrige el precio a los que quedaron ---------- */
+
+    function nivelParaCantidad(n) {
+      if (n <= 1) return {{ s.label_1 | json }};
+      if (n === 2) return {{ s.label_2 | json }};
+      return {{ s.label_3 | json }};
+    }
+
+    function firmaCarrito(cart) {
+      var grupos = {};
+      cart.items.forEach(function (it) {
+        var gid = it.properties && it.properties['_moxKit'];
+        if (!gid) return;
+        grupos[gid] = (grupos[gid] || 0) + it.quantity;
+      });
+      return JSON.stringify(grupos);
+    }
+
+    var rebalancing = false;
+    var lastSignature = null;
+
+    function rebalancear() {
+      if (rebalancing || busy) return;
+      rebalancing = true;
+
+      fetch(rootUrl + 'cart.js', { headers: { Accept: 'application/json' } })
+        .then(function (res) { return res.json(); })
+        .then(function (cart) {
+          var firma = firmaCarrito(cart);
+          if (firma === lastSignature) {
+            rebalancing = false;
+            return;
+          }
+          lastSignature = firma;
+
+          var grupos = {};
+          cart.items.forEach(function (it, idx) {
+            var gid = it.properties && it.properties['_moxKit'];
+            if (!gid) return;
+            if (!grupos[gid]) grupos[gid] = [];
+            grupos[gid].push({ item: it, line: idx + 1 });
+          });
+
+          var pendientes = [];
+
+          Object.keys(grupos).forEach(function (gid) {
+            var lineas = grupos[gid];
+            var total = lineas.reduce(function (sum, l) { return sum + l.item.quantity; }, 0);
+            var nivel = nivelParaCantidad(total);
+
+            lineas.forEach(function (l) {
+              var opciones = l.item.variant_options || [];
+              if (opciones.indexOf(nivel) > -1) return;
+
+              pendientes.push({
+                handle: l.item.handle,
+                line: l.line,
+                quantity: l.item.quantity,
+                properties: l.item.properties,
+                nivel: nivel
+              });
+            });
+          });
+
+          if (!pendientes.length) {
+            rebalancing = false;
+            return;
+          }
+
+          Promise.all(pendientes.map(function (p) { return fetchProducto(p.handle); }))
+            .then(function (productos) {
+              var cambios = pendientes
+                .map(function (p, i) {
+                  var variante = variantePorNivel(productos[i], p.nivel);
+                  return variante ? { p: p, variante: variante } : null;
+                })
+                .filter(Boolean);
+
+              if (!cambios.length) {
+                rebalancing = false;
+                return;
+              }
+
+              cambios.sort(function (a, b) { return b.p.line - a.p.line; });
+
+              function siguiente(i) {
+                if (i >= cambios.length) {
+                  var altas = cambios.map(function (c) {
+                    return { id: c.variante.id, quantity: c.p.quantity, properties: c.p.properties };
+                  });
+                  var body = { items: altas };
+                  var secIds = idsDeSecciones();
+                  if (secIds) body.sections = secIds;
+
+                  return fetch(rootUrl + 'cart/add.js', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                    body: JSON.stringify(body)
+                  })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                      lastSignature = firmaCarrito(data);
+                      if (data.sections) {
+                        aplicarSecciones(data.sections, true);
+                      } else {
+                        return refrescarSeccionesAparte(true);
+                      }
+                    })
+                    .then(function () {
+                      rebalancing = false;
+                    })
+                    .catch(function (err) {
+                      rebalancing = false;
+                      console.error('[MOX kits] error reajustando precios del kit', err);
+                    });
+                }
+                var c = cambios[i];
+                return fetch(rootUrl + 'cart/change.js', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                  body: JSON.stringify({ line: c.p.line, quantity: 0 })
+                }).then(function () { return siguiente(i + 1); });
+              }
+
+              siguiente(0);
+            })
+            .catch(function (err) {
+              rebalancing = false;
+              console.error('[MOX kits] error buscando productos para reajustar', err);
+            });
+        })
+        .catch(function (err) {
+          rebalancing = false;
+          console.error('[MOX kits] error leyendo el carrito para reajustar', err);
+        });
+    }
+
+    /* Red de respaldo: revisa igual cada 2 segundos, por si el cambio
+       vino de un lugar donde no detectamos el click (por ejemplo, otra
+       pestaña con el mismo carrito). */
+    if (!window.__moxKitsWatcher) {
+      window.__moxKitsWatcher = true;
+      setInterval(rebalancear, 2000);
+    }
+
+    /* Camino rápido: en cuanto se toca +, − o el tacho DENTRO del
+       carrito, se dispara la corrección casi al instante — sin esperar
+       el intervalo de arriba. Se usa composedPath() porque esos
+       controles viven dentro del componente del carrito, que usa
+       Shadow DOM. Se espera un instante corto antes de revisar, para
+       darle tiempo al propio carrito de Shopify a guardar el cambio. */
+    if (!window.__moxKitsClickWatcher) {
+      window.__moxKitsClickWatcher = true;
+      var pronto = null;
+
+      function dispararPronto() {
+        if (pronto) clearTimeout(pronto);
+        pronto = setTimeout(rebalancear, 350);
+      }
+
+      ['click', 'change'].forEach(function (tipo) {
+        document.addEventListener(tipo, function (e) {
+          var drawer = drawerActual();
+          if (!drawer) return;
+          var path = typeof e.composedPath === 'function' ? e.composedPath() : [e.target];
+          if (path.indexOf(drawer) === -1) return;
+          dispararPronto();
+        }, true);
+      });
+    }
+
+    function arrancar() {
+      mover(15);
+      var inicial = kits.querySelector('.mox-kit__input:checked');
+      if (inicial) {
+        setTimeout(function () { aplicar(inicial.dataset.variantId); }, 100);
+        var col = inicial.closest('.mox-kit-row').querySelector('.mox-kit__colors');
+        if (col) setTimeout(function () { col.style.overflow = 'visible'; }, 400);
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', arrancar);
+    } else {
+      arrancar();
+    }
+  })();
+</script>
+{%- else -%}
+  {%- if request.design_mode -%}
+    <div class="mox-kits-empty" style="padding: 20px; border: 1px dashed #d9d9d9; border-radius: 6px; font-size: 13px; color: #6b6b6b;" {{ block.shopify_attributes }}>
+      Este producto no tiene ninguna variante que coincida con "{{ s.label_1 }}", "{{ s.label_2 }}" o "{{ s.label_3 }}" dentro de una opción llamada "Kit". Cargá esas variantes en el producto, o el bloque no se muestra en la tienda.
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Kits MOX",
+  "tag": null,
+  "settings": [
+    { "type": "paragraph", "content": "Cada tarjeta muestra el precio real de la variante \"Kit\" de este producto. Al agregar, cada anteojo elegido se agrega como su propio producto real ({color}-armazon-{armazón}), tomando la variante del mismo nivel. Usá los mismos precios por nivel en todos tus productos." },
+    { "type": "text", "id": "title", "label": "Título", "default": "Elegí tu kit" },
+    { "type": "range", "id": "title_size", "label": "Tamaño del título", "min": 12, "max": 32, "step": 1, "unit": "px", "default": 15 },
+
+    { "type": "header", "content": "Opción 1" },
+    { "type": "text", "id": "label_1", "label": "Valor exacto de la variante", "default": "Llevando 1" },
+    { "type": "text", "id": "note_1", "label": "Texto debajo", "default": "3 cuotas sin interés" },
+    { "type": "text", "id": "badge_1", "label": "Etiqueta flotante" },
+    { "type": "range", "id": "units_1", "label": "Cantidad de anteojos a elegir", "min": 0, "max": 5, "step": 1, "default": 1 },
+    { "type": "checkbox", "id": "selected_1", "label": "Elegida por defecto", "default": true },
+
+    { "type": "header", "content": "Opción 2" },
+    { "type": "text", "id": "label_2", "label": "Valor exacto de la variante", "default": "Llevando 2" },
+    { "type": "text", "id": "note_2", "label": "Texto debajo", "default": "3 cuotas sin interés" },
+    { "type": "text", "id": "badge_2", "label": "Etiqueta flotante", "default": "Envío gratis" },
+    { "type": "range", "id": "units_2", "label": "Cantidad de anteojos a elegir", "min": 0, "max": 5, "step": 1, "default": 2 },
+    { "type": "checkbox", "id": "selected_2", "label": "Elegida por defecto", "default": false },
+
+    { "type": "header", "content": "Opción 3" },
+    { "type": "text", "id": "label_3", "label": "Valor exacto de la variante", "default": "Llevando 3" },
+    { "type": "text", "id": "note_3", "label": "Texto debajo", "default": "3 cuotas sin interés" },
+    { "type": "text", "id": "badge_3", "label": "Etiqueta flotante", "default": "Envío gratis" },
+    { "type": "range", "id": "units_3", "label": "Cantidad de anteojos a elegir", "min": 0, "max": 5, "step": 1, "default": 3 },
+    { "type": "checkbox", "id": "selected_3", "label": "Elegida por defecto", "default": false },
+
+    { "type": "header", "content": "Color de cristal" },
+    { "type": "checkbox", "id": "show_colors", "label": "Mostrar selector de color", "default": true },
+    { "type": "text", "id": "colors_title", "label": "Título del bloque de colores", "default": "Color del cristal" },
+    { "type": "text", "id": "prop_label_single", "label": "Etiqueta si es 1 anteojo", "default": "Anteojo" },
+    { "type": "text", "id": "prop_label_multi", "label": "Etiqueta si son varios", "default": "Anteojo", "info": "Se numera solo: Anteojo 1, Anteojo 2..." },
+    { "type": "text", "id": "prop_join", "label": "Separador entre cristal y armazón", "default": " · ", "info": "Así se ve en el carrito: Anteojo 1: Amarillo · Transparente" },
+
+    { "type": "text", "id": "color_1_name", "label": "Cristal 1 - nombre", "default": "Amarillo" },
+    { "type": "color", "id": "color_1_hex", "label": "Cristal 1 - círculo", "default": "#F5E050" },
+    { "type": "text", "id": "color_1_frames", "label": "Cristal 1 - armazones", "default": "1,2,3,4", "info": "Números de armazón separados por coma." },
+    { "type": "text", "id": "color_1_handle", "label": "Cristal 1 - handle de la serie", "default": "manana", "info": "Va antes de \"-armazon-\" en la URL del producto. Ej: manana-armazon-negro." },
+
+    { "type": "text", "id": "color_2_name", "label": "Cristal 2 - nombre", "default": "Naranja" },
+    { "type": "color", "id": "color_2_hex", "label": "Cristal 2 - círculo", "default": "#F4922A" },
+    { "type": "text", "id": "color_2_frames", "label": "Cristal 2 - armazones", "default": "1,2,5" },
+    { "type": "text", "id": "color_2_handle", "label": "Cristal 2 - handle de la serie", "default": "tarde" },
+
+    { "type": "text", "id": "color_3_name", "label": "Cristal 3 - nombre", "default": "Rojo" },
+    { "type": "color", "id": "color_3_hex", "label": "Cristal 3 - círculo", "default": "#D1372B" },
+    { "type": "text", "id": "color_3_frames", "label": "Cristal 3 - armazones", "default": "1,2,3" },
+    { "type": "text", "id": "color_3_handle", "label": "Cristal 3 - handle de la serie", "default": "noche" },
+
+    { "type": "text", "id": "color_4_name", "label": "Cristal 4 - nombre" },
+    { "type": "color", "id": "color_4_hex", "label": "Cristal 4 - círculo", "default": "#111111" },
+    { "type": "text", "id": "color_4_frames", "label": "Cristal 4 - armazones" },
+    { "type": "text", "id": "color_4_handle", "label": "Cristal 4 - handle de la serie" },
+
+    { "type": "header", "content": "Armazones" },
+    { "type": "checkbox", "id": "show_frames", "label": "Mostrar selector de armazón", "default": true },
+    { "type": "text", "id": "frames_title", "label": "Título del panel", "default": "Armazón" },
+    { "type": "range", "id": "frame_dot_size", "label": "Tamaño del círculo", "min": 16, "max": 48, "step": 2, "unit": "px", "default": 26 },
+
+    { "type": "text", "id": "armazon_1_name", "label": "Armazón 1 - nombre", "default": "Transparente" },
+    { "type": "image_picker", "id": "armazon_1_img", "label": "Armazón 1 - imagen" },
+    { "type": "text", "id": "armazon_1_handle", "label": "Armazón 1 - handle", "default": "transparente", "info": "Va después de \"-armazon-\" en la URL del producto." },
+
+    { "type": "text", "id": "armazon_2_name", "label": "Armazón 2 - nombre", "default": "Negro" },
+    { "type": "image_picker", "id": "armazon_2_img", "label": "Armazón 2 - imagen" },
+    { "type": "text", "id": "armazon_2_handle", "label": "Armazón 2 - handle", "default": "negro" },
+
+    { "type": "text", "id": "armazon_3_name", "label": "Armazón 3 - nombre", "default": "Marrón" },
+    { "type": "image_picker", "id": "armazon_3_img", "label": "Armazón 3 - imagen" },
+    { "type": "text", "id": "armazon_3_handle", "label": "Armazón 3 - handle", "default": "marron" },
+
+    { "type": "text", "id": "armazon_4_name", "label": "Armazón 4 - nombre", "default": "Negro y amarillo" },
+    { "type": "image_picker", "id": "armazon_4_img", "label": "Armazón 4 - imagen" },
+    { "type": "text", "id": "armazon_4_handle", "label": "Armazón 4 - handle", "default": "negro-y-amarillo" },
+
+    { "type": "text", "id": "armazon_5_name", "label": "Armazón 5 - nombre", "default": "Azul" },
+    { "type": "image_picker", "id": "armazon_5_img", "label": "Armazón 5 - imagen" },
+    { "type": "text", "id": "armazon_5_handle", "label": "Armazón 5 - handle", "default": "azul" },
+
+    { "type": "text", "id": "armazon_6_name", "label": "Armazón 6 - nombre" },
+    { "type": "image_picker", "id": "armazon_6_img", "label": "Armazón 6 - imagen" },
+    { "type": "text", "id": "armazon_6_handle", "label": "Armazón 6 - handle" },
+
+    { "type": "header", "content": "Cuadro del desplegable" },
+    { "type": "color", "id": "color_box_bg", "label": "Fondo del cuadro", "default": "#2E2E2E" },
+    { "type": "color", "id": "color_box_fg", "label": "Texto del cuadro", "default": "#FFFFFF" },
+    { "type": "color", "id": "color_box_border", "label": "Borde del cuadro", "default": "#4A4A4A" },
+    { "type": "range", "id": "color_box_radius", "label": "Redondeo del cuadro", "min": 0, "max": 20, "step": 1, "unit": "px", "default": 4 },
+
+    { "type": "header", "content": "Estilo" },
+    { "type": "color", "id": "bg", "label": "Fondo de la tarjeta", "default": "#FFFFFF" },
+    { "type": "color", "id": "fg", "label": "Texto", "default": "#111111" },
+    { "type": "color", "id": "border_color", "label": "Borde", "default": "#DFDFDF" },
+    { "type": "color", "id": "selected_bg", "label": "Fondo de la elegida", "default": "#111111" },
+    { "type": "color", "id": "selected_fg", "label": "Texto de la elegida", "default": "#FFFFFF" },
+    { "type": "color", "id": "muted", "label": "Texto de la aclaración", "default": "#777777" },
+    { "type": "range", "id": "radius", "label": "Redondeo", "min": 0, "max": 24, "step": 1, "unit": "px", "default": 4 },
+
+    { "type": "header", "content": "Etiqueta flotante" },
+    { "type": "color", "id": "badge_bg", "label": "Fondo de la etiqueta", "default": "#111111" },
+    { "type": "color", "id": "badge_fg", "label": "Texto de la etiqueta", "default": "#FFFFFF" },
+
+    { "type": "header", "content": "Pie" },
+    { "type": "text", "id": "footnote", "label": "Aclaración al pie", "default": "Precios por unidad. Envío gratis desde 2 unidades." },
+
+    { "type": "header", "content": "Espaciado" },
+    { "type": "range", "id": "padding-block-start", "label": "Arriba", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding-block-end", "label": "Abajo", "min": 0, "max": 100, "step": 1, "unit": "px", "default": 0 }
+  ],
+  "presets": [{ "name": "Kits MOX" }]
+}
+{% endschema %}
