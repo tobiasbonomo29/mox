@@ -70,7 +70,6 @@
           {%- if shop.email != blank -%}<li><a href="mailto:{{ shop.email }}">{{ shop.email }}</a></li>{%- endif -%}
           {%- if s.whatsapp_url != blank -%}<li><a href="{{ s.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a></li>{%- endif -%}
           {%- if s.hours != blank -%}<li><span style="display:inline-flex;min-height:40px;align-items:center;">{{ s.hours }}</span></li>{%- endif -%}
-          {%- if pages.contacto != blank and pages.contacto.id -%}<li><a href="{{ pages.contacto.url }}">Formulario de contacto</a></li>{%- endif -%}
         </ul>
       </div>
 

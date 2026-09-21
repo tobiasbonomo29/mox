@@ -83,9 +83,7 @@ p {
   border-radius: 4px;
 }
 
-.button,
-button.button,
-a.button {
+:is(.button, button.button, a.button):not(.close-button, .button-unstyled) {
   min-height: 48px;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -1179,7 +1177,7 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 /* ---------- Hero ---------- */
 
 .mox-hero {
-  padding-block: clamp(24px, 4vw, 56px) var(--mox-section);
+  padding-block: clamp(16px, 4vw, 56px) clamp(8px, 2vw, 24px);
 }
 
 .mox-hero__grid {
@@ -1922,4 +1920,11 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 .product-badges__badge.color-scheme-4,
 .product-card .product-badges {
   display: none;
+}
+
+/* Botones de cierre del tema: sin borde de botón primario */
+.close-button.button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--mox-ink);
 }

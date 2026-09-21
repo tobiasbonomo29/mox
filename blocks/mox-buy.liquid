@@ -60,7 +60,6 @@
 
     assign selected = p.selected_variant
     assign initial_tier = 0
-    assign tier_variants = '' | split: ''
     for t in (1..3)
       assign t_str = t | append: ''
       assign found = nil
@@ -123,12 +122,6 @@
                   render 'mox-product-meta', product: item
                 endcapture
                 assign im = item_meta_raw | split: '|'
-                assign item_kit_index = -1
-                for opt in item.options_with_values
-                  if opt.name == 'Kit'
-                    assign item_kit_index = forloop.index0
-                  endif
-                endfor
               -%}
               {%- unless first_item -%},{%- endunless -%}
               {%- assign first_item = false -%}
@@ -268,7 +261,24 @@
       </div>
     {%- endif -%}
 
-    {%- if s.show_lines and line_index > 0 -%}
+    {%- liquid
+      comment
+        Solo se muestra si al menos otra línea viene con este mismo armazón.
+      endcomment
+      assign other_lines = 0
+      if s.show_lines and line_index > 0
+        for n in (1..3)
+          if n != line_index
+            assign kh = 'mox_line_' | append: n | append: '_handle'
+            assign target_handle = settings[kh] | append: '-armazon-' | append: frame_handle
+            if all_products[target_handle].id
+              assign other_lines = other_lines | plus: 1
+            endif
+          endif
+        endfor
+      endif
+    -%}
+    {%- if other_lines > 0 -%}
       <div class="mox-choice">
         <p class="mox-choice__label" id="mox-lines-{{ block.id }}">Otras líneas con armazón {{ frame_name | downcase }}</p>
         <ul class="mox-line-links" aria-labelledby="mox-lines-{{ block.id }}">
