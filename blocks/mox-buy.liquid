@@ -315,7 +315,25 @@
     >
       <input type="hidden" name="form_type" value="product">
       <input type="hidden" name="utf8" value="✓">
-      <input type="hidden" name="id" value="{{ base_variant.id }}">
+      {%- liquid
+        comment
+          Sin JavaScript el formulario agrega 1 unidad: siempre con la variante de 1 anteojo,
+          para que nunca se cobre una unidad suelta al precio de un kit.
+        endcomment
+        assign single_variant = base_variant
+        for v in p.variants
+          if kit_index > -1
+            assign value = v.options[kit_index]
+          else
+            assign value = v.title
+          endif
+          if value contains '1'
+            assign single_variant = v
+            break
+          endif
+        endfor
+      -%}
+      <input type="hidden" name="id" value="{{ single_variant.id }}">
       <input type="hidden" name="quantity" value="1">
 
       <fieldset class="mox-tiers">

@@ -1928,3 +1928,13 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
   background: transparent;
   color: var(--mox-ink);
 }
+
+/* Objetivos táctiles mínimos en controles del tema */
+.facets-toggle__button {
+  min-height: var(--mox-tap);
+}
+
+.slideshow-control {
+  min-width: 28px;
+  min-height: 28px;
+}

@@ -16,7 +16,7 @@
           "type": "_heading",
           "static": true,
           "settings": {
-            "type_preset": "h2",
+            "type_preset": "h1",
             "font": "var(--font-primary--family)",
             "font_size": "",
             "line_height": "normal",
