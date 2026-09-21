@@ -1,0 +1,448 @@
+{%- comment -%}
+  MÖX · Compra en la ficha de producto.
+  Reemplaza a "Info de producto", "Etiquetas MOX" y "Kits MOX" con un único
+  estado para: título, precio, armazón, kit, resumen, botón y barra móvil.
+
+  Modelo real: cada línea + armazón es un producto ({línea}-armazon-{armazón}) con
+  una opción "Kit" (1, 2 o 3 anteojos) cuyo precio es el precio POR UNIDAD.
+{%- endcomment -%}
+{%- liquid
+  assign s = block.settings
+  assign p = closest.product
+  if p == blank
+    assign p = product
+  endif
+-%}
+
+{%- if p == blank -%}
+  {%- if request.design_mode -%}
+    <div class="mox-empty" {{ block.shopify_attributes }}>Este bloque necesita una ficha de producto.</div>
+  {%- endif -%}
+{%- else -%}
+  {%- liquid
+    capture meta_raw
+      render 'mox-product-meta', product: p
+    endcapture
+    assign meta = meta_raw | split: '|'
+    assign line_index = meta[0] | plus: 0
+    assign line_name = meta[1]
+    assign line_color = meta[2]
+    assign frame_name = meta[3]
+    assign display_title = meta[4]
+    assign frame_handle = meta[5]
+
+    assign line_summary = ''
+    assign line_lens = ''
+    assign line_url = routes.all_products_collection_url
+    assign line_prefix = ''
+    if line_index > 0
+      assign k = 'mox_line_' | append: line_index | append: '_summary'
+      assign line_summary = settings[k]
+      assign k = 'mox_line_' | append: line_index | append: '_lens'
+      assign line_lens = settings[k]
+      assign k = 'mox_line_' | append: line_index | append: '_collection'
+      if settings[k] != blank
+        assign line_url = settings[k].url
+      endif
+      assign k = 'mox_line_' | append: line_index | append: '_handle'
+      assign line_prefix = settings[k]
+    endif
+
+    comment
+      Índice de la opción "Kit" y nivel de cada variante (primer número del valor).
+    endcomment
+    assign kit_index = -1
+    for opt in p.options_with_values
+      if opt.name == 'Kit'
+        assign kit_index = forloop.index0
+      endif
+    endfor
+
+    assign selected = p.selected_variant
+    assign initial_tier = 0
+    assign tier_variants = '' | split: ''
+    for t in (1..3)
+      assign t_str = t | append: ''
+      assign found = nil
+      for v in p.variants
+        if kit_index > -1
+          assign value = v.options[kit_index]
+        else
+          assign value = v.title
+        endif
+        if value contains t_str
+          assign found = v
+          break
+        endif
+      endfor
+      if kit_index == -1 and t == 1 and found == nil
+        assign found = p.variants.first
+      endif
+      if found and selected and found.id == selected.id
+        assign initial_tier = t
+      endif
+    endfor
+    if initial_tier == 0
+      assign initial_tier = 1
+    endif
+  -%}
+
+  <mox-buy
+    class="mox-buy"
+    data-block-id="{{ block.id }}"
+    data-initial-tier="{{ initial_tier }}"
+    style="--mox-line-color: {{ line_color | default: '#181818' }};"
+    {{ block.shopify_attributes }}
+  >
+    <script type="application/json" data-mox-catalog>
+      {
+        "moneyFormat": {{ shop.money_format | json }},
+        "currency": {{ cart.currency.iso_code | json }},
+        "current": {{ p.handle | json }},
+        "lines": [
+          {%- for n in (1..3) -%}
+            {%- liquid
+              assign kh = 'mox_line_' | append: n | append: '_handle'
+              assign kn = 'mox_line_' | append: n | append: '_name'
+              assign kc = 'mox_line_' | append: n | append: '_color'
+              assign kl = 'mox_line_' | append: n | append: '_lens'
+            -%}
+            { "index": {{ n }}, "handle": {{ settings[kh] | json }}, "name": {{ settings[kn] | json }}, "color": {{ settings[kc] | json }}, "lens": {{ settings[kl] | json }} }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ],
+        "payments": {
+          "installments": {% if settings.mox_installments_enabled %}{ "count": {{ settings.mox_installments_count }}, "text": {{ settings.mox_installments_text | json }} }{% else %}null{% endif %},
+          "cash": {% if settings.mox_cash_enabled %}{ "percent": {{ settings.mox_cash_percent }}, "label": {{ settings.mox_cash_label | json }} }{% else %}null{% endif %}
+        },
+        "products": [
+          {%- assign first_item = true -%}
+          {%- for item in collections.all.products limit: 50 -%}
+            {%- if item.handle contains '-armazon-' -%}
+              {%- liquid
+                capture item_meta_raw
+                  render 'mox-product-meta', product: item
+                endcapture
+                assign im = item_meta_raw | split: '|'
+                assign item_kit_index = -1
+                for opt in item.options_with_values
+                  if opt.name == 'Kit'
+                    assign item_kit_index = forloop.index0
+                  endif
+                endfor
+              -%}
+              {%- unless first_item -%},{%- endunless -%}
+              {%- assign first_item = false -%}
+              {
+                "handle": {{ item.handle | json }},
+                "title": {{ item.title | json }},
+                "display": {{ im[4] | json }},
+                "lineIndex": {{ im[0] | plus: 0 }},
+                "frameName": {{ im[3] | json }},
+                "frameHandle": {{ im[5] | json }},
+                "url": {{ item.url | json }},
+                "image": {% if item.featured_image %}{{ item.featured_image | image_url: width: 160 | json }}{% else %}""{% endif %},
+                "options": {{ item.options | json }},
+                "variants": [
+                  {%- for v in item.variants -%}
+                    {
+                      "id": {{ v.id }},
+                      "title": {{ v.title | json }},
+                      "options": {{ v.options | json }},
+                      "available": {{ v.available }},
+                      "price": {{ v.price }},
+                      "compare_at_price": {% if v.compare_at_price %}{{ v.compare_at_price }}{% else %}null{% endif %},
+                      "inventoryLimit": {% if v.inventory_management == 'shopify' and v.inventory_policy == 'deny' %}{{ v.inventory_quantity | at_least: 0 }}{% else %}null{% endif %}
+                    }{% unless forloop.last %},{% endunless %}
+                  {%- endfor -%}
+                ]
+              }
+            {%- endif -%}
+          {%- endfor -%}
+        ]
+      }
+    </script>
+
+    {%- if s.show_breadcrumb -%}
+      <nav class="mox-breadcrumb" aria-label="Ruta de navegación">
+        <ol>
+          <li><a href="{{ routes.root_url }}">Inicio</a></li>
+          <li><a href="{{ routes.all_products_collection_url }}">Anteojos</a></li>
+          {%- if line_index > 0 -%}
+            <li><a href="{{ line_url }}">{{ line_name }}</a></li>
+          {%- endif -%}
+          <li><span aria-current="page">{% if frame_name != blank %}Armazón {{ frame_name | downcase }}{% else %}{{ display_title }}{% endif %}</span></li>
+        </ol>
+      </nav>
+    {%- endif -%}
+
+    <header class="mox-buy__header">
+      {%- if line_index > 0 -%}
+        <p class="mox-line-tag"><span class="mox-line-tag__dot" aria-hidden="true"></span>Línea {{ line_name }}{% if line_lens != blank %} · Cristal {{ line_lens | downcase }}{% endif %}</p>
+      {%- endif -%}
+      <h1 class="mox-buy__title">{{ display_title }}</h1>
+      {%- if line_summary != blank -%}
+        <p class="mox-buy__summary">{{ line_summary }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- liquid
+      assign base_variant = p.selected_or_first_available_variant
+      for v in p.variants
+        if kit_index > -1
+          assign value = v.options[kit_index]
+        else
+          assign value = v.title
+        endif
+        assign it_str = initial_tier | append: ''
+        if value contains it_str
+          assign base_variant = v
+          break
+        endif
+      endfor
+      assign base_total = base_variant.price | times: initial_tier
+      assign base_compare = base_variant.compare_at_price | default: 0 | times: initial_tier
+    -%}
+    <div class="mox-price" aria-live="polite">
+      <p class="mox-price__label" data-mox-price-label>{% if initial_tier > 1 %}Total del kit de {{ initial_tier }}{% else %}Precio{% endif %}</p>
+      <div class="mox-price__row">
+        <span class="mox-price__current" data-mox-price>{{ base_total | money }}</span>
+        <s class="mox-price__compare" data-mox-compare {% unless base_compare > base_total %}hidden{% endunless %}>
+          {%- if base_compare > base_total -%}{{ base_compare | money }}{%- endif -%}
+        </s>
+      </div>
+      {%- liquid
+        assign pct = 0
+        if base_compare > base_total
+          assign pct = base_compare | minus: base_total | times: 100.0 | divided_by: base_compare | round
+        endif
+      -%}
+      <p class="mox-price__badge" data-mox-discount {% if pct == 0 %}hidden{% endif %}>{% if pct > 0 %}{{ pct }}% menos que el precio anterior{% endif %}</p>
+      <p class="mox-price__unit" data-mox-unit-price {% if initial_tier < 2 %}hidden{% endif %}>{{ base_variant.price | money }} por unidad</p>
+      {%- if settings.mox_installments_enabled or settings.mox_cash_enabled -%}
+        <ul class="mox-price__payments">
+          {%- if settings.mox_installments_enabled -%}
+            {%- assign quota = base_total | divided_by: settings.mox_installments_count -%}
+            <li data-mox-installments>{{ settings.mox_installments_count }} cuotas de {{ quota | money }} {{ settings.mox_installments_text }}</li>
+          {%- endif -%}
+          {%- if settings.mox_cash_enabled -%}
+            {%- assign cash = base_total | times: settings.mox_cash_percent | divided_by: 100 -%}
+            <li data-mox-cash>{{ base_total | minus: cash | money }} {{ settings.mox_cash_label }}</li>
+          {%- endif -%}
+        </ul>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Armazones de esta línea: cada uno es un producto propio. {%- endcomment -%}
+    {%- if s.show_frames and line_index > 0 -%}
+      <div class="mox-choice">
+        <p class="mox-choice__label" id="mox-frames-{{ block.id }}">Armazón: <strong>{{ frame_name }}</strong></p>
+        <ul class="mox-frames" aria-labelledby="mox-frames-{{ block.id }}">
+          {%- for item in collections.all.products limit: 50 -%}
+            {%- assign sib_prefix = line_prefix | append: '-armazon-' -%}
+            {%- if item.handle contains sib_prefix -%}
+              {%- liquid
+                capture sib_raw
+                  render 'mox-product-meta', product: item
+                endcapture
+                assign sm = sib_raw | split: '|'
+              -%}
+              {%- if sm[0] == meta[0] -%}
+                <li>
+                  <a
+                    class="mox-frame{% if item.handle == p.handle %} is-current{% endif %}{% unless item.available %} is-soldout{% endunless %}"
+                    href="{{ item.url }}"
+                    {% if item.handle == p.handle %}aria-current="page"{% endif %}
+                  >
+                    <span class="mox-frame__media">
+                      {%- if item.featured_image -%}
+                        {{ item.featured_image | image_url: width: 160 | image_tag: width: 80, height: 80, loading: 'lazy', alt: '', widths: '80, 160' }}
+                      {%- endif -%}
+                    </span>
+                    <span class="mox-frame__name">{{ sm[3] }}{% unless item.available %} · agotado{% endunless %}</span>
+                  </a>
+                </li>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- if s.show_lines and line_index > 0 -%}
+      <div class="mox-choice">
+        <p class="mox-choice__label" id="mox-lines-{{ block.id }}">Otras líneas con armazón {{ frame_name | downcase }}</p>
+        <ul class="mox-line-links" aria-labelledby="mox-lines-{{ block.id }}">
+          {%- for n in (1..3) -%}
+            {%- liquid
+              assign kh = 'mox_line_' | append: n | append: '_handle'
+              assign kn = 'mox_line_' | append: n | append: '_name'
+              assign kc = 'mox_line_' | append: n | append: '_color'
+              assign kl = 'mox_line_' | append: n | append: '_lens'
+              assign target_handle = settings[kh] | append: '-armazon-' | append: frame_handle
+              assign target = all_products[target_handle]
+            -%}
+            <li style="--mox-line-color: {{ settings[kc] }};">
+              {%- if n == line_index -%}
+                <span class="mox-line-link is-current" aria-current="true"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ settings[kn] }}<small>Cristal {{ settings[kl] | downcase }}</small></span>
+              {%- elsif target != blank and target.id -%}
+                <a class="mox-line-link" href="{{ target.url }}"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ settings[kn] }}<small>Cristal {{ settings[kl] | downcase }}</small></a>
+              {%- else -%}
+                <span class="mox-line-link is-disabled"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ settings[kn] }}<small>No viene en {{ frame_name | downcase }}</small></span>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    <form
+      class="mox-buy__form"
+      method="post"
+      action="{{ routes.cart_add_url }}"
+      accept-charset="UTF-8"
+      enctype="multipart/form-data"
+      novalidate
+    >
+      <input type="hidden" name="form_type" value="product">
+      <input type="hidden" name="utf8" value="✓">
+      <input type="hidden" name="id" value="{{ base_variant.id }}">
+      <input type="hidden" name="quantity" value="1">
+
+      <fieldset class="mox-tiers">
+        <legend class="mox-choice__label">{{ s.kit_title }}</legend>
+        {%- for t in (1..3) -%}
+          {%- liquid
+            assign t_str = t | append: ''
+            assign tv = nil
+            for v in p.variants
+              if kit_index > -1
+                assign value = v.options[kit_index]
+              else
+                assign value = v.title
+              endif
+              if value contains t_str
+                assign tv = v
+                break
+              endif
+            endfor
+            if kit_index == -1 and t == 1 and tv == nil
+              assign tv = p.variants.first
+            endif
+          -%}
+          {%- if tv -%}
+            {%- assign tv_total = tv.price | times: t -%}
+            <label class="mox-tier{% if t == initial_tier %} is-selected{% endif %}{% unless tv.available %} is-soldout{% endunless %}" data-mox-tier-card="{{ t }}">
+              <input
+                type="radio"
+                name="mox-tier-{{ block.id }}"
+                value="{{ t }}"
+                data-mox-tier
+                {% if t == initial_tier %}checked{% endif %}
+                {% unless tv.available %}disabled{% endunless %}
+              >
+              <span class="mox-tier__mark" aria-hidden="true"></span>
+              <span class="mox-tier__body">
+                <span class="mox-tier__name">{% if t == 1 %}1 anteojo{% else %}Kit de {{ t }} anteojos{% endif %}</span>
+                <span class="mox-tier__note">{% if t == 1 %}Este modelo{% else %}Elegí la línea y el armazón de cada uno{% endif %}{% unless tv.available %} · agotado{% endunless %}</span>
+              </span>
+              <span class="mox-tier__prices">
+                <span class="mox-tier__unit">{{ tv.price | money }} <small>c/u</small></span>
+                <span class="mox-tier__total" data-mox-tier-total>{% if t > 1 %}Total {{ tv_total | money }}{% endif %}</span>
+              </span>
+            </label>
+          {%- endif -%}
+        {%- endfor -%}
+      </fieldset>
+
+      <div class="mox-units" data-mox-units {% if initial_tier < 2 %}hidden{% endif %}></div>
+
+      <template data-mox-unit-template>
+        <fieldset class="mox-unit">
+          <legend class="mox-unit__legend" data-mox-unit-legend>Anteojo</legend>
+          <img class="mox-unit__image" data-mox-unit-image width="56" height="56" alt="" hidden>
+          <div class="mox-unit__fields">
+            <div class="mox-field">
+              <label class="mox-field__label" data-mox-unit-line-label>Línea</label>
+              <span class="mox-field__control">
+                <span class="mox-field__dot" data-mox-unit-dot aria-hidden="true"></span>
+                <select data-mox-unit-line>
+                  {%- for n in (1..3) -%}
+                    {%- assign kn = 'mox_line_' | append: n | append: '_name' -%}
+                    {%- assign kl = 'mox_line_' | append: n | append: '_lens' -%}
+                    <option value="{{ n }}">{{ settings[kn] }} · cristal {{ settings[kl] | downcase }}</option>
+                  {%- endfor -%}
+                </select>
+              </span>
+            </div>
+            <div class="mox-field">
+              <label class="mox-field__label" data-mox-unit-frame-label>Armazón</label>
+              <span class="mox-field__control"><select data-mox-unit-frame></select></span>
+            </div>
+          </div>
+          <p class="mox-unit__status" data-mox-unit-status></p>
+        </fieldset>
+      </template>
+
+      <div class="mox-order" data-mox-summary-wrap {% if initial_tier < 2 %}hidden{% endif %}>
+        <p class="mox-order__title">Tu kit</p>
+        <ul class="mox-order__list" data-mox-summary></ul>
+      </div>
+
+      <p class="mox-alert" role="alert" data-mox-errors hidden></p>
+
+      <button type="submit" class="button mox-buy__submit" data-mox-submit data-label-add="{{ s.button_label | escape }}" {% unless base_variant.available %}disabled{% endunless %}>
+        <span data-mox-submit-text>{% if base_variant.available %}{{ s.button_label }}{% else %}Agotado{% endif %}</span>
+      </button>
+      <p class="visually-hidden" aria-live="polite" data-mox-live></p>
+    </form>
+
+    <ul class="mox-assurance">
+      {%- if settings.mox_shipping_text != blank -%}
+        <li>{% render 'mox-icon', name: 'truck' %}<span>{{ settings.mox_shipping_text }}</span></li>
+      {%- endif -%}
+      {%- if settings.mox_returns_text != blank -%}
+        <li>{% render 'mox-icon', name: 'return' %}<span>{{ settings.mox_returns_text }}</span></li>
+      {%- endif -%}
+      <li>{% render 'mox-icon', name: 'lock' %}<span>Pagás en el checkout seguro de Shopify</span></li>
+      {%- if shop.email != blank -%}
+        <li>{% render 'mox-icon', name: 'mail' %}<span>¿Dudas? Escribinos a <a href="mailto:{{ shop.email }}">{{ shop.email }}</a></span></li>
+      {%- endif -%}
+    </ul>
+
+    {%- if shop.enabled_payment_types.size > 0 -%}
+      <ul class="mox-payment-icons" aria-label="Medios de pago">
+        {%- for type in shop.enabled_payment_types -%}
+          <li>{{ type | payment_type_svg_tag }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <div class="mox-sticky-buy" data-mox-sticky aria-hidden="true">
+      <div class="mox-sticky-buy__info">
+        <span class="mox-sticky-buy__name" data-mox-sticky-label>{% if initial_tier > 1 %}Kit de {{ initial_tier }} anteojos{% else %}{{ display_title }}{% endif %}</span>
+        <span class="mox-sticky-buy__price" data-mox-sticky-price>{{ base_total | money }}</span>
+      </div>
+      <button type="button" class="button mox-sticky-buy__button" data-mox-sticky-submit data-label-add="{{ s.button_label | escape }}" tabindex="-1">
+        <span data-mox-submit-text>{{ s.button_label }}</span>
+      </button>
+    </div>
+  </mox-buy>
+
+  <script type="module" src="{{ 'mox-buy.js' | asset_url }}"></script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Compra MÖX",
+  "tag": null,
+  "settings": [
+    { "type": "paragraph", "content": "Título, precio, armazón, kit y botón con un único estado. Los precios salen de las variantes \"Kit\" de cada producto; las líneas y condiciones se editan en Configuración del tema → MÖX." },
+    { "type": "checkbox", "id": "show_breadcrumb", "label": "Mostrar ruta de navegación", "default": true },
+    { "type": "checkbox", "id": "show_frames", "label": "Mostrar armazones de la línea", "default": true },
+    { "type": "checkbox", "id": "show_lines", "label": "Mostrar otras líneas con el mismo armazón", "default": true },
+    { "type": "text", "id": "kit_title", "label": "Título del kit", "default": "¿Cuántos querés llevar?" },
+    { "type": "text", "id": "button_label", "label": "Texto del botón", "default": "Agregar al carrito" }
+  ],
+  "presets": [{ "name": "Compra MÖX" }]
+}
+{% endschema %}

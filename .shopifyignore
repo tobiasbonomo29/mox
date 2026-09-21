@@ -1,0 +1,4 @@
+tests/
+docs/
+package.json
+.gitignore

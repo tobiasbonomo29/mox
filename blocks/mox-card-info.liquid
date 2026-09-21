@@ -1,0 +1,84 @@
+{%- comment -%}
+  MÖX · Información de la tarjeta de producto: línea, armazón, precio y CTA.
+  El precio es el de 1 anteojo (variante de nivel 1 del Kit), no el mínimo del
+  producto: `product.price` devuelve el precio por unidad del kit de 3.
+{%- endcomment -%}
+{%- liquid
+  assign p = closest.product
+  if p == blank
+    assign p = product
+  endif
+-%}
+{%- if p != blank -%}
+  {%- liquid
+    capture meta_raw
+      render 'mox-product-meta', product: p
+    endcapture
+    assign meta = meta_raw | split: '|'
+    assign line_index = meta[0] | plus: 0
+
+    assign kit_index = -1
+    for opt in p.options_with_values
+      if opt.name == 'Kit'
+        assign kit_index = forloop.index0
+      endif
+    endfor
+
+    assign single = p.selected_or_first_available_variant
+    assign min_kit = nil
+    if kit_index > -1
+      for v in p.variants
+        assign value = v.options[kit_index]
+        if value contains '1'
+          assign single = v
+        endif
+        if value contains '3'
+          assign min_kit = v
+        endif
+      endfor
+    endif
+
+    if line_index > 0
+      assign k = 'mox_line_' | append: line_index | append: '_lens'
+      assign lens = settings[k]
+    endif
+  -%}
+  <div class="mox-card-info" {% if meta[2] != blank %}style="--mox-line-color: {{ meta[2] }};"{% endif %} {{ block.shopify_attributes }}>
+    {%- if line_index > 0 -%}
+      <p class="mox-line-tag mox-line-tag--small"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ meta[1] }}{% if lens != blank %} · cristal {{ lens | downcase }}{% endif %}</p>
+      <h3 class="mox-card-info__title"><a href="{{ p.url }}" class="mox-card-info__link">Armazón {{ meta[3] | downcase }}</a></h3>
+    {%- else -%}
+      <h3 class="mox-card-info__title"><a href="{{ p.url }}" class="mox-card-info__link">{{ p.title }}</a></h3>
+    {%- endif -%}
+
+    <p class="mox-card-info__price">
+      <span class="mox-card-info__current">{{ single.price | money }}</span>
+      {%- if single.compare_at_price > single.price -%}
+        <s class="mox-card-info__compare"><span class="visually-hidden">Precio anterior</span>{{ single.compare_at_price | money }}</s>
+      {%- endif -%}
+    </p>
+    {%- if block.settings.show_kit_note and min_kit and min_kit.price < single.price -%}
+      <p class="mox-card-info__note">Kit de 3: {{ min_kit.price | money }} c/u</p>
+    {%- endif -%}
+    {%- unless p.available -%}
+      <p class="mox-card-info__note">Agotado</p>
+    {%- endunless -%}
+    {%- if block.settings.show_cta -%}
+      <span class="mox-card-info__cta" aria-hidden="true">{{ block.settings.cta_label }}{% render 'mox-icon', name: 'arrow' %}</span>
+    {%- endif -%}
+  </div>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Info MÖX",
+  "tag": null,
+  "settings": [
+    { "type": "paragraph", "content": "Muestra línea, armazón, precio de 1 anteojo y el enlace a la ficha." },
+    { "type": "checkbox", "id": "show_kit_note", "label": "Mostrar precio por unidad del kit de 3", "default": true },
+    { "type": "checkbox", "id": "show_cta", "label": "Mostrar \"Ver modelo\"", "default": true },
+    { "type": "text", "id": "cta_label", "label": "Texto del enlace", "default": "Ver modelo" }
+  ],
+  "presets": [{ "name": "Info MÖX" }]
+}
+{% endschema %}

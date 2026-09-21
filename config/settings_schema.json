@@ -57,6 +57,253 @@
     ]
   },
   {
+    "name": "MÖX",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Líneas, condiciones comerciales y WhatsApp. Activá los textos comerciales solo si la regla existe en Shopify o en tu medio de pago."
+      },
+      {
+        "type": "header",
+        "content": "Línea 1"
+      },
+      {
+        "type": "text",
+        "id": "mox_line_1_handle",
+        "label": "Prefijo del handle",
+        "default": "manana",
+        "info": "Los productos de esta línea usan handles como manana-armazon-negro."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_1_name",
+        "label": "Nombre",
+        "default": "Mañana"
+      },
+      {
+        "type": "color",
+        "id": "mox_line_1_color",
+        "label": "Color identificador",
+        "default": "#D8AF39",
+        "info": "Se usa como acento y fondo suave. Siempre se acompaña del nombre."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_1_lens",
+        "label": "Color del cristal",
+        "default": "Amarillo"
+      },
+      {
+        "type": "text",
+        "id": "mox_line_1_level",
+        "label": "Nivel de filtrado",
+        "default": "1 de 3",
+        "info": "Vacío = se oculta la fila del comparador."
+      },
+      {
+        "type": "textarea",
+        "id": "mox_line_1_summary",
+        "label": "Descripción breve",
+        "default": "Cristal amarillo, pensado para la primera parte del día.",
+        "info": "Solo información verificada: sin beneficios médicos ni porcentajes sin respaldo."
+      },
+      {
+        "type": "collection",
+        "id": "mox_line_1_collection",
+        "label": "Colección de la línea"
+      },
+      {
+        "type": "image_picker",
+        "id": "mox_line_1_image",
+        "label": "Imagen",
+        "info": "Opcional. Si no hay, se usa la foto del primer producto de la colección."
+      },
+      {
+        "type": "header",
+        "content": "Línea 2"
+      },
+      {
+        "type": "text",
+        "id": "mox_line_2_handle",
+        "label": "Prefijo del handle",
+        "default": "tarde",
+        "info": "Los productos de esta línea usan handles como tarde-armazon-negro."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_2_name",
+        "label": "Nombre",
+        "default": "Tarde"
+      },
+      {
+        "type": "color",
+        "id": "mox_line_2_color",
+        "label": "Color identificador",
+        "default": "#B96532",
+        "info": "Se usa como acento y fondo suave. Siempre se acompaña del nombre."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_2_lens",
+        "label": "Color del cristal",
+        "default": "Naranja"
+      },
+      {
+        "type": "text",
+        "id": "mox_line_2_level",
+        "label": "Nivel de filtrado",
+        "default": "2 de 3",
+        "info": "Vacío = se oculta la fila del comparador."
+      },
+      {
+        "type": "textarea",
+        "id": "mox_line_2_summary",
+        "label": "Descripción breve",
+        "default": "Cristal naranja, pensado para la tarde.",
+        "info": "Solo información verificada: sin beneficios médicos ni porcentajes sin respaldo."
+      },
+      {
+        "type": "collection",
+        "id": "mox_line_2_collection",
+        "label": "Colección de la línea"
+      },
+      {
+        "type": "image_picker",
+        "id": "mox_line_2_image",
+        "label": "Imagen",
+        "info": "Opcional. Si no hay, se usa la foto del primer producto de la colección."
+      },
+      {
+        "type": "header",
+        "content": "Línea 3"
+      },
+      {
+        "type": "text",
+        "id": "mox_line_3_handle",
+        "label": "Prefijo del handle",
+        "default": "noche",
+        "info": "Los productos de esta línea usan handles como noche-armazon-negro."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_3_name",
+        "label": "Nombre",
+        "default": "Noche"
+      },
+      {
+        "type": "color",
+        "id": "mox_line_3_color",
+        "label": "Color identificador",
+        "default": "#923D3D",
+        "info": "Se usa como acento y fondo suave. Siempre se acompaña del nombre."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_3_lens",
+        "label": "Color del cristal",
+        "default": "Rojo"
+      },
+      {
+        "type": "text",
+        "id": "mox_line_3_level",
+        "label": "Nivel de filtrado",
+        "default": "3 de 3",
+        "info": "Vacío = se oculta la fila del comparador."
+      },
+      {
+        "type": "textarea",
+        "id": "mox_line_3_summary",
+        "label": "Descripción breve",
+        "default": "Cristal rojo, pensado para la noche.",
+        "info": "Solo información verificada: sin beneficios médicos ni porcentajes sin respaldo."
+      },
+      {
+        "type": "collection",
+        "id": "mox_line_3_collection",
+        "label": "Colección de la línea"
+      },
+      {
+        "type": "image_picker",
+        "id": "mox_line_3_image",
+        "label": "Imagen",
+        "info": "Opcional. Si no hay, se usa la foto del primer producto de la colección."
+      },
+      {
+        "type": "header",
+        "content": "Condiciones de compra"
+      },
+      {
+        "type": "text",
+        "id": "mox_shipping_text",
+        "label": "Envío",
+        "default": "Envío gratis a todo el país",
+        "info": "Verificado: descuento automático de envío gratis \"MOX - descuentos\" activo. Vacío = no se muestra."
+      },
+      {
+        "type": "checkbox",
+        "id": "mox_installments_enabled",
+        "label": "Mostrar cuotas",
+        "default": false,
+        "info": "Activalo solo si tu medio de pago ofrece estas cuotas. Se calculan sobre el total que cobra Shopify."
+      },
+      {
+        "type": "range",
+        "id": "mox_installments_count",
+        "label": "Cantidad de cuotas",
+        "min": 2,
+        "max": 12,
+        "step": 1,
+        "default": 3
+      },
+      {
+        "type": "text",
+        "id": "mox_installments_text",
+        "label": "Condición de las cuotas",
+        "default": "sin interés"
+      },
+      {
+        "type": "checkbox",
+        "id": "mox_cash_enabled",
+        "label": "Mostrar precio con descuento por medio de pago",
+        "default": false,
+        "info": "Shopify no aplica este descuento por sí solo: activalo únicamente si la regla está configurada."
+      },
+      {
+        "type": "range",
+        "id": "mox_cash_percent",
+        "label": "Descuento por medio de pago",
+        "min": 1,
+        "max": 40,
+        "step": 1,
+        "unit": "%",
+        "default": 20
+      },
+      {
+        "type": "text",
+        "id": "mox_cash_label",
+        "label": "Texto del medio de pago",
+        "default": "pagando en efectivo"
+      },
+      {
+        "type": "text",
+        "id": "mox_returns_text",
+        "label": "Cambios y devoluciones",
+        "info": "Texto breve que coincida con tu política publicada. Vacío = no se muestra."
+      },
+      {
+        "type": "header",
+        "content": "WhatsApp"
+      },
+      {
+        "type": "checkbox",
+        "id": "mox_whatsapp_managed",
+        "label": "Reubicar el botón de WhatsApp",
+        "default": true,
+        "info": "Lo sube sobre la barra de compra móvil y lo oculta con paneles abiertos. El destino lo define la app."
+      }
+    ]
+  },
+  {
     "name": "t:names.colors",
     "settings": [
       {
