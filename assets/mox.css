@@ -591,7 +591,7 @@ a.mox-line-link:hover {
   margin-bottom: var(--mox-space-3);
 }
 
-.mox-tier {
+.mox-buy .mox-tier {
   position: relative;
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr) auto;

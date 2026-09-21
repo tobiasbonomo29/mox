@@ -47,11 +47,17 @@ function manageWhatsApp() {
 
 /* ---------- Paneles abiertos ---------- */
 
+function isShown(el) {
+  const rect = el.getBoundingClientRect();
+  const style = getComputedStyle(el);
+  return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+}
+
 function syncPanelState() {
-  const open = document.querySelector(
-    'dialog[open], .menu-drawer-container[open], details.menu-drawer-container[open], header-drawer details[open]'
-  );
-  document.body.classList.toggle('mox-panel-open', !!open);
+  // Cajón del carrito, búsqueda y menú móvil: solo cuentan si realmente están visibles.
+  const candidates = document.querySelectorAll('dialog[open], header-drawer details[open] .menu-drawer, details.menu-drawer-container[open] .menu-drawer');
+  const open = [...candidates].some(isShown);
+  document.body.classList.toggle('mox-panel-open', open);
 }
 
 function watchPanels() {
