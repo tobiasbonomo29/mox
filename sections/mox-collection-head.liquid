@@ -1,0 +1,74 @@
+{%- comment -%}
+  MÖX · Encabezado de colección y búsqueda por línea.
+  H1, introducción y accesos Todos / Mañana / Tarde / Noche a colecciones reales.
+  Los filtros, el orden y la paginación siguen en la sección principal del tema.
+{%- endcomment -%}
+{%- liquid
+  assign s = section.settings
+  assign c = collection
+  assign title = c.title
+  assign intro = c.description | strip_html | strip
+  assign line_color = ''
+  if c.handle == 'all' or c == blank
+    assign title = s.all_title
+    assign intro = s.all_intro
+  endif
+  for n in (1..3)
+    assign kcol = 'mox_line_' | append: n | append: '_collection'
+    if settings[kcol] != blank and settings[kcol].handle == c.handle
+      assign kc = 'mox_line_' | append: n | append: '_color'
+      assign ks = 'mox_line_' | append: n | append: '_summary'
+      assign kl = 'mox_line_' | append: n | append: '_lens'
+      assign line_color = settings[kc]
+      if intro == blank
+        assign intro = 'Cristal ' | append: settings[kl] | downcase | append: '. ' | append: settings[ks]
+      endif
+    endif
+  endfor
+-%}
+<div class="mox-collection-head" {% if line_color != blank %}style="--mox-line-color: {{ line_color }};"{% endif %}>
+  <div class="mox-container">
+    {%- if line_color != blank -%}
+      <p class="mox-line-tag"><span class="mox-line-tag__dot" aria-hidden="true"></span>Línea</p>
+    {%- endif -%}
+    <h1 class="mox-collection-head__title">{{ title }}</h1>
+    {%- if intro != blank -%}<p class="mox-collection-head__intro">{{ intro }}</p>{%- endif -%}
+
+    <nav aria-label="Líneas">
+      <ul class="mox-tabs" role="list">
+        <li><a href="{{ routes.all_products_collection_url }}" {% if c.handle == 'all' %}aria-current="page"{% endif %}>Todos</a></li>
+        {%- for n in (1..3) -%}
+          {%- liquid
+            assign kcol = 'mox_line_' | append: n | append: '_collection'
+            assign kn = 'mox_line_' | append: n | append: '_name'
+            assign kc = 'mox_line_' | append: n | append: '_color'
+            assign lc = settings[kcol]
+          -%}
+          {%- if lc != blank and lc.products_count > 0 -%}
+            <li style="--mox-line-color: {{ settings[kc] }};">
+              <a href="{{ lc.url }}" {% if lc.handle == c.handle %}aria-current="page"{% endif %}><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ settings[kn] }}</a>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </nav>
+
+    {%- if c != blank -%}
+      <p class="mox-collection-head__count" role="status">{{ c.products_count }} {% if c.products_count == 1 %}modelo{% else %}modelos{% endif %}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Encabezado colección MÖX",
+  "tag": "div",
+  "enabled_on": { "templates": ["collection"] },
+  "settings": [
+    { "type": "text", "id": "all_title", "label": "Título para \"Todos los productos\"", "default": "Anteojos" },
+    { "type": "textarea", "id": "all_intro", "label": "Introducción para \"Todos los productos\"", "default": "Tres líneas, Mañana, Tarde y Noche, y varios armazones. Elegí la línea por el momento del día y el armazón por tu estilo." }
+  ],
+  "presets": [{ "name": "Encabezado colección MÖX" }]
+}
+{% endschema %}
+

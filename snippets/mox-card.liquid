@@ -1,0 +1,26 @@
+{%- comment -%}
+  MÖX · Tarjeta de producto (imagen 1:1 sin recorte + info de línea y precio).
+  @param product {product}
+  @param sizes {string} atributo sizes de la imagen
+{%- endcomment -%}
+{%- assign sizes = sizes | default: '(min-width: 990px) 25vw, 50vw' -%}
+<article class="mox-card">
+  <a class="mox-card__media" href="{{ product.url }}" tabindex="-1" aria-hidden="true">
+    {%- if product.featured_image -%}
+      {{
+        product.featured_image
+        | image_url: width: 900
+        | image_tag:
+          widths: '300, 450, 600, 900',
+          sizes: sizes,
+          loading: 'lazy',
+          alt: '',
+          width: product.featured_image.width,
+          height: product.featured_image.height
+      }}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'mox-card__placeholder' }}
+    {%- endif -%}
+  </a>
+  {%- render 'mox-card-info', product: product -%}
+</article>

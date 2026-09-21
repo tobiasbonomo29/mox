@@ -1,0 +1,31 @@
+{%- liquid
+  assign s = section.settings
+  assign title = s.heading | default: page.title
+  assign body = page.content | strip
+-%}
+<section class="mox-page">
+  <div class="mox-container">
+    <header class="mox-page-head">
+      {%- if s.eyebrow != blank -%}<p class="mox-eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+      <h1>{{ title }}</h1>
+      {%- if s.intro != blank -%}<p class="mox-lead">{{ s.intro }}</p>{%- endif -%}
+    </header>
+    {%- if s.show_content and body != blank -%}
+      <div class="mox-rte" style="padding-bottom: var(--mox-section);">{{ page.content }}</div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Página MÖX",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Antetítulo" },
+    { "type": "text", "id": "heading", "label": "Título (H1)", "info": "Vacío = título de la página en Shopify." },
+    { "type": "textarea", "id": "intro", "label": "Introducción" },
+    { "type": "checkbox", "id": "show_content", "label": "Mostrar el contenido de la página", "default": true }
+  ],
+  "presets": [{ "name": "Página MÖX" }]
+}
+{% endschema %}

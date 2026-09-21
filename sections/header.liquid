@@ -322,9 +322,7 @@
   <div
     class="header__underlay header__underlay-open"
   ></div>
-  {%- if request.page_type == 'index' -%}
-    <h1 class="visually-hidden">{{ shop.name }}</h1>
-  {%- endif -%}
+  {%- comment -%} MÖX: la portada tiene su propio H1 en la sección "Portada MÖX". {%- endcomment -%}
   {% for row in rows %}
     {% liquid
       assign scheme = 'color_scheme_' | append: row

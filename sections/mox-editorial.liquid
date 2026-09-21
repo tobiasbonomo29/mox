@@ -1,0 +1,41 @@
+{%- assign s = section.settings -%}
+<section class="mox-section{% if s.surface %} mox-section--surface{% endif %}" aria-labelledby="mox-ed-{{ section.id }}">
+  <div class="mox-container">
+    <div class="mox-editorial{% if s.reverse %} mox-editorial--reverse{% endif %}">
+      <figure class="mox-editorial__media">
+        {%- if s.image != blank -%}
+          {{ s.image | image_url: width: 1200 | image_tag: widths: '480, 720, 960, 1200', sizes: '(min-width: 990px) 50vw, 100vw', loading: 'lazy', alt: s.image_alt, width: s.image.width, height: s.image.height }}
+        {%- else -%}
+          {{ 'lifestyle-2' | placeholder_svg_tag }}
+        {%- endif -%}
+      </figure>
+      <div class="mox-editorial__body">
+        {%- if s.eyebrow != blank -%}<p class="mox-eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+        <h2 class="mox-heading" id="mox-ed-{{ section.id }}">{{ s.heading }}</h2>
+        {%- if s.text != blank -%}<div class="mox-rte">{{ s.text }}</div>{%- endif -%}
+        {%- if s.button_label != blank and s.button_link != blank -%}
+          <a class="mox-btn mox-btn--outline" href="{{ s.button_link }}">{{ s.button_label }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial MÖX",
+  "tag": "div",
+  "settings": [
+    { "type": "image_picker", "id": "image", "label": "Imagen" },
+    { "type": "text", "id": "image_alt", "label": "Texto alternativo" },
+    { "type": "checkbox", "id": "reverse", "label": "Imagen a la derecha", "default": false },
+    { "type": "text", "id": "eyebrow", "label": "Antetítulo", "default": "MÖX" },
+    { "type": "text", "id": "heading", "label": "Título", "default": "Pensados para acompañar tu rutina" },
+    { "type": "richtext", "id": "text", "label": "Texto", "info": "Usá solo información real de la marca.", "default": "<p>MÖX ofrece anteojos en tres líneas, Mañana, Tarde y Noche, con tres niveles de filtrado para distintos momentos del día. Elegí la línea según tu rutina y el armazón según tu estilo.</p>" },
+    { "type": "text", "id": "button_label", "label": "Botón", "default": "Cómo elegir" },
+    { "type": "url", "id": "button_link", "label": "Enlace del botón" },
+    { "type": "checkbox", "id": "surface", "label": "Fondo blanco", "default": false }
+  ],
+  "presets": [{ "name": "Editorial MÖX" }]
+}
+{% endschema %}

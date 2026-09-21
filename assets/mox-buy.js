@@ -168,7 +168,9 @@ class MoxBuy extends HTMLElement {
       const cardTier = Number(card.getAttribute('data-mox-tier-card'));
       const totalEl = card.querySelector('[data-mox-tier-total]');
       if (!totalEl) return;
-      if (cardTier === tier && result.unitPrices.length === tier) {
+      if (cardTier === 1) {
+        totalEl.textContent = '';
+      } else if (cardTier === tier && result.unitPrices.length === tier) {
         totalEl.textContent = `Total ${this.#money(result.total)}`;
       } else {
         const variant = variantForTier(this.catalog[this.current], cardTier);
@@ -394,7 +396,21 @@ class MoxBuy extends HTMLElement {
       { threshold: 0 }
     );
     this.observer.observe(anchor);
-    signal.addEventListener('abort', () => this.observer?.disconnect());
+
+    // Mientras el formulario de compra está en pantalla, el botón flotante de
+    // WhatsApp se oculta en móvil para no tapar precios ni controles.
+    const form = this.querySelector('.mox-buy__form');
+    if (form) {
+      this.formObserver = new IntersectionObserver(([entry]) => {
+        document.body.classList.toggle('mox-buy-in-view', entry.isIntersecting);
+      });
+      this.formObserver.observe(form);
+    }
+    signal.addEventListener('abort', () => {
+      this.observer?.disconnect();
+      this.formObserver?.disconnect();
+      document.body.classList.remove('mox-buy-in-view');
+    });
   }
 
   /* ---------------- agregar al carrito ---------------- */

@@ -1,0 +1,80 @@
+{%- comment -%}
+  MÖX · Descripción y especificaciones de la ficha.
+  - Descripción: la del producto en Shopify.
+  - Especificaciones: metafields custom.medidas, custom.materiales,
+    custom.tecnologia y custom.incluye (texto de varias líneas o texto enriquecido).
+  Lo que no tiene contenido no se muestra. No hay textos de relleno.
+{%- endcomment -%}
+{%- liquid
+  assign s = section.settings
+  assign p = product
+  assign desc = p.description | strip
+  assign mf = p.metafields.custom
+  assign has_specs = false
+  if mf.medidas != blank or mf.materiales != blank or mf.tecnologia != blank or mf.incluye != blank
+    assign has_specs = true
+  endif
+-%}
+{%- if p != blank -%}
+  {%- if desc != blank or has_specs or settings.mox_shipping_text != blank or settings.mox_returns_text != blank -%}
+    <section class="mox-section mox-section--tight" aria-labelledby="mox-details-{{ section.id }}">
+      <div class="mox-container">
+        <h2 class="mox-heading" id="mox-details-{{ section.id }}">{{ s.heading }}</h2>
+        <div class="mox-accordion" style="margin-top: var(--mox-space-5);">
+          {%- if desc != blank -%}
+            <details open>
+              <summary>Descripción</summary>
+              <div class="mox-accordion__content mox-rte">{{ p.description }}</div>
+            </details>
+          {%- endif -%}
+          {%- if mf.medidas != blank -%}
+            <details>
+              <summary>Medidas</summary>
+              <div class="mox-accordion__content">{{ mf.medidas | metafield_tag }}</div>
+            </details>
+          {%- endif -%}
+          {%- if mf.materiales != blank -%}
+            <details>
+              <summary>Materiales</summary>
+              <div class="mox-accordion__content">{{ mf.materiales | metafield_tag }}</div>
+            </details>
+          {%- endif -%}
+          {%- if mf.tecnologia != blank -%}
+            <details>
+              <summary>Cristal y tecnología</summary>
+              <div class="mox-accordion__content">{{ mf.tecnologia | metafield_tag }}</div>
+            </details>
+          {%- endif -%}
+          {%- if mf.incluye != blank -%}
+            <details>
+              <summary>Qué incluye</summary>
+              <div class="mox-accordion__content">{{ mf.incluye | metafield_tag }}</div>
+            </details>
+          {%- endif -%}
+          {%- if settings.mox_shipping_text != blank or settings.mox_returns_text != blank -%}
+            <details>
+              <summary>Envío{% if settings.mox_returns_text != blank %} y cambios{% endif %}</summary>
+              <div class="mox-accordion__content">
+                {%- if settings.mox_shipping_text != blank -%}<p>{{ settings.mox_shipping_text }}.</p>{%- endif -%}
+                {%- if settings.mox_returns_text != blank -%}<p>{{ settings.mox_returns_text }}</p>{%- endif -%}
+              </div>
+            </details>
+          {%- endif -%}
+        </div>
+      </div>
+    </section>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Detalles de producto MÖX",
+  "tag": "div",
+  "enabled_on": { "templates": ["product"] },
+  "settings": [
+    { "type": "paragraph", "content": "Descripción del producto y metafields custom.medidas, custom.materiales, custom.tecnologia y custom.incluye. Solo se muestra lo que tiene contenido." },
+    { "type": "text", "id": "heading", "label": "Título", "default": "Detalles" }
+  ],
+  "presets": [{ "name": "Detalles de producto MÖX" }]
+}
+{% endschema %}

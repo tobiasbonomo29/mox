@@ -1,4 +1,4 @@
-tests/
-docs/
+tests/*
+docs/*
 package.json
 .gitignore

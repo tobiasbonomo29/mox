@@ -104,7 +104,7 @@
         "type": "textarea",
         "id": "mox_line_1_summary",
         "label": "Descripción breve",
-        "default": "Cristal amarillo, pensado para la primera parte del día.",
+        "default": "Pensada para la primera parte del día.",
         "info": "Solo información verificada: sin beneficios médicos ni porcentajes sin respaldo."
       },
       {
@@ -159,7 +159,7 @@
         "type": "textarea",
         "id": "mox_line_2_summary",
         "label": "Descripción breve",
-        "default": "Cristal naranja, pensado para la tarde.",
+        "default": "Pensada para la tarde.",
         "info": "Solo información verificada: sin beneficios médicos ni porcentajes sin respaldo."
       },
       {
@@ -214,7 +214,7 @@
         "type": "textarea",
         "id": "mox_line_3_summary",
         "label": "Descripción breve",
-        "default": "Cristal rojo, pensado para la noche.",
+        "default": "Pensada para la noche.",
         "info": "Solo información verificada: sin beneficios médicos ni porcentajes sin respaldo."
       },
       {

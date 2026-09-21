@@ -1,0 +1,107 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "mox-page",
+      "settings": {
+        "eyebrow": "Guía",
+        "heading": "Cómo elegir tus anteojos MÖX",
+        "intro": "",
+        "show_content": true
+      }
+    },
+    "lines": {
+      "type": "mox-lines",
+      "settings": {
+        "eyebrow": "Paso 1",
+        "heading": "Elegí la línea según el momento del día",
+        "text": "Mañana, Tarde y Noche se distinguen por el color del cristal.",
+        "surface": false
+      }
+    },
+    "compare": {
+      "type": "mox-compare",
+      "settings": {
+        "eyebrow": "Paso 2",
+        "heading": "Compará las diferencias",
+        "text": "",
+        "note": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones.",
+        "surface": true
+      }
+    },
+    "faq": {
+      "type": "mox-faq",
+      "settings": {
+        "heading": "Dudas frecuentes",
+        "text": "",
+        "open_first": false
+      },
+      "blocks": {
+        "q1": {
+          "type": "question",
+          "settings": {
+            "question": "¿Qué diferencia hay entre Mañana, Tarde y Noche?",
+            "answer": "<p>El color del cristal: amarillo en Mañana, naranja en Tarde y rojo en Noche. Son tres niveles de filtrado pensados para distintos momentos del día.</p>"
+          }
+        },
+        "q2": {
+          "type": "question",
+          "settings": {
+            "question": "¿Cómo elijo el armazón?",
+            "answer": "<p>Cada línea viene en varios armazones. En la ficha de cada modelo ves los armazones disponibles de esa línea y podés pasar de uno a otro.</p>"
+          }
+        },
+        "q3": {
+          "type": "question",
+          "settings": {
+            "question": "¿Puedo combinar líneas en un kit?",
+            "answer": "<p>Sí. En los kits de 2 y 3 anteojos elegís la línea y el armazón de cada uno.</p>"
+          }
+        },
+        "q4": {
+          "type": "question",
+          "settings": {
+            "question": "¿Cómo funciona el precio de los kits?",
+            "answer": "<p>El precio por unidad baja según cuántos anteojos llevás juntos: 1, 2 o 3. Si después cambiás la cantidad en el carrito, el precio por unidad se ajusta a la cantidad final del kit.</p>"
+          }
+        },
+        "q5": {
+          "type": "question",
+          "settings": {
+            "question": "¿Cuánto cuesta el envío?",
+            "answer": "<p>El envío es gratis a todo el país.</p>"
+          }
+        },
+        "q6": {
+          "type": "question",
+          "settings": {
+            "question": "¿Cómo pago?",
+            "answer": "<p>En el checkout seguro de Shopify, con los medios de pago habilitados en la tienda.</p>"
+          }
+        }
+      },
+      "block_order": [
+        "q1",
+        "q2",
+        "q3",
+        "q4",
+        "q5",
+        "q6"
+      ]
+    }
+  },
+  "order": [
+    "main",
+    "lines",
+    "compare",
+    "faq"
+  ]
+}

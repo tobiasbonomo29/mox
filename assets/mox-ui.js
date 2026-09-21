@@ -11,7 +11,9 @@ import { takeNotice } from '@theme/mox-cart';
 /* ---------- WhatsApp ---------- */
 
 function findWhatsAppButton() {
-  const links = document.querySelectorAll('a[href*="wa.me"], a[href*="whatsapp.com"], [class*="whatsapp" i], [id*="whatsapp" i]');
+  const links = document.querySelectorAll(
+    '[class*="wa-preview"], [class*="wa-widget"], a[href*="wa.me"], a[href*="whatsapp.com"], [class*="whatsapp" i], [id*="whatsapp" i]'
+  );
   for (const node of links) {
     let el = /** @type {HTMLElement | null} */ (node);
     while (el && el !== document.body) {

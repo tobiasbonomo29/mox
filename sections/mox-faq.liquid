@@ -1,0 +1,53 @@
+{%- assign s = section.settings -%}
+{%- if section.blocks.size > 0 -%}
+  <section class="mox-section" id="preguntas" aria-labelledby="mox-faq-{{ section.id }}">
+    <div class="mox-container">
+      <div class="mox-section__head">
+        <div>
+          <h2 class="mox-heading" id="mox-faq-{{ section.id }}">{{ s.heading }}</h2>
+          {%- if s.text != blank -%}<p class="mox-lead">{{ s.text }}</p>{%- endif -%}
+        </div>
+      </div>
+      <div class="mox-accordion">
+        {%- for block in section.blocks -%}
+          {%- if block.settings.question != blank and block.settings.answer != blank -%}
+            <details {{ block.shopify_attributes }}{% if forloop.first and s.open_first %} open{% endif %}>
+              <summary>{{ block.settings.question }}</summary>
+              <div class="mox-accordion__content">{{ block.settings.answer }}</div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Preguntas MÖX",
+  "tag": "div",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título", "default": "Preguntas frecuentes" },
+    { "type": "textarea", "id": "text", "label": "Texto" },
+    { "type": "checkbox", "id": "open_first", "label": "Abrir la primera", "default": false }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Pregunta",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Pregunta" },
+        { "type": "richtext", "id": "answer", "label": "Respuesta", "info": "Solo respuestas verificadas." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Preguntas MÖX",
+      "blocks": [
+        { "type": "question", "settings": { "question": "¿Qué diferencia hay entre Mañana, Tarde y Noche?", "answer": "<p>El color del cristal: amarillo en Mañana, naranja en Tarde y rojo en Noche.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

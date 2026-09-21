@@ -1,0 +1,114 @@
+{%- comment -%}
+  MÖX · Grilla de productos (destacados o relacionados).
+  Fuente: selección manual, una colección, o la misma línea del producto abierto.
+{%- endcomment -%}
+{%- liquid
+  assign s = section.settings
+  assign current = product
+  assign items = nil
+  assign heading_link = s.link
+
+  case s.source
+    when 'manual'
+      assign items = s.products
+    when 'collection'
+      assign items = s.collection.products
+      if heading_link == blank and s.collection != blank
+        assign heading_link = s.collection.url
+      endif
+    when 'related'
+      if current != blank and current.handle contains '-armazon-'
+        capture meta_raw
+          render 'mox-product-meta', product: current
+        endcapture
+        assign meta = meta_raw | split: '|'
+        assign k = 'mox_line_' | append: meta[0] | append: '_collection'
+        assign line_collection = settings[k]
+        if line_collection != blank
+          assign items = line_collection.products
+          assign heading_link = line_collection.url
+        endif
+      endif
+      assign fill = collections.all.products
+  endcase
+
+  assign shown = 0
+-%}
+
+{%- capture cards -%}
+  {%- assign used = '' -%}
+  {%- for item in items -%}
+    {%- if shown >= s.limit -%}{%- break -%}{%- endif -%}
+    {%- if current != blank and item.id == current.id -%}{%- continue -%}{%- endif -%}
+    {%- unless item.available or s.show_soldout -%}{%- continue -%}{%- endunless -%}
+    <li>{%- render 'mox-card', product: item -%}</li>
+    {%- assign shown = shown | plus: 1 -%}
+    {%- assign used = used | append: ',' | append: item.id | append: ',' -%}
+  {%- endfor -%}
+  {%- comment -%} Relacionados: se completa con otros modelos si la línea tiene pocos. {%- endcomment -%}
+  {%- for item in fill -%}
+    {%- if shown >= s.limit -%}{%- break -%}{%- endif -%}
+    {%- assign marker = ',' | append: item.id | append: ',' -%}
+    {%- if used contains marker -%}{%- continue -%}{%- endif -%}
+    {%- if current != blank and item.id == current.id -%}{%- continue -%}{%- endif -%}
+    {%- unless item.handle contains '-armazon-' -%}{%- continue -%}{%- endunless -%}
+    {%- unless item.available or s.show_soldout -%}{%- continue -%}{%- endunless -%}
+    <li>{%- render 'mox-card', product: item -%}</li>
+    {%- assign shown = shown | plus: 1 -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- if shown > 0 or request.design_mode -%}
+  <section class="mox-section{% if s.surface %} mox-section--surface{% endif %}" aria-labelledby="mox-grid-{{ section.id }}">
+    <div class="mox-container">
+      <div class="mox-section__head">
+        <div>
+          {%- if s.eyebrow != blank -%}<p class="mox-eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+          <h2 class="mox-heading" id="mox-grid-{{ section.id }}">{{ s.heading }}</h2>
+          {%- if s.text != blank -%}<p class="mox-lead">{{ s.text }}</p>{%- endif -%}
+        </div>
+        {%- if s.link_label != blank and heading_link != blank -%}
+          <a class="mox-link" href="{{ heading_link }}">{{ s.link_label }}{% render 'mox-icon', name: 'arrow' %}</a>
+        {%- endif -%}
+      </div>
+      {%- if shown > 0 -%}
+        <ul class="mox-grid" role="list">{{ cards }}</ul>
+      {%- else -%}
+        <p class="mox-empty">Elegí productos o una colección con productos disponibles.</p>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Productos MÖX",
+  "tag": "div",
+  "class": "mox-product-grid-section",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Antetítulo" },
+    { "type": "text", "id": "heading", "label": "Título", "default": "Elegí tu modelo" },
+    { "type": "textarea", "id": "text", "label": "Texto" },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Productos",
+      "options": [
+        { "value": "manual", "label": "Selección manual" },
+        { "value": "collection", "label": "Colección" },
+        { "value": "related", "label": "Misma línea del producto (fichas)" }
+      ],
+      "default": "manual"
+    },
+    { "type": "product_list", "id": "products", "label": "Productos", "limit": 12 },
+    { "type": "collection", "id": "collection", "label": "Colección" },
+    { "type": "range", "id": "limit", "label": "Cantidad máxima", "min": 2, "max": 12, "step": 1, "default": 4 },
+    { "type": "checkbox", "id": "show_soldout", "label": "Incluir agotados", "default": false },
+    { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver todos" },
+    { "type": "url", "id": "link", "label": "Enlace", "info": "Si está vacío, se usa la colección elegida." },
+    { "type": "checkbox", "id": "surface", "label": "Fondo blanco", "default": false }
+  ],
+  "presets": [{ "name": "Productos MÖX" }]
+}
+{% endschema %}
+

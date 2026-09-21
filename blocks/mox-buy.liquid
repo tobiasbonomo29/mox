@@ -347,7 +347,7 @@
               </span>
               <span class="mox-tier__prices">
                 <span class="mox-tier__unit">{{ tv.price | money }} <small>c/u</small></span>
-                <span class="mox-tier__total" data-mox-tier-total>{% if t > 1 %}Total {{ tv_total | money }}{% endif %}</span>
+                {%- if t > 1 -%}<span class="mox-tier__total" data-mox-tier-total>Total {{ tv_total | money }}</span>{%- endif -%}
               </span>
             </label>
           {%- endif -%}

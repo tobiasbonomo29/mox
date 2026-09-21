@@ -1,0 +1,58 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "mox-page",
+      "settings": {
+        "eyebrow": "Sobre MÖX",
+        "heading": "Anteojos para cada momento del día",
+        "intro": "MÖX ofrece tres líneas de anteojos, Mañana, Tarde y Noche, con tres niveles de filtrado para distintos momentos del día.",
+        "show_content": true
+      }
+    },
+    "editorial": {
+      "type": "mox-editorial",
+      "settings": {
+        "image": "shopify://shop_images/ChatGPT_Image_16_ago_2026_01_00_00_a.m..png",
+        "image_alt": "Anteojos MÖX sobre un escritorio de trabajo",
+        "reverse": false,
+        "eyebrow": "",
+        "heading": "Cómo pensamos las líneas",
+        "text": "<p>Cada línea se distingue por el color de su cristal: amarillo en Mañana, naranja en Tarde y rojo en Noche. Todas se ofrecen en varios armazones y podés combinarlas en un mismo kit.</p>",
+        "button_label": "Ver anteojos",
+        "button_link": "shopify://collections/all",
+        "surface": true
+      }
+    },
+    "lines": {
+      "type": "mox-lines",
+      "settings": {
+        "eyebrow": "",
+        "heading": "Nuestras líneas",
+        "text": "",
+        "surface": false
+      }
+    },
+    "facts": {
+      "type": "mox-facts",
+      "settings": {
+        "heading": "Comprá con información clara",
+        "contact_text": "Escribinos por WhatsApp o por correo."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "editorial",
+    "lines",
+    "facts"
+  ]
+}

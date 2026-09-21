@@ -1,0 +1,144 @@
+{%- comment -%}
+  MÖX · Pie de página con newsletter (formulario de clientes de Shopify),
+  navegación, atención, políticas publicadas y redes reales.
+  Las redes que apuntan a cuentas de Shopify o están vacías no se muestran.
+{%- endcomment -%}
+{%- assign s = section.settings -%}
+<div class="mox-footer">
+  <div class="mox-container">
+    {%- if s.show_newsletter -%}
+      <div class="mox-newsletter" id="newsletter">
+        <div>
+          <h2 class="mox-heading">{{ s.newsletter_heading }}</h2>
+          {%- if s.newsletter_text != blank -%}<p class="mox-lead">{{ s.newsletter_text }}</p>{%- endif -%}
+        </div>
+        {%- form 'customer', id: 'mox-newsletter-form', class: 'mox-newsletter__form', novalidate: 'novalidate' -%}
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <label class="mox-newsletter__label" for="mox-newsletter-email">Tu correo electrónico</label>
+          <div class="mox-newsletter__row">
+            <input
+              id="mox-newsletter-email"
+              type="email"
+              name="contact[email]"
+              autocomplete="email"
+              required
+              aria-describedby="mox-newsletter-status"
+              {% if form.errors %}aria-invalid="true"{% endif %}
+            >
+            <button type="submit" class="mox-btn">{{ s.newsletter_button }}</button>
+          </div>
+          <div id="mox-newsletter-status" role="status" aria-live="polite">
+            {%- if form.posted_successfully? -%}
+              <p class="mox-newsletter__msg is-success">¡Listo! Te sumaste a la lista.</p>
+            {%- elsif form.errors -%}
+              <p class="mox-newsletter__msg is-error">Revisá el correo e intentá de nuevo. {{ form.errors | default_errors | strip_html }}</p>
+            {%- endif -%}
+          </div>
+          {%- if s.newsletter_hint != blank -%}<p class="mox-newsletter__hint">{{ s.newsletter_hint }}</p>{%- endif -%}
+        {%- endform -%}
+      </div>
+      <hr class="mox-footer__rule">
+    {%- endif -%}
+
+    <div class="mox-footer__grid">
+      <div class="mox-footer__brand">
+        {%- if settings.logo != blank -%}
+          {%- assign logo_h = 120 | divided_by: settings.logo.aspect_ratio | round -%}
+          <a href="{{ routes.root_url }}" aria-label="{{ shop.name }} – inicio">
+            {{ settings.logo | image_url: width: 240 | image_tag: width: 120, height: logo_h, alt: shop.name, loading: 'lazy' }}
+          </a>
+        {%- else -%}
+          <a href="{{ routes.root_url }}" class="mox-heading">MÖX</a>
+        {%- endif -%}
+        {%- if s.description != blank -%}<p>{{ s.description }}</p>{%- endif -%}
+      </div>
+
+      {%- if s.menu != blank and s.menu.links.size > 0 -%}
+        <nav aria-labelledby="mox-footer-nav">
+          <h2 class="mox-footer__title" id="mox-footer-nav">{{ s.menu_title | default: s.menu.title }}</h2>
+          <ul class="mox-footer__list" role="list">
+            {%- for link in s.menu.links -%}
+              <li><a href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
+            {%- endfor -%}
+          </ul>
+        </nav>
+      {%- endif -%}
+
+      <div>
+        <h2 class="mox-footer__title">Atención</h2>
+        <ul class="mox-footer__list" role="list">
+          {%- if shop.email != blank -%}<li><a href="mailto:{{ shop.email }}">{{ shop.email }}</a></li>{%- endif -%}
+          {%- if s.whatsapp_url != blank -%}<li><a href="{{ s.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a></li>{%- endif -%}
+          {%- if s.hours != blank -%}<li><span style="display:inline-flex;min-height:40px;align-items:center;">{{ s.hours }}</span></li>{%- endif -%}
+          {%- if pages.contacto != blank and pages.contacto.id -%}<li><a href="{{ pages.contacto.url }}">Formulario de contacto</a></li>{%- endif -%}
+        </ul>
+      </div>
+
+      {%- capture policy_items -%}
+        {%- for policy in shop.policies -%}
+          {%- if policy.body != blank -%}<li><a href="{{ policy.url }}">{{ policy.title }}</a></li>{%- endif -%}
+        {%- endfor -%}
+        {%- for link in s.legal_menu.links -%}
+          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+        {%- endfor -%}
+      {%- endcapture -%}
+      {%- if policy_items != blank -%}
+        <nav aria-labelledby="mox-footer-legal">
+          <h2 class="mox-footer__title" id="mox-footer-legal">Políticas</h2>
+          <ul class="mox-footer__list" role="list">{{ policy_items }}</ul>
+        </nav>
+      {%- endif -%}
+    </div>
+
+    <div class="mox-footer__bottom">
+      <p style="margin:0;">© {{ 'now' | date: '%Y' }} {{ s.brand_name | default: shop.name }}</p>
+      {%- capture socials -%}
+        {%- assign networks = 'instagram,tiktok,facebook,youtube' | split: ',' -%}
+        {%- for n in networks -%}
+          {%- assign key = n | append: '_url' -%}
+          {%- assign url = s[key] -%}
+          {%- if url != blank -%}
+            {%- assign lower = url | downcase -%}
+            {%- unless lower contains '/shopify' or lower contains '@shopify' -%}
+              <li><a href="{{ url }}" target="_blank" rel="noopener">{{ n | capitalize | replace: 'Tiktok', 'TikTok' | replace: 'Youtube', 'YouTube' }}</a></li>
+            {%- endunless -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endcapture -%}
+      {%- if socials != blank -%}
+        <ul class="mox-footer__list" role="list" aria-label="Redes sociales" style="display:flex;flex-wrap:wrap;gap:var(--mox-space-4);">{{ socials }}</ul>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Pie MÖX",
+  "tag": "div",
+  "settings": [
+    { "type": "header", "content": "Newsletter" },
+    { "type": "checkbox", "id": "show_newsletter", "label": "Mostrar newsletter", "default": true },
+    { "type": "text", "id": "newsletter_heading", "label": "Título", "default": "Sumate a la lista de MÖX" },
+    { "type": "text", "id": "newsletter_text", "label": "Texto", "default": "Novedades de productos y lanzamientos." },
+    { "type": "text", "id": "newsletter_button", "label": "Botón", "default": "Suscribirme" },
+    { "type": "text", "id": "newsletter_hint", "label": "Aclaración", "default": "Podés darte de baja cuando quieras." },
+    { "type": "header", "content": "Marca" },
+    { "type": "text", "id": "brand_name", "label": "Nombre", "default": "MÖX" },
+    { "type": "textarea", "id": "description", "label": "Descripción breve", "default": "Anteojos en tres líneas para distintos momentos del día." },
+    { "type": "header", "content": "Navegación" },
+    { "type": "link_list", "id": "menu", "label": "Menú", "default": "footer" },
+    { "type": "text", "id": "menu_title", "label": "Título del menú", "default": "Tienda" },
+    { "type": "link_list", "id": "legal_menu", "label": "Menú legal adicional", "info": "Opcional. Las políticas publicadas en Configuración → Políticas se muestran solas." },
+    { "type": "header", "content": "Atención" },
+    { "type": "url", "id": "whatsapp_url", "label": "Enlace de WhatsApp", "info": "Ej. https://wa.me/549XXXXXXXXXX. Vacío = no se muestra." },
+    { "type": "text", "id": "hours", "label": "Horario de atención" },
+    { "type": "header", "content": "Redes" },
+    { "type": "url", "id": "instagram_url", "label": "Instagram" },
+    { "type": "url", "id": "tiktok_url", "label": "TikTok" },
+    { "type": "url", "id": "facebook_url", "label": "Facebook" },
+    { "type": "url", "id": "youtube_url", "label": "YouTube" }
+  ],
+  "presets": [{ "name": "Pie MÖX" }]
+}
+{% endschema %}
