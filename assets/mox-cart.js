@@ -16,6 +16,18 @@ import { normalizeProduct, planRebalance } from '@theme/mox-pricing';
 const SOURCE = 'mox-cart';
 const NOTICE_KEY = 'mox-kit-notice';
 
+/**
+ * Textos editables (Configuración del tema → MOX · Textos), impresos por
+ * layout/theme.liquid en window.moxTexts. Si falta uno se usa el de fábrica.
+ * @param {string} key
+ * @param {string} fallback
+ * @param {Record<string, string | number>} [vars]
+ */
+function text(key, fallback, vars = {}) {
+  const raw = (window.moxTexts && window.moxTexts[key]) || fallback;
+  return raw.replace(/[(w+)]/g, (match, name) => (name in vars ? String(vars[name]) : match));
+}
+
 function root() {
   return (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
 }
@@ -143,7 +155,7 @@ async function rebalanceNow() {
     items: plan.map((p) => ({ id: p.toVariant, quantity: p.quantity, properties: p.properties })),
   });
   if (!add.ok) {
-    publishNotice('No pudimos actualizar el precio de tu kit porque una de las variantes no tiene stock. Revisá las cantidades antes de pagar.');
+    publishNotice(text('cartNoStock', 'No pudimos actualizar el precio de tu kit porque una de las variantes no tiene stock. Revisá las cantidades antes de pagar.'));
     return { changed: false, error: add.data };
   }
 
@@ -151,15 +163,17 @@ async function rebalanceNow() {
   plan.forEach((p) => (updates[p.key] = 0));
   const update = await postJSON('cart/update.js', { updates, sections: sections.join(',') });
   if (!update.ok) {
-    publishNotice('No pudimos terminar de actualizar tu kit. Recargá la página para ver el precio correcto.');
+    publishNotice(text('cartFailed', 'No pudimos terminar de actualizar tu kit. Recargá la página para ver el precio correcto.'));
     return { changed: true, error: update.data };
   }
 
   const sizes = [...new Set(plan.map((p) => p.kitSize))];
   const message =
     sizes.length === 1
-      ? `Tu kit ahora tiene ${sizes[0]} ${sizes[0] === 1 ? 'anteojo' : 'anteojos'}: actualizamos el precio por unidad.`
-      : 'Actualizamos el precio por unidad de tus kits según la cantidad de anteojos.';
+      ? sizes[0] === 1
+        ? text('cartKitOne', 'Tu kit ahora tiene 1 anteojo: actualizamos el precio por unidad.')
+        : text('cartKitMany', 'Tu kit ahora tiene [n] anteojos: actualizamos el precio por unidad.', { n: sizes[0] })
+      : text('cartKits', 'Actualizamos el precio por unidad de tus kits según la cantidad de anteojos.');
   publishNotice(message);
   dispatchUpdate(update.data, update.data && update.data.sections, { silent: true });
   return { changed: true };
@@ -178,11 +192,11 @@ export const moxCart = {
       try {
         result = await postJSON('cart/add.js', { items, sections: sections.join(','), sections_url: window.location.pathname });
       } catch (error) {
-        return { ok: false, message: 'No pudimos conectarnos. Revisá tu conexión y probá de nuevo.' };
+        return { ok: false, message: text('cartOffline', 'No pudimos conectarnos. Revisá tu conexión y probá de nuevo.') };
       }
 
       if (!result.ok) {
-        const description = (result.data && (result.data.description || result.data.message)) || 'No pudimos agregar el producto.';
+        const description = (result.data && (result.data.description || result.data.message)) || text('cartAddFailed', 'No pudimos agregar el producto.');
         // Si Shopify agregó parte del kit, se quita para no dejarlo incompleto.
         if (kitId) {
           try {
@@ -193,7 +207,7 @@ export const moxCart = {
               partial.forEach((i) => (updates[i.key] = 0));
               const cleanup = await postJSON('cart/update.js', { updates, sections: sections.join(',') });
               dispatchUpdate(cleanup.data, cleanup.data && cleanup.data.sections, { silent: true });
-              return { ok: false, message: `${description} No agregamos el kit incompleto: elegí otra combinación.` };
+              return { ok: false, message: `${description} ${text('cartPartial', 'No agregamos el kit incompleto: elegí otra combinación.')}` };
             }
           } catch (error) {
             /* sigue con el mensaje original */

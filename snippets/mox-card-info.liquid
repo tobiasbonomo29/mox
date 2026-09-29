@@ -50,8 +50,8 @@
   -%}
   <div class="mox-card-info" {% if meta[2] != blank %}style="--mox-line-color: {{ meta[2] }};"{% endif %} {{ attrs }}>
     {%- if line_index > 0 -%}
-      <p class="mox-line-tag mox-line-tag--small"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ meta[1] }}{% if lens != blank %} · cristal {{ lens | downcase }}{% endif %}</p>
-      <h3 class="mox-card-info__title"><a href="{{ p.url }}" class="mox-card-info__link">Armazón {{ meta[3] | downcase }}</a></h3>
+      <p class="mox-line-tag mox-line-tag--small"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ meta[1] }}{% if lens != blank %} · {{ settings.mox_t_lens | downcase }} {{ lens | downcase }}{% endif %}</p>
+      <h3 class="mox-card-info__title"><a href="{{ p.url }}" class="mox-card-info__link">{{ settings.mox_t_frame }} {{ meta[3] | downcase }}</a></h3>
     {%- else -%}
       <h3 class="mox-card-info__title"><a href="{{ p.url }}" class="mox-card-info__link">{{ p.title }}</a></h3>
     {%- endif -%}
@@ -59,14 +59,15 @@
     <p class="mox-card-info__price">
       <span class="mox-card-info__current">{{ single.price | money }}</span>
       {%- if single.compare_at_price > single.price -%}
-        <s class="mox-card-info__compare"><span class="visually-hidden">Precio anterior</span>{{ single.compare_at_price | money }}</s>
+        <s class="mox-card-info__compare"><span class="visually-hidden">{{ settings.mox_t_compare_before }}</span>{{ single.compare_at_price | money }}</s>
       {%- endif -%}
     </p>
     {%- if show_kit_note and min_kit and min_kit.price < single.price -%}
-      <p class="mox-card-info__note">Kit de 3: {{ min_kit.price | money }} c/u</p>
+      {%- assign kit_money = min_kit.price | money -%}
+      <p class="mox-card-info__note">{{ settings.mox_t_kit_note | replace: '[precio]', kit_money }}</p>
     {%- endif -%}
     {%- unless p.available -%}
-      <p class="mox-card-info__note">Agotado</p>
+      <p class="mox-card-info__note">{{ settings.mox_t_soldout }}</p>
     {%- endunless -%}
     {%- if show_cta -%}
       <span class="mox-card-info__cta" aria-hidden="true">{{ cta_label }}{% render 'mox-icon', name: 'arrow' %}</span>

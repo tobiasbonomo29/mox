@@ -532,6 +532,236 @@
     ]
   },
   {
+    "name": "MOX · Textos",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Textos fijos que se repiten en toda la tienda. Los que tienen [corchetes] se completan solos: [n] es un número, [precio] un importe."
+      },
+      {
+        "type": "header",
+        "content": "Palabras de producto"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_line",
+        "label": "Línea",
+        "default": "Línea",
+        "info": "Ej.: \"Línea Noche\"."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_lens",
+        "label": "Cristal",
+        "default": "Cristal",
+        "info": "Ej.: \"Cristal rojo\"."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_frame",
+        "label": "Armazón",
+        "default": "Armazón",
+        "info": "Ej.: \"Armazón negro\". También arma el nombre \"Noche · Armazón negro\"."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_soldout",
+        "label": "Agotado",
+        "default": "Agotado"
+      },
+      {
+        "type": "header",
+        "content": "Tarjetas de producto y colecciones"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_kit_note",
+        "label": "Precio en kit de 3",
+        "default": "Kit de 3: [precio] c/u"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_compare_before",
+        "label": "Precio anterior (lectores de pantalla)",
+        "default": "Precio anterior"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_model",
+        "label": "Cantidad de modelos (singular)",
+        "default": "modelo"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_models",
+        "label": "Cantidad de modelos (plural)",
+        "default": "modelos"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_breadcrumb_home",
+        "label": "Ruta de navegación: inicio",
+        "default": "Inicio"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_breadcrumb_shop",
+        "label": "Ruta de navegación: tienda",
+        "default": "Anteojos"
+      },
+      {
+        "type": "header",
+        "content": "Comparador e información de compra"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_compare_from",
+        "label": "Comparador: precio en kit",
+        "default": "Desde [precio] c/u en kit de 3"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_level",
+        "label": "Comparador: nivel",
+        "default": "Nivel"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_installments_upto",
+        "label": "Información de compra: cuotas",
+        "default": "Hasta [n] cuotas"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_whatsapp",
+        "label": "Pie: enlace de WhatsApp",
+        "default": "WhatsApp"
+      },
+      {
+        "type": "header",
+        "content": "Ficha: botón y errores"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_adding",
+        "label": "Botón mientras agrega",
+        "default": "Agregando…"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_added",
+        "label": "Botón al agregar",
+        "default": "Agregado"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_announce_single",
+        "label": "Aviso: 1 anteojo agregado",
+        "default": "Agregado al carrito."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_announce_kit",
+        "label": "Aviso: kit agregado",
+        "default": "Kit de [n] anteojos agregado al carrito."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_review_selection",
+        "label": "Aviso: selección incompleta",
+        "default": "Revisá la selección antes de agregar."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_err_missing",
+        "label": "Error: falta armazón",
+        "default": "Elegí un armazón para el anteojo [n]."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_err_unknown",
+        "label": "Error: anteojo no disponible",
+        "default": "El anteojo [n] no está disponible."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_err_tier",
+        "label": "Error: sin precio para el kit",
+        "default": "[modelo] no tiene precio para este kit. Elegí otra combinación."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_err_sold_out",
+        "label": "Error: agotado",
+        "default": "[modelo] está agotado para este kit."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_err_stock",
+        "label": "Error: stock insuficiente",
+        "default": "Solo quedan [stock] unidades de [modelo] para este kit."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_err_generic",
+        "label": "Error general",
+        "default": "Revisá tu selección."
+      },
+      {
+        "type": "header",
+        "content": "Avisos del carrito"
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_kit_one",
+        "label": "Kit que quedó con 1 anteojo",
+        "default": "Tu kit ahora tiene 1 anteojo: actualizamos el precio por unidad."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_kit_many",
+        "label": "Kit que cambió de cantidad",
+        "default": "Tu kit ahora tiene [n] anteojos: actualizamos el precio por unidad."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_kits",
+        "label": "Varios kits actualizados",
+        "default": "Actualizamos el precio por unidad de tus kits según la cantidad de anteojos."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_no_stock",
+        "label": "Sin stock para actualizar el kit",
+        "default": "No pudimos actualizar el precio de tu kit porque una de las variantes no tiene stock. Revisá las cantidades antes de pagar."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_failed",
+        "label": "Error al actualizar el kit",
+        "default": "No pudimos terminar de actualizar tu kit. Recargá la página para ver el precio correcto."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_offline",
+        "label": "Sin conexión",
+        "default": "No pudimos conectarnos. Revisá tu conexión y probá de nuevo."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_add_failed",
+        "label": "No se pudo agregar",
+        "default": "No pudimos agregar el producto."
+      },
+      {
+        "type": "text",
+        "id": "mox_t_cart_partial",
+        "label": "Kit incompleto",
+        "default": "No agregamos el kit incompleto: elegí otra combinación."
+      }
+    ]
+  },
+  {
     "name": "t:names.colors",
     "settings": [
       {

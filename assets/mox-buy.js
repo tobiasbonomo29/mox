@@ -10,12 +10,16 @@ import { formatMoney } from '@theme/money-formatting';
 import { resolveKit, normalizeProduct, variantForTier } from '@theme/mox-pricing';
 import { moxCart } from '@theme/mox-cart';
 
+/**
+ * Mensajes de error: clave del texto configurable (bloque "Compra MOX") y texto
+ * por defecto. Marcadores: [n] número de anteojo, [modelo], [stock].
+ */
 const ERROR_TEXT = {
-  'missing-selection': (u) => `Elegí un armazón para el anteojo ${u.unit}.`,
-  'unknown-product': (u) => `El anteojo ${u.unit} no está disponible.`,
-  'tier-unavailable': (u, name) => `${name} no tiene precio para este kit. Elegí otra combinación.`,
-  'sold-out': (u, name) => `${name} está agotado para este kit.`,
-  'insufficient-stock': (u, name) => `Solo quedan ${u.available} unidades de ${name} para este kit.`,
+  'missing-selection': ['errMissing', 'Elegí un armazón para el anteojo [n].'],
+  'unknown-product': ['errUnknown', 'El anteojo [n] no está disponible.'],
+  'tier-unavailable': ['errTier', '[modelo] no tiene precio para este kit. Elegí otra combinación.'],
+  'sold-out': ['errSoldOut', '[modelo] está agotado para este kit.'],
+  'insufficient-stock': ['errStock', 'Solo quedan [stock] unidades de [modelo] para este kit.'],
 };
 
 class MoxBuy extends HTMLElement {
@@ -169,6 +173,18 @@ class MoxBuy extends HTMLElement {
     return this.meta[handle]?.display || handle;
   }
 
+  /**
+   * Texto configurable del bloque (Personalizar → Compra MOX) con marcadores
+   * entre corchetes, p. ej. "Kit de [n] anteojos". Si está vacío usa el de fábrica.
+   * @param {string} key
+   * @param {string} fallback
+   * @param {Record<string, string | number>} [vars]
+   */
+  #t(key, fallback, vars = {}) {
+    const raw = this.ui[key] || fallback;
+    return raw.replace(/\[(\w+)\]/g, (match, name) => (name in vars ? String(vars[name]) : match));
+  }
+
   #renderTierCards(tier, result) {
     this.querySelectorAll('[data-mox-tier-card]').forEach((card) => {
       const cardTier = Number(card.getAttribute('data-mox-tier-card'));
@@ -177,10 +193,10 @@ class MoxBuy extends HTMLElement {
       if (cardTier === 1) {
         totalEl.textContent = '';
       } else if (cardTier === tier && result.unitPrices.length === tier) {
-        totalEl.textContent = `Total ${this.#money(result.total)}`;
+        totalEl.textContent = this.#t('tierTotal', 'Total [precio]', { precio: this.#money(result.total) });
       } else {
         const variant = variantForTier(this.catalog[this.current], cardTier);
-        totalEl.textContent = variant ? `Total ${this.#money(variant.price * cardTier)}` : '';
+        totalEl.textContent = variant ? this.#t('tierTotal', 'Total [precio]', { precio: this.#money(variant.price * cardTier) }) : '';
       }
     });
   }
@@ -211,7 +227,7 @@ class MoxBuy extends HTMLElement {
 
       el.setAttribute('data-mox-unit', String(index));
       const legend = el.querySelector('[data-mox-unit-legend]');
-      if (legend) legend.textContent = `Anteojo ${index + 1}`;
+      if (legend) legend.textContent = this.#t('unitLegend', 'Anteojo [n]', { n: index + 1 });
 
       const lineSelect = /** @type {HTMLSelectElement} */ (el.querySelector('[data-mox-unit-line]'));
       const frameSelect = /** @type {HTMLSelectElement} */ (el.querySelector('[data-mox-unit-frame]'));
@@ -230,7 +246,11 @@ class MoxBuy extends HTMLElement {
       if (!handle) options.push(new Option(this.ui.chooseFrame ?? 'Elegí un armazón', '', true, true));
       for (const m of frames) {
         const variant = variantForTier(this.catalog[m.handle], tier);
-        const label = variant ? (variant.available ? m.frameName : `${m.frameName} · agotado`) : `${m.frameName} · no disponible en este kit`;
+        const label = variant
+          ? variant.available
+            ? m.frameName
+            : `${m.frameName} · ${this.#t('soldOutShort', 'agotado')}`
+          : `${m.frameName} · ${this.#t('notInKit', 'no disponible en este kit')}`;
         const option = new Option(label, m.handle, false, m.handle === handle);
         option.disabled = !variant || !variant.available;
         options.push(option);
@@ -257,11 +277,13 @@ class MoxBuy extends HTMLElement {
       if (status) {
         if (!handle) {
           // Sin armazón elegido el aviso se muestra como error (rojo) hasta que se elija uno.
-          status.textContent = line ? (this.ui.missingFrame ?? 'Falta elegir armazón.') : 'Elegí una línea.';
+          status.textContent = line ? this.#t('missingFrame', 'Falta elegir armazón.') : this.#t('chooseLine', 'Elegí una línea.');
           status.classList.add('is-warning');
         } else {
           const variant = variantForTier(this.catalog[handle], tier);
-          status.textContent = variant ? `${this.#money(variant.price)} por unidad` : 'No disponible en este kit';
+          status.textContent = variant
+            ? this.#t('unitPrice', '[precio] por unidad', { precio: this.#money(variant.price) })
+            : this.#t('unavailable', 'No disponible en este kit');
           status.classList.toggle('is-warning', !variant || !variant.available);
         }
       }
@@ -282,7 +304,7 @@ class MoxBuy extends HTMLElement {
 
     if (priceEl) priceEl.textContent = this.#money(total);
     if (labelEl) {
-      labelEl.textContent = tier > 1 ? `${this.ui.priceLabelKit ?? 'Precio llevando'} ${tier}` : this.ui.priceLabel ?? 'Precio';
+      labelEl.textContent = tier > 1 ? `${this.#t('priceLabelKit', 'Precio llevando')} ${tier}` : this.#t('priceLabel', 'Precio');
     }
     // El envío gratis es desde 2 anteojos.
     for (const el of this.querySelectorAll('[data-mox-ship]')) {
@@ -297,7 +319,10 @@ class MoxBuy extends HTMLElement {
       const min = Math.min(...prices);
       const max = Math.max(...prices);
       unitEl.hidden = tier < 2 || !prices.length;
-      unitEl.textContent = min === max ? `${this.#money(min)} por unidad` : `Desde ${this.#money(min)} por unidad`;
+      unitEl.textContent =
+        min === max
+          ? this.#t('unitPrice', '[precio] por unidad', { precio: this.#money(min) })
+          : this.#t('unitPriceFrom', 'Desde [precio] por unidad', { precio: this.#money(min) });
     }
 
     const quotaEl = this.querySelector('[data-mox-installments]');
@@ -312,7 +337,7 @@ class MoxBuy extends HTMLElement {
     const stickyPrice = this.querySelector('[data-mox-sticky-price]');
     if (stickyPrice) stickyPrice.textContent = this.#money(total);
     const stickyLabel = this.querySelector('[data-mox-sticky-label]');
-    if (stickyLabel) stickyLabel.textContent = tier > 1 ? `Kit de ${tier} anteojos` : this.#nameOf(this.current);
+    if (stickyLabel) stickyLabel.textContent = tier > 1 ? this.#t('stickyKit', 'Kit de [n] anteojos', { n: tier }) : this.#nameOf(this.current);
   }
 
   #renderSummary(tier, units, result) {
@@ -327,7 +352,7 @@ class MoxBuy extends HTMLElement {
     for (const [handle, qty] of counts) {
       const li = document.createElement('li');
       if (!handle) {
-        li.textContent = `${qty} × armazón sin elegir`;
+        li.textContent = this.#t('summaryMissing', '[n] × armazón sin elegir', { n: qty });
       } else {
         const variant = variantForTier(this.catalog[handle], tier);
         const name = document.createElement('span');
@@ -348,7 +373,10 @@ class MoxBuy extends HTMLElement {
     if (!box) return;
     const messages = result.errors
       .filter((e) => e.code !== 'units-mismatch' && e.code !== 'missing-selection')
-      .map((e) => (ERROR_TEXT[e.code] ? ERROR_TEXT[e.code](e, this.#nameOf(e.handle)) : 'Revisá tu selección.'));
+      .map((e) => {
+        const [key, fallback] = ERROR_TEXT[e.code] || ['errGeneric', 'Revisá tu selección.'];
+        return this.#t(key, fallback, { n: e.unit, modelo: this.#nameOf(e.handle), stock: e.available });
+      });
     box.textContent = messages.join(' ');
     box.hidden = messages.length === 0;
   }
@@ -361,9 +389,9 @@ class MoxBuy extends HTMLElement {
       button.disabled = !ready;
       const text = button.querySelector('[data-mox-submit-text]') || button;
       if (!ready && result.errors.some((e) => e.code === 'missing-selection')) {
-        text.textContent = this.ui.chooseAll ?? 'Elegí todos los armazones';
+        text.textContent = this.#t('chooseAll', 'Elegí todos los armazones');
       } else if (!ready && result.errors.some((e) => e.code === 'sold-out')) {
-        text.textContent = 'Agotado';
+        text.textContent = this.#t('soldOut', 'Agotado');
       } else {
         text.textContent = button.dataset.labelAdd || 'Agregar al carrito';
       }
@@ -428,7 +456,7 @@ class MoxBuy extends HTMLElement {
     const result = this.resolution;
     if (!result.ok) {
       this.render();
-      this.#announce('Revisá la selección antes de agregar.');
+      this.#announce(this.#t('reviewSelection', 'Revisá la selección antes de agregar.'));
       return;
     }
 
@@ -446,7 +474,11 @@ class MoxBuy extends HTMLElement {
       if (!outcome.ok) {
         this.#announce(outcome.message, true);
       } else {
-        this.#announce(tier > 1 ? `Kit de ${tier} anteojos agregado al carrito.` : 'Agregado al carrito.');
+        this.#announce(
+          tier > 1
+            ? this.#t('announceKit', 'Kit de [n] anteojos agregado al carrito.', { n: tier })
+            : this.#t('announceSingle', 'Agregado al carrito.')
+        );
         this.#flashAdded();
       }
     } finally {
@@ -463,7 +495,7 @@ class MoxBuy extends HTMLElement {
       button.disabled = busy;
       button.setAttribute('aria-busy', String(busy));
       const text = button.querySelector('[data-mox-submit-text]') || button;
-      if (busy) text.textContent = 'Agregando…';
+      if (busy) text.textContent = this.#t('adding', 'Agregando…');
     });
   }
 
@@ -471,7 +503,7 @@ class MoxBuy extends HTMLElement {
     const buttons = this.querySelectorAll('[data-mox-submit], [data-mox-sticky-submit]');
     buttons.forEach((btn) => {
       const text = btn.querySelector('[data-mox-submit-text]') || btn;
-      text.textContent = 'Agregado';
+      text.textContent = this.#t('added', 'Agregado');
     });
     setTimeout(() => this.render(), 1600);
   }

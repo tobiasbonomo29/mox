@@ -46,6 +46,18 @@
         --mox-radius: {{ settings.mox_radius }}px;
       }
     {% endstyle %}
+    <script>
+      window.moxTexts = {
+        cartKitOne: {{ settings.mox_t_cart_kit_one | json }},
+        cartKitMany: {{ settings.mox_t_cart_kit_many | json }},
+        cartKits: {{ settings.mox_t_cart_kits | json }},
+        cartNoStock: {{ settings.mox_t_cart_no_stock | json }},
+        cartFailed: {{ settings.mox_t_cart_failed | json }},
+        cartOffline: {{ settings.mox_t_cart_offline | json }},
+        cartAddFailed: {{ settings.mox_t_cart_add_failed | json }},
+        cartPartial: {{ settings.mox_t_cart_partial | json }}
+      };
+    </script>
     <script type="module" src="{{ 'mox-cart.js' | asset_url }}"></script>
     <script type="module" src="{{ 'mox-ui.js' | asset_url }}"></script>
   </head>

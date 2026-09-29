@@ -46,7 +46,7 @@
     assign frame_name = frame_lower | capitalize
 
     if line_index > 0
-      assign display = line_name | append: ' · Armazón ' | append: frame_lower
+      assign display = line_name | append: ' · ' | append: settings.mox_t_frame | append: ' ' | append: frame_lower
     endif
   endif
 -%}

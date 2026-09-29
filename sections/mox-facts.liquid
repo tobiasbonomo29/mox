@@ -27,7 +27,7 @@
       {%- endif -%}
       <li class="mox-fact">
         <h3>{% render 'mox-icon', name: 'lock' %}{{ s.payment_heading }}</h3>
-        <p>{{ s.payment_text }}{% if settings.mox_installments_enabled %} Hasta {{ settings.mox_installments_count }} cuotas {{ settings.mox_installments_text }}.{% endif %}</p>
+        <p>{{ s.payment_text }}{% if settings.mox_installments_enabled %} {{ settings.mox_t_installments_upto | replace: '[n]', settings.mox_installments_count }} {{ settings.mox_installments_text }}.{% endif %}</p>
         {%- if shop.enabled_payment_types.size > 0 -%}
           <ul class="mox-payment-icons" aria-label="Medios de pago">
             {%- for type in shop.enabled_payment_types -%}<li>{{ type | payment_type_svg_tag }}</li>{%- endfor -%}

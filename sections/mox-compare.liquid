@@ -103,7 +103,7 @@
               {%- assign c = line | split: '~' -%}
               {%- assign single = c[7] | plus: 0 -%}
               {%- assign kit = c[8] | plus: 0 -%}
-              <td>{% if single > 0 %}{{ single | money }}{% if kit < single %}<br><span class="mox-line-tag--small">Desde {{ kit | money }} c/u en kit de 3</span>{% endif %}{% endif %}</td>
+              <td>{% if single > 0 %}{{ single | money }}{% if kit < single %}{% assign kit_money = kit | money %}<br><span class="mox-line-tag--small">{{ settings.mox_t_compare_from | replace: '[precio]', kit_money }}</span>{% endif %}{% endif %}</td>
             {%- endfor -%}
           </tr>
           <tr>
@@ -131,13 +131,13 @@
             <dd>{{ c[5] }}</dd>
             {%- if c[4] != blank -%}
               <dt>{{ s.level_label }}</dt>
-              <dd>Nivel {{ c[4] }}</dd>
+              <dd>{{ settings.mox_t_level }} {{ c[4] }}</dd>
             {%- endif -%}
             <dt>{{ s.frames_label }}</dt>
             <dd>{{ c[6] }}</dd>
             {%- if single > 0 -%}
               <dt>{{ s.price_label }}</dt>
-              <dd>{{ single | money }}{% if kit < single %} · desde {{ kit | money }} c/u en kit de 3{% endif %}</dd>
+              <dd>{{ single | money }}{% if kit < single %}{% assign kit_money = kit | money %} · {{ settings.mox_t_compare_from | replace: '[precio]', kit_money }}{% endif %}</dd>
             {%- endif -%}
           </dl>
           <a class="mox-btn mox-btn--outline" href="{{ c[9] }}">{{ s.view_label }} {{ c[1] }}</a>

@@ -21,7 +21,7 @@
       assign kl = 'mox_line_' | append: n | append: '_lens'
       assign line_color = settings[kc]
       if intro == blank
-        assign intro = 'Cristal ' | append: settings[kl] | downcase | append: '. ' | append: settings[ks]
+        assign intro = settings.mox_t_lens | append: ' ' | append: settings[kl] | downcase | capitalize | append: '. ' | append: settings[ks]
       endif
     endif
   endfor
@@ -54,7 +54,7 @@
     </nav>
 
     {%- if c != blank -%}
-      <p class="mox-collection-head__count" role="status">{{ c.products_count }} {% if c.products_count == 1 %}modelo{% else %}modelos{% endif %}</p>
+      <p class="mox-collection-head__count" role="status">{{ c.products_count }} {% if c.products_count == 1 %}{{ settings.mox_t_model }}{% else %}{{ settings.mox_t_models }}{% endif %}</p>
     {%- endif -%}
   </div>
 </div>

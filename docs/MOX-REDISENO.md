@@ -79,6 +79,26 @@ Pendiente de MOX o del Admin:
 - **Videos** de cada línea (9:16).
 - **Texto debajo del precio (punto 4):** el cliente todavía no definió qué cambiar.
 
+## Dónde se edita cada cosa (editor visual)
+
+Todo el contenido visible se edita desde **Tienda online → Temas → Personalizar**. No queda texto fijo en el código de las secciones MOX.
+
+| Qué | Dónde |
+|---|---|
+| Textos, imágenes y botones de cada sección | Clic en la sección, en el panel izquierdo. Las secciones se agregan, ocultan, mueven y quitan desde ahí, en cualquier página. |
+| Nombre, color, cristal, descripción, imagen y colección de cada línea (Mañana, Tarde, Noche) | Configuración del tema (ícono de engranaje) → **MOX**. Se usan en la portada, las líneas, el comparador, las tarjetas de cristal y la ficha. |
+| Datos de las tarjetas de cristal (uso, usos, luz azul, nm, informe) | Configuración del tema → MOX → campos "Tarjeta de cristal" de cada línea. |
+| Envío, cuotas, descuento por transferencia y cambios | Configuración del tema → MOX → Condiciones de compra. |
+| Certificados | Configuración del tema → MOX · Certificados. |
+| Palabras que se repiten ("Línea", "Cristal", "Armazón", "Agotado", "Kit de 3: … c/u"), avisos del carrito y mensajes de error de la ficha | Configuración del tema → **MOX · Textos**. |
+| Textos de la ficha de compra ("Precio llevando", "Llevando 1/2/3", "Anteojo 1", "Total", etc.) | Plantilla de producto → sección de producto → bloque **Compra MOX**. |
+| Videos de la portada | Sección Líneas MOX → Video Mañana/Tarde/Noche. |
+| Precio, stock, fotos y descripción de cada anteojo | Admin → Productos. No es parte del tema. |
+| Menús del encabezado y del pie | Admin → Tienda online → Menús ("MOX principal" y "MOX pie"). |
+| Textos del tema base (carrito, búsqueda, cuenta) | Temas → ⋯ → **Editar contenido predeterminado del tema**. |
+
+Los textos con [corchetes] se completan solos: [n] es un número, [precio] un importe, [armazon] el armazón, [modelo] el producto y [stock] las unidades disponibles.
+
 ## Limitaciones conocidas
 
 - "Pantalla completa" garantiza el alto mínimo. Las secciones con mucho contenido (grilla de productos, comparador y preguntas frecuentes en celular, ficha de producto) siguen siendo más altas que la pantalla.

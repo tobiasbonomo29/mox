@@ -68,7 +68,7 @@
         <h2 class="mox-footer__title">{{ s.contact_heading }}</h2>
         <ul class="mox-footer__list" role="list">
           {%- if shop.email != blank -%}<li><a href="mailto:{{ shop.email }}">{{ shop.email }}</a></li>{%- endif -%}
-          {%- if s.whatsapp_url != blank -%}<li><a href="{{ s.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a></li>{%- endif -%}
+          {%- if s.whatsapp_url != blank -%}<li><a href="{{ s.whatsapp_url }}" target="_blank" rel="noopener">{{ settings.mox_t_whatsapp }}</a></li>{%- endif -%}
           {%- if s.hours != blank -%}<li><span style="display:inline-flex;min-height:40px;align-items:center;">{{ s.hours }}</span></li>{%- endif -%}
         </ul>
       </div>
