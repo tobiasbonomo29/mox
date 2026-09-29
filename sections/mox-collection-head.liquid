@@ -1,5 +1,5 @@
 {%- comment -%}
-  MÖX · Encabezado de colección y búsqueda por línea.
+  MOX · Encabezado de colección y búsqueda por línea.
   H1, introducción y accesos Todos / Mañana / Tarde / Noche a colecciones reales.
   Los filtros, el orden y la paginación siguen en la sección principal del tema.
 {%- endcomment -%}
@@ -29,14 +29,14 @@
 <div class="mox-collection-head" {% if line_color != blank %}style="--mox-line-color: {{ line_color }};"{% endif %}>
   <div class="mox-container">
     {%- if line_color != blank -%}
-      <p class="mox-line-tag"><span class="mox-line-tag__dot" aria-hidden="true"></span>Línea</p>
+      <p class="mox-line-tag"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ s.line_label }}</p>
     {%- endif -%}
     <h1 class="mox-collection-head__title">{{ title }}</h1>
     {%- if intro != blank -%}<p class="mox-collection-head__intro">{{ intro }}</p>{%- endif -%}
 
     <nav aria-label="Líneas">
       <ul class="mox-tabs" role="list">
-        <li><a href="{{ routes.all_products_collection_url }}" {% if c.handle == 'all' %}aria-current="page"{% endif %}>Todos</a></li>
+        <li><a href="{{ routes.all_products_collection_url }}" {% if c.handle == 'all' %}aria-current="page"{% endif %}>{{ s.all_label }}</a></li>
         {%- for n in (1..3) -%}
           {%- liquid
             assign kcol = 'mox_line_' | append: n | append: '_collection'
@@ -61,14 +61,44 @@
 
 {% schema %}
 {
-  "name": "Encabezado colección MÖX",
+  "name": "Encabezado colección MOX",
   "tag": "div",
-  "enabled_on": { "templates": ["collection"] },
+  "enabled_on": {
+    "templates": [
+      "collection"
+    ]
+  },
   "settings": [
-    { "type": "text", "id": "all_title", "label": "Título para \"Todos los productos\"", "default": "Anteojos" },
-    { "type": "textarea", "id": "all_intro", "label": "Introducción para \"Todos los productos\"", "default": "Tres líneas, Mañana, Tarde y Noche, y varios armazones. Elegí la línea por el momento del día y el armazón por tu estilo." }
+    {
+      "type": "text",
+      "id": "all_title",
+      "label": "Título para \"Todos los productos\"",
+      "default": "Anteojos"
+    },
+    {
+      "type": "textarea",
+      "id": "all_intro",
+      "label": "Introducción para \"Todos los productos\"",
+      "default": "Tres líneas, Mañana, Tarde y Noche, y varios armazones. Elegí la línea por el momento del día y el armazón por tu estilo."
+    },
+    {
+      "type": "text",
+      "id": "all_label",
+      "label": "Pestaña de todos los productos",
+      "default": "Todos"
+    },
+    {
+      "type": "text",
+      "id": "line_label",
+      "label": "Etiqueta de línea",
+      "default": "Línea"
+    }
   ],
-  "presets": [{ "name": "Encabezado colección MÖX" }]
+  "presets": [
+    {
+      "name": "Encabezado colección MOX"
+    }
+  ]
 }
 {% endschema %}
 

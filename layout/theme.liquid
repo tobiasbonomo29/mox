@@ -37,6 +37,15 @@
 
     {{ content_for_header }}
     {{ 'mox.css' | asset_url | stylesheet_tag }}
+    {% style %}
+      :root {
+        --mox-bg: {{ settings.mox_background }};
+        --mox-surface: {{ settings.mox_surface }};
+        --mox-ink: {{ settings.mox_text }};
+        --mox-muted: {{ settings.mox_muted }};
+        --mox-radius: {{ settings.mox_radius }}px;
+      }
+    {% endstyle %}
     <script type="module" src="{{ 'mox-cart.js' | asset_url }}"></script>
     <script type="module" src="{{ 'mox-ui.js' | asset_url }}"></script>
   </head>

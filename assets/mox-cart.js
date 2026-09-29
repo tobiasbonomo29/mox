@@ -1,5 +1,5 @@
 /**
- * MÖX · Operaciones de carrito compartidas.
+ * MOX · Operaciones de carrito compartidas.
  *
  * - Cola única: ninguna operación de kit se superpone con otra (doble clic,
  *   recálculos concurrentes).
@@ -204,14 +204,14 @@ export const moxCart = {
 
       dispatchUpdate(null, result.data && result.data.sections, { added: true });
       // Una unidad suelta puede sumarse a una línea igual ya existente: se ajusta su nivel.
-      if (!kitId) await rebalanceNow().catch((error) => console.error('[MÖX] recálculo de kit', error));
+      if (!kitId) await rebalanceNow().catch((error) => console.error('[MOX] recálculo de kit', error));
       return { ok: true };
     });
   },
 
   /** Recalcula los kits del carrito (se puede llamar varias veces; se ejecuta de a una). */
   rebalance() {
-    return exclusive(() => rebalanceNow().catch((error) => console.error('[MÖX] recálculo de kit', error)));
+    return exclusive(() => rebalanceNow().catch((error) => console.error('[MOX] recálculo de kit', error)));
   },
 };
 

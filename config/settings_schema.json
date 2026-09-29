@@ -57,7 +57,7 @@
     ]
   },
   {
-    "name": "MÖX",
+    "name": "MOX",
     "settings": [
       {
         "type": "paragraph",
@@ -244,7 +244,7 @@
         "id": "mox_installments_enabled",
         "label": "Mostrar cuotas",
         "default": false,
-        "info": "Activalo solo si tu medio de pago ofrece estas cuotas. Se calculan sobre el total que cobra Shopify."
+        "info": "Muestra las condiciones informativas. Configurá las cuotas reales en el proveedor de pagos."
       },
       {
         "type": "range",
@@ -276,13 +276,13 @@
         "max": 40,
         "step": 1,
         "unit": "%",
-        "default": 20
+        "default": 10
       },
       {
         "type": "text",
         "id": "mox_cash_label",
         "label": "Texto del medio de pago",
-        "default": "pagando en efectivo"
+        "default": "pagando en transferencia"
       },
       {
         "type": "text",
@@ -300,6 +300,49 @@
         "label": "Reubicar el botón de WhatsApp",
         "default": true,
         "info": "Lo sube sobre la barra de compra móvil y lo oculta con paneles abiertos. El destino lo define la app."
+      }
+    ]
+  },
+  {
+    "name": "MOX · Diseño",
+    "settings": [
+      {
+        "type": "color",
+        "id": "mox_background",
+        "label": "Fondo crema",
+        "default": "#f7f5f0"
+      },
+      {
+        "type": "color",
+        "id": "mox_surface",
+        "label": "Fondo de tarjetas",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "mox_text",
+        "label": "Texto principal",
+        "default": "#181818"
+      },
+      {
+        "type": "color",
+        "id": "mox_muted",
+        "label": "Texto secundario",
+        "default": "#62625d"
+      },
+      {
+        "type": "range",
+        "id": "mox_radius",
+        "label": "Bordes redondeados",
+        "min": 0,
+        "max": 32,
+        "step": 1,
+        "unit": "px",
+        "default": 12
+      },
+      {
+        "type": "paragraph",
+        "content": "La tipografía, el logo y los colores del encabezado se editan en sus apartados generales del tema."
       }
     ]
   },

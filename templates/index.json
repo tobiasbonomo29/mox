@@ -15,15 +15,16 @@
         "eyebrow": "",
         "heading": "Un anteojo para cada momento de tu día.",
         "text": "Conocé las líneas Mañana, Tarde y Noche y elegí la que acompaña tu rutina.",
-        "cta_label": "Explorar anteojos",
+        "cta_label": "Comprar ahora",
         "cta_link": "shopify://collections/all",
-        "cta2_label": "Comparar líneas",
+        "cta2_label": "Comparar anteojos",
         "cta2_link": "#comparar",
         "show_lines": true,
         "promo": "",
         "image": "shopify://shop_images/ChatGPT_Image_16_ago_2026_01_00_00_a.m..png",
-        "image_alt": "Anteojos MÖX de cristal amarillo sobre un escritorio, junto a una notebook",
-        "focal_css": "object-position: 70% 55%;"
+        "image_alt": "Anteojos MOX de cristal amarillo sobre un escritorio, junto a una notebook",
+        "focal_x": 70,
+        "focal_y": 55
       }
     },
     "lines": {
@@ -32,17 +33,31 @@
         "eyebrow": "Tres líneas",
         "heading": "Elegí según el momento del día",
         "text": "Cada línea se distingue por el color de su cristal. Los armazones se eligen aparte.",
-        "surface": false
+        "surface": false,
+        "guide": false,
+        "video_cards": true,
+        "view_label": "Ver",
+        "lens_label": "Cristal",
+        "level_label": "Filtrado",
+        "guide_note": "Elegí tu armazón y combinalo con otras líneas en tu kit.",
+        "show_count": true
       }
     },
     "compare": {
       "type": "mox-compare",
+      "disabled": true,
       "settings": {
         "eyebrow": "Comparar",
         "heading": "Mañana, Tarde y Noche lado a lado",
         "text": "Las tres líneas tienen el mismo sistema de kits. Lo que cambia es el color del cristal y el momento del día para el que están pensadas.",
         "note": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones.",
-        "surface": true
+        "surface": true,
+        "lens_label": "Cristal",
+        "moment_label": "Momento del día",
+        "level_label": "Nivel de filtrado",
+        "frames_label": "Armazones",
+        "price_label": "Precio por anteojo",
+        "view_label": "Ver"
       }
     },
     "featured": {
@@ -58,22 +73,25 @@
           "noche-armazon-marron",
           "manana-armazon-negro-y-amarillo"
         ],
+        "collection": "",
         "limit": 4,
         "show_soldout": false,
         "link_label": "Ver todos",
         "link": "shopify://collections/all",
-        "surface": false
+        "surface": false,
+        "card_cta": "Ver modelo",
+        "show_kit_note": true
       }
     },
     "editorial": {
       "type": "mox-editorial",
       "settings": {
         "image": "shopify://shop_images/ChatGPT_Image_Sep_7_2026_02_55_53_PM.png",
-        "image_alt": "Anteojos MÖX línea Tarde con armazón negro",
+        "image_alt": "Anteojos MOX línea Tarde con armazón negro",
         "reverse": false,
-        "eyebrow": "MÖX",
+        "eyebrow": "MOX",
         "heading": "Pensados para acompañar tu rutina",
-        "text": "<p>MÖX ofrece anteojos en tres líneas, Mañana, Tarde y Noche, con tres niveles de filtrado para distintos momentos del día. Elegí la línea según tu rutina y el armazón según tu estilo.</p>",
+        "text": "<p>MOX ofrece anteojos en tres líneas, Mañana, Tarde y Noche, con tres niveles de filtrado para distintos momentos del día. Elegí la línea según tu rutina y el armazón según tu estilo.</p>",
         "button_label": "Cómo elegir",
         "button_link": "shopify://pages/como-elegir",
         "surface": true
@@ -83,16 +101,17 @@
       "type": "mox-facts",
       "settings": {
         "heading": "Comprá con información clara",
-        "contact_text": "Escribinos por WhatsApp o por correo."
+        "contact_text": "Escribinos por WhatsApp o por correo.",
+        "shipping_heading": "Envío",
+        "returns_heading": "Cambios",
+        "payment_heading": "Pagos",
+        "contact_heading": "Atención",
+        "policy_label": "Ver la política",
+        "payment_text": "Pagás en el checkout seguro de Shopify con los medios habilitados."
       }
     },
     "faq": {
       "type": "mox-faq",
-      "settings": {
-        "heading": "Preguntas frecuentes",
-        "text": "",
-        "open_first": false
-      },
       "blocks": {
         "q1": {
           "type": "question",
@@ -136,7 +155,12 @@
         "q4",
         "q5",
         "q6"
-      ]
+      ],
+      "settings": {
+        "heading": "Preguntas frecuentes",
+        "text": "",
+        "open_first": false
+      }
     }
   },
   "order": [
@@ -149,4 +173,3 @@
     "faq"
   ]
 }
-

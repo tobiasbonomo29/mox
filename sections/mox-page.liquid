@@ -1,6 +1,6 @@
 {%- liquid
   assign s = section.settings
-  assign title = s.heading | default: page.title
+  assign title = s.heading | default: page.title | replace: 'MÖX', 'MOX'
   assign body = page.content | strip
 -%}
 <section class="mox-page">
@@ -11,14 +11,14 @@
       {%- if s.intro != blank -%}<p class="mox-lead">{{ s.intro }}</p>{%- endif -%}
     </header>
     {%- if s.show_content and body != blank -%}
-      <div class="mox-rte" style="padding-bottom: var(--mox-section);">{{ page.content }}</div>
+      <div class="mox-rte" style="padding-bottom: var(--mox-section);">{{ page.content | replace: 'MÖX', 'MOX' }}</div>
     {%- endif -%}
   </div>
 </section>
 
 {% schema %}
 {
-  "name": "Página MÖX",
+  "name": "Página MOX",
   "tag": "div",
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Antetítulo" },
@@ -26,6 +26,6 @@
     { "type": "textarea", "id": "intro", "label": "Introducción" },
     { "type": "checkbox", "id": "show_content", "label": "Mostrar el contenido de la página", "default": true }
   ],
-  "presets": [{ "name": "Página MÖX" }]
+  "presets": [{ "name": "Página MOX" }]
 }
 {% endschema %}

@@ -77,7 +77,7 @@
             },
             "info": {
               "type": "mox-card-info",
-              "name": "Info MÖX",
+              "name": "Info MOX",
               "settings": {
                 "show_kit_note": true,
                 "show_cta": true,

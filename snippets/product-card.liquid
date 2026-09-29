@@ -56,6 +56,10 @@
 
 <product-card
   class="product-card size-style"
+  {% if settings.show_second_image_on_hover %}
+    on:pointerenter="/previewImage"
+    on:pointerleave="/resetImage"
+  {% endif %}
   style="{% render 'size-style', settings: block_settings %}"
   data-product-id="{{ product.id }}"
   id="product-card-{{ block.id }}"

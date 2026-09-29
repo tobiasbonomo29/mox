@@ -1,6 +1,6 @@
 {%- comment -%}
-  MÖX · Información de compra. Cada dato sale de configuración verificable:
-  envío y cambios (Configuración del tema → MÖX), medios de pago habilitados
+  MOX · Información de compra. Cada dato sale de configuración verificable:
+  envío y cambios (Configuración del tema → MOX), medios de pago habilitados
   en Shopify y el correo de la tienda. Lo que está vacío no se muestra.
 {%- endcomment -%}
 {%- assign s = section.settings -%}
@@ -14,20 +14,20 @@
     <ul class="mox-facts" role="list">
       {%- if settings.mox_shipping_text != blank -%}
         <li class="mox-fact">
-          <h3>{% render 'mox-icon', name: 'truck' %}Envío</h3>
+          <h3>{% render 'mox-icon', name: 'truck' %}{{ s.shipping_heading }}</h3>
           <p>{{ settings.mox_shipping_text }}.</p>
         </li>
       {%- endif -%}
       {%- if settings.mox_returns_text != blank -%}
         <li class="mox-fact">
-          <h3>{% render 'mox-icon', name: 'return' %}Cambios</h3>
+          <h3>{% render 'mox-icon', name: 'return' %}{{ s.returns_heading }}</h3>
           <p>{{ settings.mox_returns_text }}</p>
-          {%- if shop.refund_policy.body != blank -%}<p><a href="{{ shop.refund_policy.url }}">Ver la política</a></p>{%- endif -%}
+          {%- if shop.refund_policy.body != blank -%}<p><a href="{{ shop.refund_policy.url }}">{{ s.policy_label }}</a></p>{%- endif -%}
         </li>
       {%- endif -%}
       <li class="mox-fact">
-        <h3>{% render 'mox-icon', name: 'lock' %}Pagos</h3>
-        <p>Pagás en el checkout seguro de Shopify{% if shop.enabled_payment_types.size > 0 %} con los medios habilitados{% endif %}.{% if settings.mox_installments_enabled %} Hasta {{ settings.mox_installments_count }} cuotas {{ settings.mox_installments_text }}.{% endif %}</p>
+        <h3>{% render 'mox-icon', name: 'lock' %}{{ s.payment_heading }}</h3>
+        <p>{{ s.payment_text }}{% if settings.mox_installments_enabled %} Hasta {{ settings.mox_installments_count }} cuotas {{ settings.mox_installments_text }}.{% endif %}</p>
         {%- if shop.enabled_payment_types.size > 0 -%}
           <ul class="mox-payment-icons" aria-label="Medios de pago">
             {%- for type in shop.enabled_payment_types -%}<li>{{ type | payment_type_svg_tag }}</li>{%- endfor -%}
@@ -36,7 +36,7 @@
       </li>
       {%- if shop.email != blank or s.contact_text != blank -%}
         <li class="mox-fact">
-          <h3>{% render 'mox-icon', name: 'mail' %}Atención</h3>
+          <h3>{% render 'mox-icon', name: 'mail' %}{{ s.contact_heading }}</h3>
           {%- if s.contact_text != blank -%}<p>{{ s.contact_text }}</p>{%- endif -%}
           {%- if shop.email != blank -%}<p><a href="mailto:{{ shop.email }}">{{ shop.email }}</a></p>{%- endif -%}
         </li>
@@ -47,12 +47,62 @@
 
 {% schema %}
 {
-  "name": "Info de compra MÖX",
+  "name": "Info de compra MOX",
   "tag": "div",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Título", "default": "Comprá con información clara" },
-    { "type": "text", "id": "contact_text", "label": "Texto de atención", "default": "Escribinos por WhatsApp o por correo." }
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Comprá con información clara"
+    },
+    {
+      "type": "text",
+      "id": "contact_text",
+      "label": "Texto de atención",
+      "default": "Escribinos por WhatsApp o por correo."
+    },
+    {
+      "type": "text",
+      "id": "shipping_heading",
+      "label": "Título de envío",
+      "default": "Envío"
+    },
+    {
+      "type": "text",
+      "id": "returns_heading",
+      "label": "Título de cambios",
+      "default": "Cambios"
+    },
+    {
+      "type": "text",
+      "id": "payment_heading",
+      "label": "Título de pagos",
+      "default": "Pagos"
+    },
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Título de atención",
+      "default": "Atención"
+    },
+    {
+      "type": "text",
+      "id": "policy_label",
+      "label": "Enlace a la política",
+      "default": "Ver la política"
+    },
+    {
+      "type": "textarea",
+      "id": "payment_text",
+      "label": "Texto de pagos",
+      "default": "Pagás en el checkout seguro de Shopify con los medios habilitados."
+    }
   ],
-  "presets": [{ "name": "Info de compra MÖX" }]
+  "presets": [
+    {
+      "name": "Info de compra MOX"
+    }
+  ]
 }
 {% endschema %}

@@ -1,5 +1,5 @@
 /**
- * MÖX · Ajustes de interfaz globales.
+ * MOX · Ajustes de interfaz globales.
  * - WhatsApp (botón de app): lo sube sobre la barra de compra móvil y lo oculta
  *   mientras hay un panel abierto (carrito, menú, búsqueda). No cambia su destino.
  * - Aviso de recálculo de kit en el carrito.

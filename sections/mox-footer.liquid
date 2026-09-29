@@ -1,5 +1,5 @@
 {%- comment -%}
-  MÖX · Pie de página con newsletter (formulario de clientes de Shopify),
+  MOX · Pie de página con newsletter (formulario de clientes de Shopify),
   navegación, atención, políticas publicadas y redes reales.
   Las redes que apuntan a cuentas de Shopify o están vacías no se muestran.
 {%- endcomment -%}
@@ -14,7 +14,7 @@
         </div>
         {%- form 'customer', id: 'mox-newsletter-form', class: 'mox-newsletter__form', novalidate: 'novalidate' -%}
           <input type="hidden" name="contact[tags]" value="newsletter">
-          <label class="mox-newsletter__label" for="mox-newsletter-email">Tu correo electrónico</label>
+          <label class="mox-newsletter__label" for="mox-newsletter-email">{{ s.email_label }}</label>
           <div class="mox-newsletter__row">
             <input
               id="mox-newsletter-email"
@@ -29,9 +29,9 @@
           </div>
           <div id="mox-newsletter-status" role="status" aria-live="polite">
             {%- if form.posted_successfully? -%}
-              <p class="mox-newsletter__msg is-success">¡Listo! Te sumaste a la lista.</p>
+              <p class="mox-newsletter__msg is-success">{{ s.newsletter_success }}</p>
             {%- elsif form.errors -%}
-              <p class="mox-newsletter__msg is-error">Revisá el correo e intentá de nuevo. {{ form.errors | default_errors | strip_html }}</p>
+              <p class="mox-newsletter__msg is-error">{{ s.newsletter_error }} {{ form.errors | default_errors | strip_html }}</p>
             {%- endif -%}
           </div>
           {%- if s.newsletter_hint != blank -%}<p class="mox-newsletter__hint">{{ s.newsletter_hint }}</p>{%- endif -%}
@@ -48,7 +48,7 @@
             {{ settings.logo | image_url: width: 240 | image_tag: width: 120, height: logo_h, alt: shop.name, loading: 'lazy' }}
           </a>
         {%- else -%}
-          <a href="{{ routes.root_url }}" class="mox-heading">MÖX</a>
+          <a href="{{ routes.root_url }}" class="mox-heading">{{ s.brand_name | escape }}</a>
         {%- endif -%}
         {%- if s.description != blank -%}<p>{{ s.description }}</p>{%- endif -%}
       </div>
@@ -58,14 +58,14 @@
           <h2 class="mox-footer__title" id="mox-footer-nav">{{ s.menu_title | default: s.menu.title }}</h2>
           <ul class="mox-footer__list" role="list">
             {%- for link in s.menu.links -%}
-              <li><a href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
+              <li><a href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title | replace: 'MÖX', 'MOX' }}</a></li>
             {%- endfor -%}
           </ul>
         </nav>
       {%- endif -%}
 
       <div>
-        <h2 class="mox-footer__title">Atención</h2>
+        <h2 class="mox-footer__title">{{ s.contact_heading }}</h2>
         <ul class="mox-footer__list" role="list">
           {%- if shop.email != blank -%}<li><a href="mailto:{{ shop.email }}">{{ shop.email }}</a></li>{%- endif -%}
           {%- if s.whatsapp_url != blank -%}<li><a href="{{ s.whatsapp_url }}" target="_blank" rel="noopener">WhatsApp</a></li>{%- endif -%}
@@ -78,12 +78,12 @@
           {%- if policy.body != blank -%}<li><a href="{{ policy.url }}">{{ policy.title }}</a></li>{%- endif -%}
         {%- endfor -%}
         {%- for link in s.legal_menu.links -%}
-          <li><a href="{{ link.url }}">{{ link.title }}</a></li>
+          <li><a href="{{ link.url }}">{{ link.title | replace: 'MÖX', 'MOX' }}</a></li>
         {%- endfor -%}
       {%- endcapture -%}
       {%- if policy_items != blank -%}
         <nav aria-labelledby="mox-footer-legal">
-          <h2 class="mox-footer__title" id="mox-footer-legal">Políticas</h2>
+          <h2 class="mox-footer__title" id="mox-footer-legal">{{ s.policies_heading }}</h2>
           <ul class="mox-footer__list" role="list">{{ policy_items }}</ul>
         </nav>
       {%- endif -%}
@@ -113,31 +113,155 @@
 
 {% schema %}
 {
-  "name": "Pie MÖX",
+  "name": "Pie MOX",
   "tag": "div",
   "settings": [
-    { "type": "header", "content": "Newsletter" },
-    { "type": "checkbox", "id": "show_newsletter", "label": "Mostrar newsletter", "default": true },
-    { "type": "text", "id": "newsletter_heading", "label": "Título", "default": "Sumate a la lista de MÖX" },
-    { "type": "text", "id": "newsletter_text", "label": "Texto", "default": "Novedades de productos y lanzamientos." },
-    { "type": "text", "id": "newsletter_button", "label": "Botón", "default": "Suscribirme" },
-    { "type": "text", "id": "newsletter_hint", "label": "Aclaración", "default": "Podés darte de baja cuando quieras." },
-    { "type": "header", "content": "Marca" },
-    { "type": "text", "id": "brand_name", "label": "Nombre", "default": "MÖX" },
-    { "type": "textarea", "id": "description", "label": "Descripción breve", "default": "Anteojos en tres líneas para distintos momentos del día." },
-    { "type": "header", "content": "Navegación" },
-    { "type": "link_list", "id": "menu", "label": "Menú", "default": "footer" },
-    { "type": "text", "id": "menu_title", "label": "Título del menú", "default": "Tienda" },
-    { "type": "link_list", "id": "legal_menu", "label": "Menú legal adicional", "info": "Opcional. Las políticas publicadas en Configuración → Políticas se muestran solas." },
-    { "type": "header", "content": "Atención" },
-    { "type": "url", "id": "whatsapp_url", "label": "Enlace de WhatsApp", "info": "Ej. https://wa.me/549XXXXXXXXXX. Vacío = no se muestra." },
-    { "type": "text", "id": "hours", "label": "Horario de atención" },
-    { "type": "header", "content": "Redes" },
-    { "type": "url", "id": "instagram_url", "label": "Instagram" },
-    { "type": "url", "id": "tiktok_url", "label": "TikTok" },
-    { "type": "url", "id": "facebook_url", "label": "Facebook" },
-    { "type": "url", "id": "youtube_url", "label": "YouTube" }
+    {
+      "type": "header",
+      "content": "Newsletter"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_newsletter",
+      "label": "Mostrar newsletter",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "newsletter_heading",
+      "label": "Título",
+      "default": "Sumate a la lista de MOX"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_text",
+      "label": "Texto",
+      "default": "Novedades de productos y lanzamientos."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_button",
+      "label": "Botón",
+      "default": "Suscribirme"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_hint",
+      "label": "Aclaración",
+      "default": "Podés darte de baja cuando quieras."
+    },
+    {
+      "type": "header",
+      "content": "Marca"
+    },
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Nombre",
+      "default": "MOX"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descripción breve",
+      "default": "Anteojos en tres líneas para distintos momentos del día."
+    },
+    {
+      "type": "header",
+      "content": "Navegación"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menú",
+      "default": "footer"
+    },
+    {
+      "type": "text",
+      "id": "menu_title",
+      "label": "Título del menú",
+      "default": "Tienda"
+    },
+    {
+      "type": "link_list",
+      "id": "legal_menu",
+      "label": "Menú legal adicional",
+      "info": "Opcional. Las políticas publicadas en Configuración → Políticas se muestran solas."
+    },
+    {
+      "type": "header",
+      "content": "Atención"
+    },
+    {
+      "type": "url",
+      "id": "whatsapp_url",
+      "label": "Enlace de WhatsApp",
+      "info": "Ej. https://wa.me/549XXXXXXXXXX. Vacío = no se muestra."
+    },
+    {
+      "type": "text",
+      "id": "hours",
+      "label": "Horario de atención"
+    },
+    {
+      "type": "header",
+      "content": "Redes"
+    },
+    {
+      "type": "url",
+      "id": "instagram_url",
+      "label": "Instagram"
+    },
+    {
+      "type": "url",
+      "id": "tiktok_url",
+      "label": "TikTok"
+    },
+    {
+      "type": "url",
+      "id": "facebook_url",
+      "label": "Facebook"
+    },
+    {
+      "type": "url",
+      "id": "youtube_url",
+      "label": "YouTube"
+    },
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Título de atención",
+      "default": "Atención"
+    },
+    {
+      "type": "text",
+      "id": "policies_heading",
+      "label": "Título de políticas",
+      "default": "Políticas"
+    },
+    {
+      "type": "text",
+      "id": "email_label",
+      "label": "Etiqueta del correo",
+      "default": "Tu correo electrónico"
+    },
+    {
+      "type": "text",
+      "id": "newsletter_success",
+      "label": "Mensaje de suscripción exitosa",
+      "default": "¡Listo! Te sumaste a la lista."
+    },
+    {
+      "type": "text",
+      "id": "newsletter_error",
+      "label": "Mensaje de error",
+      "default": "Revisá el correo e intentá de nuevo."
+    }
   ],
-  "presets": [{ "name": "Pie MÖX" }]
+  "presets": [
+    {
+      "name": "Pie MOX"
+    }
+  ]
 }
 {% endschema %}

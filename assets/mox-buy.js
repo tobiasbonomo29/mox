@@ -1,5 +1,5 @@
 /**
- * MÖX · Componente de compra de la ficha de producto.
+ * MOX · Componente de compra de la ficha de producto.
  *
  * Una sola fuente de estado ({ tier, units }) para todos los controles:
  * tarjetas de kit, selectores de cada anteojo, precio, resumen, botón
@@ -7,7 +7,7 @@
  * el bloque `mox-buy` con los productos reales del catálogo.
  */
 import { formatMoney } from '@theme/money-formatting';
-import { resolveKit, discountPercent, installments, applyPercent, normalizeProduct, variantForTier } from '@theme/mox-pricing';
+import { resolveKit, normalizeProduct, variantForTier } from '@theme/mox-pricing';
 import { moxCart } from '@theme/mox-cart';
 
 const ERROR_TEXT = {
@@ -32,7 +32,7 @@ class MoxBuy extends HTMLElement {
     try {
       data = JSON.parse(dataEl.textContent || '{}');
     } catch (error) {
-      console.error('[MÖX] catálogo inválido', error);
+      console.error('[MOX] catálogo inválido', error);
       return;
     }
 
@@ -41,6 +41,7 @@ class MoxBuy extends HTMLElement {
     this.lines = data.lines;
     this.current = data.current;
     this.payments = data.payments;
+    this.ui = data.ui || {};
     this.catalog = {};
     this.meta = {};
     for (const raw of data.products) {
@@ -97,6 +98,11 @@ class MoxBuy extends HTMLElement {
 
     if (target.matches('[data-mox-tier]')) {
       this.setTier(Number(target.value));
+      if (Number(target.value) > 1 && this.ui.scrollToKit !== false) {
+        const units = this.querySelector('[data-mox-units]');
+        units?.querySelector('select')?.focus({ preventScroll: true });
+        units?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      }
       return;
     }
 
@@ -221,7 +227,7 @@ class MoxBuy extends HTMLElement {
       const line = this.lines.find((l) => l.index === lineIndex);
       const frames = Object.values(this.meta).filter((m) => m.lineIndex === lineIndex);
       const options = [];
-      if (!handle) options.push(new Option('Elegí un armazón', '', true, true));
+      if (!handle) options.push(new Option(this.ui.chooseFrame ?? 'Elegí un armazón', '', true, true));
       for (const m of frames) {
         const variant = variantForTier(this.catalog[m.handle], tier);
         const label = variant ? (variant.available ? m.frameName : `${m.frameName} · agotado`) : `${m.frameName} · no disponible en este kit`;
@@ -247,8 +253,8 @@ class MoxBuy extends HTMLElement {
       const status = el.querySelector('[data-mox-unit-status]');
       if (status) {
         if (!handle) {
-          status.textContent = line ? `Este armazón no existe en ${line.name}. Elegí uno disponible.` : 'Elegí una línea.';
-          status.classList.add('is-warning');
+          status.textContent = line ? (this.ui.missingFrame ?? 'Falta elegir armazón.') : 'Elegí una línea.';
+          status.classList.remove('is-warning');
         } else {
           const variant = variantForTier(this.catalog[handle], tier);
           status.textContent = variant ? `${this.#money(variant.price)} por unidad` : 'No disponible en este kit';
@@ -261,7 +267,6 @@ class MoxBuy extends HTMLElement {
   #renderPrice(tier, result) {
     const priceEl = this.querySelector('[data-mox-price]');
     const compareEl = /** @type {HTMLElement | null} */ (this.querySelector('[data-mox-compare]'));
-    const badgeEl = /** @type {HTMLElement | null} */ (this.querySelector('[data-mox-discount]'));
     const unitEl = this.querySelector('[data-mox-unit-price]');
     const labelEl = this.querySelector('[data-mox-price-label]');
 
@@ -277,11 +282,6 @@ class MoxBuy extends HTMLElement {
       compareEl.hidden = !(compare > total);
       compareEl.textContent = compare > total ? this.#money(compare) : '';
     }
-    if (badgeEl) {
-      const pct = discountPercent(total, compare);
-      badgeEl.hidden = pct <= 0;
-      badgeEl.textContent = pct > 0 ? `${pct}% menos que el precio anterior` : '';
-    }
     if (unitEl) {
       const prices = result.unitPrices.length === tier ? result.unitPrices : fallback ? [fallback.price] : [];
       const min = Math.min(...prices);
@@ -292,12 +292,11 @@ class MoxBuy extends HTMLElement {
 
     const quotaEl = this.querySelector('[data-mox-installments]');
     if (quotaEl && this.payments?.installments) {
-      const list = installments(total, this.payments.installments.count);
-      quotaEl.textContent = `${this.payments.installments.count} cuotas de ${this.#money(list[0])} ${this.payments.installments.text}`.trim();
+      quotaEl.textContent = `${this.payments.installments.count} cuotas ${this.payments.installments.text}`.trim();
     }
     const cashEl = this.querySelector('[data-mox-cash]');
     if (cashEl && this.payments?.cash) {
-      cashEl.textContent = `${this.#money(applyPercent(total, this.payments.cash.percent))} ${this.payments.cash.label}`;
+      cashEl.textContent = `${this.payments.cash.percent}% ${this.payments.cash.label}`;
     }
 
     const stickyPrice = this.querySelector('[data-mox-sticky-price]');
@@ -319,7 +318,6 @@ class MoxBuy extends HTMLElement {
       const li = document.createElement('li');
       if (!handle) {
         li.textContent = `${qty} × armazón sin elegir`;
-        li.className = 'is-warning';
       } else {
         const variant = variantForTier(this.catalog[handle], tier);
         const name = document.createElement('span');
@@ -353,7 +351,7 @@ class MoxBuy extends HTMLElement {
       button.disabled = !ready;
       const text = button.querySelector('[data-mox-submit-text]') || button;
       if (!ready && result.errors.some((e) => e.code === 'missing-selection')) {
-        text.textContent = 'Elegí todos los armazones';
+        text.textContent = this.ui.chooseAll ?? 'Elegí todos los armazones';
       } else if (!ready && result.errors.some((e) => e.code === 'sold-out')) {
         text.textContent = 'Agotado';
       } else {

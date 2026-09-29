@@ -16,7 +16,7 @@
           "type": "_product-media-gallery",
           "static": true,
           "settings": {
-            "media_presentation": "carousel",
+            "media_presentation": "grid",
             "media_columns": "two",
             "image_gap": 8,
             "large_first_image": false,
@@ -27,7 +27,7 @@
             "thumbnail_width": 72,
             "thumbnail_radius": 8,
             "aspect_ratio": "1",
-            "constrain_to_viewport": false,
+            "constrain_to_viewport": true,
             "media_fit": "contain",
             "media_radius": 12,
             "extend_media": false,
@@ -70,13 +70,25 @@
           "blocks": {
             "mox_buy": {
               "type": "mox-buy",
-              "name": "Compra MÖX",
+              "name": "Compra MOX",
               "settings": {
                 "show_breadcrumb": true,
                 "show_frames": true,
                 "show_lines": true,
                 "kit_title": "¿Cuántos querés llevar?",
-                "button_label": "Agregar al carrito"
+                "button_label": "Agregar al carrito",
+                "tier_1_label": "Llevando 1",
+                "tier_2_label": "Llevando 2",
+                "tier_3_label": "Llevando 3",
+                "single_note": "Este modelo",
+                "kit_note": "Elegí la línea y el armazón de cada uno",
+                "missing_frame": "Falta elegir armazón.",
+                "choose_frame": "Elegí un armazón",
+                "choose_all": "Elegí todos los armazones",
+                "summary_title": "Tu kit",
+                "payment_note": "Pagás en el checkout seguro de Shopify",
+                "contact_note": "¿Dudas? Escribinos a",
+                "scroll_to_kit": true
               },
               "blocks": {}
             }
@@ -102,7 +114,17 @@
     "details": {
       "type": "mox-product-details",
       "settings": {
-        "heading": "Detalles"
+        "heading": "Detalles",
+        "description_label": "Descripción",
+        "measurements_label": "Medidas",
+        "materials_label": "Materiales",
+        "technology_label": "Cristal y tecnología",
+        "includes_label": "Qué incluye",
+        "shipping_label": "Envío y cambios",
+        "fallback_medidas": "",
+        "fallback_materiales": "",
+        "fallback_tecnologia": "",
+        "fallback_incluye": ""
       }
     },
     "compare": {
@@ -112,16 +134,17 @@
         "heading": "Compará las tres líneas",
         "text": "Las tres líneas tienen el mismo sistema de kits. Lo que cambia es el color del cristal y el momento del día para el que están pensadas.",
         "note": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones.",
-        "surface": true
+        "surface": true,
+        "lens_label": "Cristal",
+        "moment_label": "Momento del día",
+        "level_label": "Nivel de filtrado",
+        "frames_label": "Armazones",
+        "price_label": "Precio por anteojo",
+        "view_label": "Ver"
       }
     },
     "faq": {
       "type": "mox-faq",
-      "settings": {
-        "heading": "Preguntas frecuentes",
-        "text": "",
-        "open_first": false
-      },
       "blocks": {
         "q1": {
           "type": "question",
@@ -157,7 +180,12 @@
         "q3",
         "q4",
         "q5"
-      ]
+      ],
+      "settings": {
+        "heading": "Preguntas frecuentes",
+        "text": "",
+        "open_first": false
+      }
     },
     "related": {
       "type": "mox-product-grid",
@@ -166,11 +194,15 @@
         "heading": "Otros modelos",
         "text": "",
         "source": "related",
+        "products": [],
+        "collection": "",
         "limit": 4,
         "show_soldout": false,
         "link_label": "Ver todos",
         "link": "",
-        "surface": false
+        "surface": false,
+        "card_cta": "Ver modelo",
+        "show_kit_note": true
       }
     }
   },
@@ -182,4 +214,3 @@
     "related"
   ]
 }
-

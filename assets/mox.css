@@ -1,8 +1,8 @@
 /* ==========================================================================
-   MÖX · Tokens y componentes
+   MOX · Tokens y componentes
    Los colores de esquema, tipografía y radios se definen en Configuración del
    tema (settings_data). Este archivo agrega tokens de marca, el contenedor de
-   1280 px y los componentes MÖX. Se evita !important salvo donde el tema base
+   1280 px y los componentes MOX. Se evita !important salvo donde el tema base
    fija estilos en línea.
    ========================================================================== */
 
@@ -710,6 +710,7 @@ a.mox-line-link:hover {
 /* Anteojos del kit */
 
 .mox-units {
+  scroll-margin-top: calc(var(--header-height, 96px) + 24px);
   display: grid;
   gap: var(--mox-space-3);
 }
@@ -1180,7 +1181,7 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
   position: relative;
   isolation: isolate;
   display: grid;
-  min-height: clamp(460px, 72vh, 760px);
+  min-height: min(760px, calc(100svh - var(--header-group-height, 96px)));
 }
 
 .mox-hero__media,
@@ -1189,7 +1190,8 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 }
 
 .mox-hero__media {
-  position: relative;
+  position: absolute;
+  inset: 0;
   margin: 0;
   overflow: hidden;
   background: var(--mox-surface);
@@ -1234,7 +1236,7 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
   z-index: 1;
   display: flex;
   align-items: center;
-  padding-block: clamp(48px, 8vw, 96px);
+  padding-block: clamp(24px, 5svh, 64px);
 }
 
 .mox-hero__content {
@@ -1565,6 +1567,7 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 }
 
 .mox-card__media {
+  position: relative;
   display: block;
   aspect-ratio: 1;
   border-radius: var(--mox-radius);
@@ -1582,6 +1585,42 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 
 .mox-card:hover .mox-card__media img {
   transform: scale(1.02);
+}
+
+.mox-card__media .mox-card__secondary {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+@media (hover: hover) {
+  .mox-card:hover .mox-card__secondary { opacity: 1; }
+}
+.mox-card:focus-within .mox-card__secondary { opacity: 1; }
+
+.mox-page { background: var(--mox-bg); }
+.mox-lines--guide .mox-line-card { background: var(--mox-bg); }
+.mox-lines--guide .mox-line-card__media { aspect-ratio: 4 / 3; }
+.mox-lines--video .mox-line-card__media {
+  aspect-ratio: 3 / 4;
+  max-height: 60svh;
+  overflow: hidden;
+}
+.mox-line-card__video {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--mox-bg);
+}
+
+@media (max-height: 650px) {
+  .mox-hero__title { font-size: clamp(1.75rem, 5svh, 3rem); }
+  .mox-hero__text { margin-top: 12px; font-size: 1rem; }
+  .mox-hero__actions, .mox-hero__lines { margin-top: 16px; }
 }
 
 .mox-card .mox-card-info {

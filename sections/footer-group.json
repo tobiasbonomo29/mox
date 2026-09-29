@@ -15,11 +15,11 @@
       "type": "mox-footer",
       "settings": {
         "show_newsletter": true,
-        "newsletter_heading": "Sumate a la lista de MÖX",
+        "newsletter_heading": "Sumate a la lista de MOX",
         "newsletter_text": "Novedades de productos y lanzamientos.",
         "newsletter_button": "Suscribirme",
         "newsletter_hint": "Podés darte de baja cuando quieras.",
-        "brand_name": "MÖX",
+        "brand_name": "MOX",
         "description": "Anteojos en tres líneas para distintos momentos del día.",
         "menu": "mox-pie",
         "menu_title": "Tienda",

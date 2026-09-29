@@ -12,9 +12,9 @@
     "main": {
       "type": "mox-page",
       "settings": {
-        "eyebrow": "Sobre MÖX",
+        "eyebrow": "Sobre MOX",
         "heading": "Anteojos para cada momento del día",
-        "intro": "MÖX ofrece tres líneas de anteojos, Mañana, Tarde y Noche, con tres niveles de filtrado para distintos momentos del día.",
+        "intro": "MOX ofrece tres líneas de anteojos, Mañana, Tarde y Noche, con tres niveles de filtrado para distintos momentos del día.",
         "show_content": true
       }
     },
@@ -22,7 +22,7 @@
       "type": "mox-editorial",
       "settings": {
         "image": "shopify://shop_images/ChatGPT_Image_16_ago_2026_01_00_00_a.m..png",
-        "image_alt": "Anteojos MÖX sobre un escritorio de trabajo",
+        "image_alt": "Anteojos MOX sobre un escritorio de trabajo",
         "reverse": false,
         "eyebrow": "",
         "heading": "Cómo pensamos las líneas",

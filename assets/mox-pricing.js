@@ -1,5 +1,5 @@
 /**
- * MÖX · Lógica pura de kits y precios (sin DOM).
+ * MOX · Lógica pura de kits y precios (sin DOM).
  *
  * Modelo de datos real del catálogo:
  * - Cada combinación línea + armazón es un producto propio, con handle
@@ -194,7 +194,7 @@ export function applyPercent(total, percent) {
  * en su kit. Las líneas sin `_moxKit` se consideran un kit propio.
  *
  * @param {Array<{ key: string, variant_id: number, handle: string, quantity: number, properties?: Record<string, string> | null, options_with_values?: Array<{ name: string, value: string }>, variant_options?: string[] }>} items
- * @param {Record<string, any>} catalog - Productos normalizados por handle (solo los de MÖX).
+ * @param {Record<string, any>} catalog - Productos normalizados por handle (solo los de MOX).
  * @returns {Array<{ key: string, fromVariant: number, toVariant: number, quantity: number, properties: Record<string, string>, fromTier: number, toTier: number, kitSize: number }>}
  */
 export function planRebalance(items, catalog) {

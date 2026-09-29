@@ -1,6 +1,6 @@
 {%- comment -%}
-  MÖX · Selector de líneas. Los datos de cada línea (nombre, color, cristal,
-  descripción, colección) salen de Configuración del tema → MÖX.
+  MOX · Selector de líneas. Los datos de cada línea (nombre, color, cristal,
+  descripción, colección) salen de Configuración del tema → MOX.
 {%- endcomment -%}
 {%- assign s = section.settings -%}
 <section class="mox-section{% if s.surface %} mox-section--surface{% endif %}" id="lineas" aria-labelledby="mox-lines-{{ section.id }}">
@@ -12,7 +12,7 @@
         {%- if s.text != blank -%}<p class="mox-lead">{{ s.text }}</p>{%- endif -%}
       </div>
     </div>
-    <ul class="mox-lines" role="list">
+    <ul class="mox-lines{% if s.video_cards %} mox-lines--video{% endif %}{% if s.guide %} mox-lines--guide{% endif %}" role="list">
       {%- for n in (1..3) -%}
         {%- liquid
           assign kn = 'mox_line_' | append: n | append: '_name'
@@ -21,6 +21,9 @@
           assign ks = 'mox_line_' | append: n | append: '_summary'
           assign kcol = 'mox_line_' | append: n | append: '_collection'
           assign ki = 'mox_line_' | append: n | append: '_image'
+          assign kv = 'video_' | append: n
+          assign video = s[kv]
+          assign level_key = 'mox_line_' | append: n | append: '_level'
           assign col = settings[kcol]
           assign image = settings[ki]
           if image == blank and col != blank
@@ -35,17 +38,23 @@
         <li>
           <article class="mox-line-card" style="--mox-line-color: {{ settings[kc] }};">
             <span class="mox-line-card__media">
-              {%- if image != blank -%}
+              {%- if s.video_cards and video != blank -%}
+                {{ video | video_tag: image_size: '800x', autoplay: false, loop: true, muted: true, controls: true, preload: 'none', class: 'mox-line-card__video' }}
+              {%- elsif image != blank -%}
                 {{ image | image_url: width: 800 | image_tag: widths: '360, 540, 800', sizes: '(min-width: 750px) 33vw, 100vw', loading: 'lazy', alt: '', width: image.width, height: image.height }}
               {%- endif -%}
             </span>
             <div class="mox-line-card__body">
-              <p class="mox-line-tag mox-line-tag--small"><span class="mox-line-tag__dot" aria-hidden="true"></span>Cristal {{ settings[kl] | downcase }}</p>
+              <p class="mox-line-tag mox-line-tag--small"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ s.lens_label }} {{ settings[kl] | downcase }}</p>
               <h3 class="mox-line-card__name"><a href="{{ url }}">{{ settings[kn] }}</a></h3>
               {%- if settings[ks] != blank -%}<p class="mox-line-card__text">{{ settings[ks] }}</p>{%- endif -%}
+              {%- if s.guide -%}
+                {%- if settings[level_key] != blank -%}<p class="mox-line-card__text">{{ s.level_label }}: {{ settings[level_key] }}</p>{%- endif -%}
+                {%- if s.guide_note != blank -%}<p class="mox-line-card__text">{{ s.guide_note }}</p>{%- endif -%}
+              {%- endif -%}
               <p class="mox-line-card__meta">
-                <span>{% if count > 0 %}{{ count }} {% if count == 1 %}armazón{% else %}armazones{% endif %}{% endif %}</span>
-                <span class="mox-link" aria-hidden="true">Ver {{ settings[kn] }}{% render 'mox-icon', name: 'arrow' %}</span>
+                <span>{% if s.show_count and count > 0 %}{{ count }} {% if count == 1 %}armazón{% else %}armazones{% endif %}{% endif %}</span>
+                <span class="mox-link" aria-hidden="true">{{ s.view_label }} {{ settings[kn] }}{% render 'mox-icon', name: 'arrow' %}</span>
               </p>
             </div>
           </article>
@@ -57,15 +66,99 @@
 
 {% schema %}
 {
-  "name": "Líneas MÖX",
+  "name": "Líneas MOX",
   "tag": "div",
   "settings": [
-    { "type": "paragraph", "content": "Nombre, color, cristal, descripción, imagen y colección de cada línea se editan en Configuración del tema → MÖX." },
-    { "type": "text", "id": "eyebrow", "label": "Antetítulo", "default": "Tres líneas" },
-    { "type": "text", "id": "heading", "label": "Título", "default": "Elegí según el momento del día" },
-    { "type": "textarea", "id": "text", "label": "Texto", "default": "Cada línea se distingue por el color de su cristal. Los armazones se eligen aparte." },
-    { "type": "checkbox", "id": "surface", "label": "Fondo blanco", "default": false }
+    {
+      "type": "paragraph",
+      "content": "Nombre, color, cristal, descripción, imagen y colección de cada línea se editan en Configuración del tema → MOX."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Antetítulo",
+      "default": "Tres líneas"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Elegí según el momento del día"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto",
+      "default": "Cada línea se distingue por el color de su cristal. Los armazones se eligen aparte."
+    },
+    {
+      "type": "checkbox",
+      "id": "surface",
+      "label": "Fondo blanco",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "guide",
+      "label": "Guía con foto e información",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "video_cards",
+      "label": "Tarjetas de video vertical",
+      "default": false
+    },
+    {
+      "type": "video",
+      "id": "video_1",
+      "label": "Video Mañana"
+    },
+    {
+      "type": "video",
+      "id": "video_2",
+      "label": "Video Tarde"
+    },
+    {
+      "type": "video",
+      "id": "video_3",
+      "label": "Video Noche"
+    },
+    {
+      "type": "text",
+      "id": "view_label",
+      "label": "Texto antes del nombre en el enlace",
+      "default": "Ver"
+    },
+    {
+      "type": "text",
+      "id": "lens_label",
+      "label": "Etiqueta del cristal",
+      "default": "Cristal"
+    },
+    {
+      "type": "text",
+      "id": "level_label",
+      "label": "Etiqueta del filtrado",
+      "default": "Filtrado"
+    },
+    {
+      "type": "textarea",
+      "id": "guide_note",
+      "label": "Consejo de la guía",
+      "default": "Elegí tu armazón y combinalo con otras líneas en tu kit."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count",
+      "label": "Mostrar cantidad de armazones",
+      "default": true
+    }
   ],
-  "presets": [{ "name": "Líneas MÖX" }]
+  "presets": [
+    {
+      "name": "Líneas MOX"
+    }
+  ]
 }
 {% endschema %}

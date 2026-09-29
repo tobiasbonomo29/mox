@@ -1,5 +1,5 @@
 {%- comment -%}
-  MÖX · Comparador de líneas. Solo muestra datos verificables: color del
+  MOX · Comparador de líneas. Solo muestra datos verificables: color del
   cristal, momento del día, nivel de filtrado (si se cargó), armazones y
   precios reales de la colección de cada línea.
 {%- endcomment -%}
@@ -67,14 +67,14 @@
         </thead>
         <tbody>
           <tr>
-            <th scope="row">Color del cristal</th>
+            <th scope="row">{{ s.lens_label }}</th>
             {%- for line in lines -%}
               {%- assign c = line | split: '~' -%}
               <td><span class="mox-compare__swatch" style="--mox-line-color: {{ c[2] }};"><span class="mox-compare__lens" aria-hidden="true"></span>{{ c[3] }}</span></td>
             {%- endfor -%}
           </tr>
           <tr>
-            <th scope="row">Para qué momento</th>
+            <th scope="row">{{ s.moment_label }}</th>
             {%- for line in lines -%}
               {%- assign c = line | split: '~' -%}
               <td>{{ c[5] }}</td>
@@ -83,7 +83,7 @@
           {%- assign first = lines.first | split: '~' -%}
           {%- if first[4] != blank -%}
             <tr>
-              <th scope="row">Nivel de filtrado</th>
+              <th scope="row">{{ s.level_label }}</th>
               {%- for line in lines -%}
                 {%- assign c = line | split: '~' -%}
                 <td>{{ c[4] }}</td>
@@ -91,14 +91,14 @@
             </tr>
           {%- endif -%}
           <tr>
-            <th scope="row">Armazones</th>
+            <th scope="row">{{ s.frames_label }}</th>
             {%- for line in lines -%}
               {%- assign c = line | split: '~' -%}
               <td>{{ c[6] }}</td>
             {%- endfor -%}
           </tr>
           <tr>
-            <th scope="row">Precio por anteojo</th>
+            <th scope="row">{{ s.price_label }}</th>
             {%- for line in lines -%}
               {%- assign c = line | split: '~' -%}
               {%- assign single = c[7] | plus: 0 -%}
@@ -110,7 +110,7 @@
             <td></td>
             {%- for line in lines -%}
               {%- assign c = line | split: '~' -%}
-              <td><a class="mox-btn mox-btn--outline" href="{{ c[9] }}">Ver {{ c[1] }}</a></td>
+              <td><a class="mox-btn mox-btn--outline" href="{{ c[9] }}">{{ s.view_label }} {{ c[1] }}</a></td>
             {%- endfor -%}
           </tr>
         </tbody>
@@ -125,22 +125,22 @@
         <li class="mox-compare__card" style="--mox-line-color: {{ c[2] }};">
           <h3>{{ c[1] }}</h3>
           <dl>
-            <dt>Cristal</dt>
+            <dt>{{ s.lens_label }}</dt>
             <dd><span class="mox-compare__swatch"><span class="mox-compare__lens" aria-hidden="true"></span>{{ c[3] }}</span></dd>
-            <dt>Momento</dt>
+            <dt>{{ s.moment_label }}</dt>
             <dd>{{ c[5] }}</dd>
             {%- if c[4] != blank -%}
-              <dt>Filtrado</dt>
+              <dt>{{ s.level_label }}</dt>
               <dd>Nivel {{ c[4] }}</dd>
             {%- endif -%}
-            <dt>Armazones</dt>
+            <dt>{{ s.frames_label }}</dt>
             <dd>{{ c[6] }}</dd>
             {%- if single > 0 -%}
-              <dt>Precio</dt>
+              <dt>{{ s.price_label }}</dt>
               <dd>{{ single | money }}{% if kit < single %} · desde {{ kit | money }} c/u en kit de 3{% endif %}</dd>
             {%- endif -%}
           </dl>
-          <a class="mox-btn mox-btn--outline" href="{{ c[9] }}">Ver {{ c[1] }}</a>
+          <a class="mox-btn mox-btn--outline" href="{{ c[9] }}">{{ s.view_label }} {{ c[1] }}</a>
         </li>
       {%- endfor -%}
     </ul>
@@ -151,16 +151,84 @@
 
 {% schema %}
 {
-  "name": "Comparador MÖX",
+  "name": "Comparador MOX",
   "tag": "div",
   "settings": [
-    { "type": "paragraph", "content": "Los datos salen de Configuración del tema → MÖX y de los productos de cada colección. No agregues porcentajes de filtrado ni beneficios que no estén verificados." },
-    { "type": "text", "id": "eyebrow", "label": "Antetítulo", "default": "Comparar" },
-    { "type": "text", "id": "heading", "label": "Título", "default": "Mañana, Tarde y Noche lado a lado" },
-    { "type": "textarea", "id": "text", "label": "Texto", "default": "Las tres líneas tienen el mismo sistema de kits. Lo que cambia es el color del cristal y el momento del día para el que están pensadas." },
-    { "type": "text", "id": "note", "label": "Nota al pie", "default": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones." },
-    { "type": "checkbox", "id": "surface", "label": "Fondo blanco", "default": true }
+    {
+      "type": "paragraph",
+      "content": "Los datos salen de Configuración del tema → MOX y de los productos de cada colección. No agregues porcentajes de filtrado ni beneficios que no estén verificados."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Antetítulo",
+      "default": "Comparar"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Mañana, Tarde y Noche lado a lado"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto",
+      "default": "Las tres líneas tienen el mismo sistema de kits. Lo que cambia es el color del cristal y el momento del día para el que están pensadas."
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Nota al pie",
+      "default": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones."
+    },
+    {
+      "type": "checkbox",
+      "id": "surface",
+      "label": "Fondo blanco",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "lens_label",
+      "label": "Etiqueta: Cristal",
+      "default": "Cristal"
+    },
+    {
+      "type": "text",
+      "id": "moment_label",
+      "label": "Etiqueta: Momento del día",
+      "default": "Momento del día"
+    },
+    {
+      "type": "text",
+      "id": "level_label",
+      "label": "Etiqueta: Nivel de filtrado",
+      "default": "Nivel de filtrado"
+    },
+    {
+      "type": "text",
+      "id": "frames_label",
+      "label": "Etiqueta: Armazones",
+      "default": "Armazones"
+    },
+    {
+      "type": "text",
+      "id": "price_label",
+      "label": "Etiqueta: Precio por anteojo",
+      "default": "Precio por anteojo"
+    },
+    {
+      "type": "text",
+      "id": "view_label",
+      "label": "Etiqueta: Ver",
+      "default": "Ver"
+    }
   ],
-  "presets": [{ "name": "Comparador MÖX" }]
+  "presets": [
+    {
+      "name": "Comparador MOX"
+    }
+  ]
 }
 {% endschema %}

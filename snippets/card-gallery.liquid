@@ -72,10 +72,6 @@
     --gallery-aspect-ratio: {{ ratio }};
   "
   data-product-id="{{ product.id }}"
-  {% if settings.show_second_image_on_hover %}
-    on:pointerenter="/previewImage"
-    on:pointerleave="/resetImage"
-  {% endif %}
   {% if settings.transition_to_main_product %}
     data-view-transition-to-main-product
   {% endif %}

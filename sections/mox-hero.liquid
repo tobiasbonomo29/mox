@@ -1,6 +1,13 @@
 {%- liquid
   assign s = section.settings
   assign img = s.image
+  capture focal_style
+    echo "object-position: "
+    echo s.focal_x
+    echo "% "
+    echo s.focal_y
+    echo "%;"
+  endcapture
   assign img_mobile = s.image_mobile | default: s.image
 -%}
 <section class="mox-hero" aria-labelledby="mox-hero-{{ section.id }}">
@@ -25,7 +32,7 @@
             loading: 'eager',
             fetchpriority: 'high',
             alt: s.image_alt,
-            style: s.focal_css
+            style: focal_style
         }}
       </picture>
     {%- else -%}
@@ -67,24 +74,108 @@
 
 {% schema %}
 {
-  "name": "Portada MÖX",
+  "name": "Portada MOX",
   "tag": "div",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Antetítulo" },
-    { "type": "text", "id": "heading", "label": "Título (H1)", "default": "Un anteojo para cada momento de tu día." },
-    { "type": "textarea", "id": "text", "label": "Texto", "default": "Conocé las líneas Mañana, Tarde y Noche y elegí la que acompaña tu rutina." },
-    { "type": "text", "id": "cta_label", "label": "Botón principal", "default": "Explorar anteojos" },
-    { "type": "url", "id": "cta_link", "label": "Enlace del botón principal" },
-    { "type": "text", "id": "cta2_label", "label": "Botón secundario", "default": "Comparar líneas" },
-    { "type": "text", "id": "cta2_link", "label": "Enlace del botón secundario", "default": "#comparar", "info": "Ancla al comparador de esta página o una URL." },
-    { "type": "checkbox", "id": "show_lines", "label": "Mostrar las tres líneas", "default": true },
-    { "type": "text", "id": "promo", "label": "Promoción vigente (opcional)", "info": "Solo si existe en Shopify. Se muestra con menor jerarquía que el producto." },
-    { "type": "header", "content": "Imagen" },
-    { "type": "image_picker", "id": "image", "label": "Imagen (escritorio)" },
-    { "type": "image_picker", "id": "image_mobile", "label": "Imagen para celular", "info": "Recorte vertical u horizontal propio para móvil. Si no hay, se usa la de escritorio." },
-    { "type": "text", "id": "image_alt", "label": "Texto alternativo", "default": "Anteojos MÖX sobre un escritorio junto a una computadora" },
-    { "type": "text", "id": "focal_css", "label": "Encuadre (CSS)", "default": "object-position: 60% 50%;", "info": "Ej. object-position: 70% 50%;" }
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Antetítulo"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título (H1)",
+      "default": "Un anteojo para cada momento de tu día."
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto",
+      "default": "Conocé las líneas Mañana, Tarde y Noche y elegí la que acompaña tu rutina."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Botón principal",
+      "default": "Comprar ahora"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Enlace del botón principal"
+    },
+    {
+      "type": "text",
+      "id": "cta2_label",
+      "label": "Botón secundario",
+      "default": "Comparar anteojos"
+    },
+    {
+      "type": "text",
+      "id": "cta2_link",
+      "label": "Enlace del botón secundario",
+      "default": "#comparar",
+      "info": "Ancla al comparador de esta página o una URL."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_lines",
+      "label": "Mostrar las tres líneas",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "promo",
+      "label": "Promoción vigente (opcional)",
+      "info": "Solo si existe en Shopify. Se muestra con menor jerarquía que el producto."
+    },
+    {
+      "type": "header",
+      "content": "Imagen"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagen (escritorio)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Imagen para celular",
+      "info": "Recorte vertical u horizontal propio para móvil. Si no hay, se usa la de escritorio."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Texto alternativo",
+      "default": "Anteojos MOX sobre un escritorio junto a una computadora"
+    },
+    {
+      "type": "range",
+      "id": "focal_x",
+      "label": "Encuadre horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "focal_y",
+      "label": "Encuadre vertical",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 55
+    }
   ],
-  "presets": [{ "name": "Portada MÖX" }]
+  "presets": [
+    {
+      "name": "Portada MOX"
+    }
+  ]
 }
 {% endschema %}

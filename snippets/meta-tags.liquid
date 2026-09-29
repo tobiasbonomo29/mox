@@ -17,10 +17,10 @@
 >
 
 {%- liquid
-  assign og_title = page_title | default: shop.name
+  assign og_title = page_title | default: shop.name | replace: 'MÖX', 'MOX'
   assign og_url = canonical_url | default: request.origin
   assign og_type = 'website'
-  assign og_description = page_description | default: shop.description | default: shop.name
+  assign og_description = page_description | default: shop.description | default: shop.name | replace: 'MÖX', 'MOX'
 
   if request.page_type == 'product'
     assign og_type = 'product'
@@ -33,7 +33,7 @@
 
 <meta
   property="og:site_name"
-  content="{{ shop.name }}"
+  content="{{ shop.name | replace: 'MÖX', 'MOX' }}"
 >
 <meta
   property="og:url"
@@ -102,10 +102,10 @@
 >
 
 <title>
-  {{ page_title }}
+  {{ page_title | replace: 'MÖX', 'MOX' }}
   {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
   {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
-  {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+  {%- unless page_title contains shop.name %} &ndash; {{ shop.name | replace: 'MÖX', 'MOX' }}{% endunless -%}
 </title>
 
 <link

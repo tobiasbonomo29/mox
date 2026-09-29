@@ -65,7 +65,7 @@
             {% for link in menu.links %}
               <li class="menu__item {{ block_settings.link_preset }}">
                 <a href="{{ link.url }}">
-                  {{ link.title }}
+                  {{ link.title | replace: 'MÖX', 'MOX' }}
                 </a>
               </li>
             {% endfor %}

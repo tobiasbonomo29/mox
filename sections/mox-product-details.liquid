@@ -1,5 +1,5 @@
 {%- comment -%}
-  MÖX · Descripción y especificaciones de la ficha.
+  MOX · Descripción y especificaciones de la ficha.
   - Descripción: la del producto en Shopify.
   - Especificaciones: metafields custom.medidas, custom.materiales,
     custom.tecnologia y custom.incluye (texto de varias líneas o texto enriquecido).
@@ -11,6 +11,9 @@
   assign desc = p.description | strip
   assign mf = p.metafields.custom
   assign has_specs = false
+  if s.fallback_medidas != blank or s.fallback_materiales != blank or s.fallback_tecnologia != blank or s.fallback_incluye != blank
+    assign has_specs = true
+  endif
   if mf.medidas != blank or mf.materiales != blank or mf.tecnologia != blank or mf.incluye != blank
     assign has_specs = true
   endif
@@ -23,37 +26,37 @@
         <div class="mox-accordion" style="margin-top: var(--mox-space-5);">
           {%- if desc != blank -%}
             <details open>
-              <summary>Descripción</summary>
+              <summary>{{ s.description_label }}</summary>
               <div class="mox-accordion__content mox-rte">{{ p.description }}</div>
             </details>
           {%- endif -%}
-          {%- if mf.medidas != blank -%}
+          {%- if mf.medidas != blank or s.fallback_medidas != blank -%}
             <details>
-              <summary>Medidas</summary>
-              <div class="mox-accordion__content">{{ mf.medidas | metafield_tag }}</div>
+              <summary>{{ s.measurements_label }}</summary>
+              <div class="mox-accordion__content">{% if mf.medidas != blank %}{{ mf.medidas | metafield_tag }}{% else %}{{ s.fallback_medidas }}{% endif %}</div>
             </details>
           {%- endif -%}
-          {%- if mf.materiales != blank -%}
+          {%- if mf.materiales != blank or s.fallback_materiales != blank -%}
             <details>
-              <summary>Materiales</summary>
-              <div class="mox-accordion__content">{{ mf.materiales | metafield_tag }}</div>
+              <summary>{{ s.materials_label }}</summary>
+              <div class="mox-accordion__content">{% if mf.materiales != blank %}{{ mf.materiales | metafield_tag }}{% else %}{{ s.fallback_materiales }}{% endif %}</div>
             </details>
           {%- endif -%}
-          {%- if mf.tecnologia != blank -%}
+          {%- if mf.tecnologia != blank or s.fallback_tecnologia != blank -%}
             <details>
-              <summary>Cristal y tecnología</summary>
-              <div class="mox-accordion__content">{{ mf.tecnologia | metafield_tag }}</div>
+              <summary>{{ s.technology_label }}</summary>
+              <div class="mox-accordion__content">{% if mf.tecnologia != blank %}{{ mf.tecnologia | metafield_tag }}{% else %}{{ s.fallback_tecnologia }}{% endif %}</div>
             </details>
           {%- endif -%}
-          {%- if mf.incluye != blank -%}
+          {%- if mf.incluye != blank or s.fallback_incluye != blank -%}
             <details>
-              <summary>Qué incluye</summary>
-              <div class="mox-accordion__content">{{ mf.incluye | metafield_tag }}</div>
+              <summary>{{ s.includes_label }}</summary>
+              <div class="mox-accordion__content">{% if mf.incluye != blank %}{{ mf.incluye | metafield_tag }}{% else %}{{ s.fallback_incluye }}{% endif %}</div>
             </details>
           {%- endif -%}
           {%- if settings.mox_shipping_text != blank or settings.mox_returns_text != blank -%}
             <details>
-              <summary>Envío{% if settings.mox_returns_text != blank %} y cambios{% endif %}</summary>
+              <summary>{{ s.shipping_label }}</summary>
               <div class="mox-accordion__content">
                 {%- if settings.mox_shipping_text != blank -%}<p>{{ settings.mox_shipping_text }}.</p>{%- endif -%}
                 {%- if settings.mox_returns_text != blank -%}<p>{{ settings.mox_returns_text }}</p>{%- endif -%}
@@ -68,13 +71,93 @@
 
 {% schema %}
 {
-  "name": "Detalles de producto MÖX",
+  "name": "Detalles de producto MOX",
   "tag": "div",
-  "enabled_on": { "templates": ["product"] },
+  "enabled_on": {
+    "templates": [
+      "product"
+    ]
+  },
   "settings": [
-    { "type": "paragraph", "content": "Descripción del producto y metafields custom.medidas, custom.materiales, custom.tecnologia y custom.incluye. Solo se muestra lo que tiene contenido." },
-    { "type": "text", "id": "heading", "label": "Título", "default": "Detalles" }
+    {
+      "type": "paragraph",
+      "content": "Descripción del producto y metafields custom.medidas, custom.materiales, custom.tecnologia y custom.incluye. Solo se muestra lo que tiene contenido."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Detalles"
+    },
+    {
+      "type": "text",
+      "id": "description_label",
+      "label": "Título: Descripción",
+      "default": "Descripción"
+    },
+    {
+      "type": "text",
+      "id": "measurements_label",
+      "label": "Título: Medidas",
+      "default": "Medidas"
+    },
+    {
+      "type": "text",
+      "id": "materials_label",
+      "label": "Título: Materiales",
+      "default": "Materiales"
+    },
+    {
+      "type": "text",
+      "id": "technology_label",
+      "label": "Título: Cristal y tecnología",
+      "default": "Cristal y tecnología"
+    },
+    {
+      "type": "text",
+      "id": "includes_label",
+      "label": "Título: Qué incluye",
+      "default": "Qué incluye"
+    },
+    {
+      "type": "text",
+      "id": "shipping_label",
+      "label": "Título de envío y cambios",
+      "default": "Envío y cambios"
+    },
+    {
+      "type": "header",
+      "content": "Contenido adicional"
+    },
+    {
+      "type": "paragraph",
+      "content": "Los datos de cada producto se editan en Productos. Estos campos son alternativas cuando el producto no tiene el dato cargado; podés conectarlos a una fuente dinámica."
+    },
+    {
+      "type": "richtext",
+      "id": "fallback_medidas",
+      "label": "Medidas"
+    },
+    {
+      "type": "richtext",
+      "id": "fallback_materiales",
+      "label": "Materiales"
+    },
+    {
+      "type": "richtext",
+      "id": "fallback_tecnologia",
+      "label": "Cristal y tecnología"
+    },
+    {
+      "type": "richtext",
+      "id": "fallback_incluye",
+      "label": "Qué incluye"
+    }
   ],
-  "presets": [{ "name": "Detalles de producto MÖX" }]
+  "presets": [
+    {
+      "name": "Detalles de producto MOX"
+    }
+  ]
 }
 {% endschema %}

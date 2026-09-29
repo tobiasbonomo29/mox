@@ -1,5 +1,5 @@
 {%- comment -%}
-  MÖX · Grilla de productos (destacados o relacionados).
+  MOX · Grilla de productos (destacados o relacionados).
   Fuente: selección manual, una colección, o la misma línea del producto abierto.
 {%- endcomment -%}
 {%- liquid
@@ -41,7 +41,7 @@
     {%- if shown >= s.limit -%}{%- break -%}{%- endif -%}
     {%- if current != blank and item.id == current.id -%}{%- continue -%}{%- endif -%}
     {%- unless item.available or s.show_soldout -%}{%- continue -%}{%- endunless -%}
-    <li>{%- render 'mox-card', product: item -%}</li>
+    <li>{%- render 'mox-card', product: item, cta_label: s.card_cta, show_kit_note: s.show_kit_note -%}</li>
     {%- assign shown = shown | plus: 1 -%}
     {%- assign used = used | append: ',' | append: item.id | append: ',' -%}
   {%- endfor -%}
@@ -53,7 +53,7 @@
     {%- if current != blank and item.id == current.id -%}{%- continue -%}{%- endif -%}
     {%- unless item.handle contains '-armazon-' -%}{%- continue -%}{%- endunless -%}
     {%- unless item.available or s.show_soldout -%}{%- continue -%}{%- endunless -%}
-    <li>{%- render 'mox-card', product: item -%}</li>
+    <li>{%- render 'mox-card', product: item, cta_label: s.card_cta, show_kit_note: s.show_kit_note -%}</li>
     {%- assign shown = shown | plus: 1 -%}
   {%- endfor -%}
 {%- endcapture -%}
@@ -82,33 +82,108 @@
 
 {% schema %}
 {
-  "name": "Productos MÖX",
+  "name": "Productos MOX",
   "tag": "div",
   "class": "mox-product-grid-section",
   "settings": [
-    { "type": "text", "id": "eyebrow", "label": "Antetítulo" },
-    { "type": "text", "id": "heading", "label": "Título", "default": "Elegí tu modelo" },
-    { "type": "textarea", "id": "text", "label": "Texto" },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Antetítulo"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Elegí tu modelo"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto"
+    },
     {
       "type": "select",
       "id": "source",
       "label": "Productos",
       "options": [
-        { "value": "manual", "label": "Selección manual" },
-        { "value": "collection", "label": "Colección" },
-        { "value": "related", "label": "Misma línea del producto (fichas)" }
+        {
+          "value": "manual",
+          "label": "Selección manual"
+        },
+        {
+          "value": "collection",
+          "label": "Colección"
+        },
+        {
+          "value": "related",
+          "label": "Misma línea del producto (fichas)"
+        }
       ],
       "default": "manual"
     },
-    { "type": "product_list", "id": "products", "label": "Productos", "limit": 12 },
-    { "type": "collection", "id": "collection", "label": "Colección" },
-    { "type": "range", "id": "limit", "label": "Cantidad máxima", "min": 2, "max": 12, "step": 1, "default": 4 },
-    { "type": "checkbox", "id": "show_soldout", "label": "Incluir agotados", "default": false },
-    { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver todos" },
-    { "type": "url", "id": "link", "label": "Enlace", "info": "Si está vacío, se usa la colección elegida." },
-    { "type": "checkbox", "id": "surface", "label": "Fondo blanco", "default": false }
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Productos",
+      "limit": 12
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Colección"
+    },
+    {
+      "type": "range",
+      "id": "limit",
+      "label": "Cantidad máxima",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_soldout",
+      "label": "Incluir agotados",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Texto del enlace",
+      "default": "Ver todos"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Enlace",
+      "info": "Si está vacío, se usa la colección elegida."
+    },
+    {
+      "type": "checkbox",
+      "id": "surface",
+      "label": "Fondo blanco",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "card_cta",
+      "label": "Texto del enlace de cada producto",
+      "default": "Ver modelo"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_kit_note",
+      "label": "Mostrar precio del kit en las tarjetas",
+      "default": true
+    }
   ],
-  "presets": [{ "name": "Productos MÖX" }]
+  "presets": [
+    {
+      "name": "Productos MOX"
+    }
+  ]
 }
 {% endschema %}
 

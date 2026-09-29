@@ -1,5 +1,5 @@
 {%- comment -%}
-  MÖX · Tarjeta de producto (imagen 1:1 sin recorte + info de línea y precio).
+  MOX · Tarjeta de producto (imagen 1:1 sin recorte + info de línea y precio).
   @param product {product}
   @param sizes {string} atributo sizes de la imagen
 {%- endcomment -%}
@@ -18,9 +18,12 @@
           width: product.featured_image.width,
           height: product.featured_image.height
       }}
+      {%- if settings.show_second_image_on_hover and product.images[1] != blank -%}
+        {{ product.images[1] | image_url: width: 900 | image_tag: class: 'mox-card__secondary', widths: '300, 450, 600, 900', sizes: sizes, loading: 'lazy', alt: '' }}
+      {%- endif -%}
     {%- else -%}
       {{ 'product-1' | placeholder_svg_tag: 'mox-card__placeholder' }}
     {%- endif -%}
   </a>
-  {%- render 'mox-card-info', product: product -%}
+  {%- render 'mox-card-info', product: product, cta_label: cta_label, show_kit_note: show_kit_note -%}
 </article>

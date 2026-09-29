@@ -13,37 +13,47 @@
       "type": "mox-page",
       "settings": {
         "eyebrow": "Guía",
-        "heading": "Cómo elegir tus anteojos MÖX",
-        "intro": "",
-        "show_content": true
+        "heading": "Cómo elegir tus anteojos MOX",
+        "intro": "Elegí el cristal para tu momento del día y el armazón que va con vos.",
+        "show_content": false
+      }
+    },
+    "mox_compare_G4QJFk": {
+      "type": "mox-compare",
+      "name": "Comparador MOX",
+      "settings": {
+        "eyebrow": "Comparar",
+        "heading": "Mañana, Tarde y Noche lado a lado",
+        "text": "Las tres líneas tienen el mismo sistema de kits. Lo que cambia es el color del cristal y el momento del día para el que están pensadas.",
+        "note": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones.",
+        "surface": true,
+        "lens_label": "Cristal",
+        "moment_label": "Momento del día",
+        "level_label": "Nivel de filtrado",
+        "frames_label": "Armazones",
+        "price_label": "Precio por anteojo",
+        "view_label": "Ver"
       }
     },
     "lines": {
       "type": "mox-lines",
       "settings": {
-        "eyebrow": "Paso 1",
+        "eyebrow": "Tres momentos, tres cristales",
         "heading": "Elegí la línea según el momento del día",
-        "text": "Mañana, Tarde y Noche se distinguen por el color del cristal.",
-        "surface": false
-      }
-    },
-    "compare": {
-      "type": "mox-compare",
-      "settings": {
-        "eyebrow": "Paso 2",
-        "heading": "Compará las diferencias",
-        "text": "",
-        "note": "En los kits de 2 y 3 anteojos podés combinar líneas y armazones.",
-        "surface": true
+        "text": "Podés combinar líneas y armazones en los kits de 2 y 3 anteojos.",
+        "surface": false,
+        "guide": true,
+        "video_cards": true,
+        "video_1": "shopify://files/videos/mox_glasses_motion_1080x1920.mp4",
+        "view_label": "Ver",
+        "lens_label": "Cristal",
+        "level_label": "Filtrado",
+        "guide_note": "Elegí tu armazón y combinalo con otras líneas en tu kit.",
+        "show_count": true
       }
     },
     "faq": {
       "type": "mox-faq",
-      "settings": {
-        "heading": "Dudas frecuentes",
-        "text": "",
-        "open_first": false
-      },
       "blocks": {
         "q1": {
           "type": "question",
@@ -95,13 +105,18 @@
         "q4",
         "q5",
         "q6"
-      ]
+      ],
+      "settings": {
+        "heading": "Dudas frecuentes",
+        "text": "",
+        "open_first": false
+      }
     }
   },
   "order": [
     "main",
+    "mox_compare_G4QJFk",
     "lines",
-    "compare",
     "faq"
   ]
 }
