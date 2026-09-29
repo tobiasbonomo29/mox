@@ -56,6 +56,8 @@ No se borró ni modificó nada existente.
 
 ## Cambios de septiembre 2026
 
+Publicado el 29/09/2026 como **"MOX 2026 - Septiembre"** (#189870178609). El anterior (#189836591409) quedó sin publicar como respaldo: para volver atrás, publicalo desde Tienda online → Temas.
+
 Base: el tema publicado **"MOX 2026 - Actualizado"** (#189836591409), que tenía cambios posteriores al repositorio y se trajo al repo antes de empezar. "Rebel" ya no es el tema publicado.
 
 | Pedido | Qué se hizo |

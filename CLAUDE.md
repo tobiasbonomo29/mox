@@ -10,8 +10,8 @@ The store owner communicates in Spanish (rioplatense, "vos"). Code comments, doc
 
 ## Commands
 
-- `shopify theme dev --store a9pxrx-1g.myshopify.com --theme 189615604017 --store-password <clave>` — local preview at http://127.0.0.1:9292, synced to the **development theme `189615604017`**. The live theme is **"MOX 2026 - Actualizado" (#189836591409)**, not "Rebel" as older docs say. It must not be modified; publish (`shopify theme push`) only after the owner approves.
-- The live theme gets edited outside git (Shopify code editor / theme editor). Before starting work, pull it into a scratch folder (`shopify theme pull --theme 189836591409 --path <tmp>`) and diff against the repo (`diff -rq --strip-trailing-cr`) so newer live changes aren't overwritten.
+- `shopify theme dev --store a9pxrx-1g.myshopify.com --theme 189615604017 --store-password <clave>` — local preview at http://127.0.0.1:9292, synced to the **development theme `189615604017`**. The live theme is **"MOX 2026 - Septiembre" (#189870178609)**; the previous one, "MOX 2026 - Actualizado" (#189836591409), is kept unpublished as rollback. Older docs mention "Rebel". It must not be modified; publish (`shopify theme push`) only after the owner approves.
+- The live theme gets edited outside git (Shopify code editor / theme editor). Before starting work, pull it into a scratch folder (`shopify theme pull --theme 189870178609 --path <tmp>`) and diff against the repo (`diff -rq --strip-trailing-cr`) so newer live changes aren't overwritten.
 - `shopify theme check` — Theme Check lint. Unused legacy blocks carry ~27 pre-existing warnings (see below); don't add new ones.
 - `node --test tests/mox-pricing.test.mjs` — tests for the pure pricing logic (`node --test tests/` fails on Node 24). Single test: add `--test-name-pattern="<nombre>"`.
 
