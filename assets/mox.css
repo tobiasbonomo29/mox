@@ -16,7 +16,7 @@
   --mox-manana: #d8af39;
   --mox-tarde: #b96532;
   --mox-noche: #923d3d;
-  --mox-danger: #9b2c2c;
+  --mox-danger: #c62828;
   --mox-danger-bg: #fbeeee;
   --mox-ok: #2f6b3a;
 
@@ -2046,4 +2046,522 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 .slideshow-control {
   min-width: 28px;
   min-height: 28px;
+}
+
+/* ==========================================================================
+   Cambios de septiembre 2026
+   ========================================================================== */
+
+/* ---------- Ficha: armazón pendiente en rojo ---------- */
+
+.mox-field__control select[aria-invalid='true'] {
+  border-color: var(--mox-danger);
+  box-shadow: 0 0 0 1px var(--mox-danger);
+}
+
+/* ---------- Ficha: envío gratis desde 2 ---------- */
+
+.mox-assurance li[hidden] {
+  display: none;
+}
+
+.mox-tier__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--mox-ok) 12%, #fff);
+  color: var(--mox-ok);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.mox-tier__badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ---------- Certificados ---------- */
+
+.mox-certs {
+  display: grid;
+  gap: var(--mox-space-3);
+}
+
+.mox-certs--compact {
+  padding: var(--mox-space-4);
+  border: 1px solid var(--mox-line);
+  border-radius: var(--mox-radius);
+  background: var(--mox-surface);
+}
+
+.mox-certs__title {
+  display: flex;
+  align-items: center;
+  gap: var(--mox-space-2);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.mox-certs__text {
+  margin: 0;
+  max-width: var(--mox-measure);
+  color: var(--mox-muted);
+  font-size: 0.9375rem;
+}
+
+.mox-certs--empty {
+  border-style: dashed;
+}
+
+.mox-certs__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--mox-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mox-certs--compact .mox-certs__list {
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: var(--mox-space-3);
+}
+
+.mox-cert,
+.mox-cert__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mox-space-2);
+  color: inherit;
+  text-decoration: none;
+}
+
+.mox-cert__media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: var(--mox-space-3);
+  border: 1px solid var(--mox-line);
+  border-radius: var(--mox-radius-sm);
+  background: var(--mox-surface);
+}
+
+.mox-cert__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mox-cert__name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.mox-cert__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mox-cert__link:hover .mox-cert__media {
+  border-color: var(--mox-ink);
+}
+
+/* ---------- Secciones a pantalla completa ---------- */
+
+.mox-full-screen .mox-hero {
+  min-height: calc(100vh - var(--header-group-height, 96px));
+  min-height: calc(100svh - var(--header-group-height, 96px));
+}
+
+.mox-full-screen .mox-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--header-height, 72px));
+  min-height: calc(100svh - var(--header-height, 72px));
+  padding-block: clamp(32px, 6svh, 80px);
+}
+
+.mox-full-screen .mox-section > .mox-container {
+  width: 100%;
+}
+
+@media screen and (max-width: 749px) {
+  .mox-full-screen .mox-hero {
+    min-height: calc(100dvh - var(--header-group-height, 96px));
+  }
+
+  .mox-full-screen .mox-section {
+    min-height: calc(100dvh - var(--header-height, 64px));
+  }
+}
+
+/* ---------- Indicación de deslizar ---------- */
+
+.mox-swipe-hint {
+  margin: var(--mox-space-3) 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--mox-muted);
+}
+
+@media screen and (min-width: 750px) {
+  .mox-swipe-hint--mobile {
+    display: none;
+  }
+}
+
+/* ---------- Líneas: carrusel de videos verticales 9:16 ---------- */
+
+.mox-lines--video {
+  /* Ancho de cada video: entra completo en la pantalla junto al título. */
+  --mox-video-w: min(78vw, 360px, calc((100svh - var(--header-height, 72px) - 290px) * 9 / 16));
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--mox-video-w);
+  grid-template-columns: none;
+  justify-content: safe center;
+  gap: var(--mox-space-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--page-margin, 20px);
+  scrollbar-width: none;
+  margin-inline: calc(var(--page-margin, 20px) * -1);
+  padding-inline: var(--page-margin, 20px);
+}
+
+@media screen and (max-width: 749px) {
+  .mox-lines--video {
+    /* En celular el título ocupa más renglones. */
+    --mox-video-w: min(78vw, calc((100svh - var(--header-height, 64px) - 340px) * 9 / 16));
+  }
+}
+
+.mox-lines--video::-webkit-scrollbar {
+  display: none;
+}
+
+.mox-lines--video > li {
+  scroll-snap-align: center;
+}
+
+.mox-lines--video .mox-line-card {
+  display: grid;
+  border: 0;
+  background: var(--mox-ink);
+}
+
+.mox-lines--video .mox-line-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 2;
+}
+
+.mox-lines--video .mox-line-card__media {
+  grid-area: 1 / 1;
+  position: relative;
+  aspect-ratio: 9 / 16;
+  max-height: none;
+  overflow: hidden;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--mox-line-color) 55%, #fff), var(--mox-line-color));
+}
+
+.mox-lines--video .mox-line-card__video,
+.mox-lines--video .mox-line-card__poster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: transparent;
+}
+
+.mox-line-card__pending {
+  position: absolute;
+  top: var(--mox-space-4);
+  left: var(--mox-space-4);
+  right: var(--mox-space-4);
+  z-index: 1;
+  padding: 4px 8px;
+  border-radius: var(--mox-radius-sm);
+  background: rgb(255 255 255 / 0.9);
+  color: var(--mox-ink);
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.mox-lines--video .mox-line-card__body {
+  grid-area: 1 / 1;
+  align-self: end;
+  position: relative;
+  z-index: 1;
+  gap: 4px;
+  padding: var(--mox-space-7) var(--mox-space-4) var(--mox-space-4);
+  background: linear-gradient(to top, rgb(0 0 0 / 0.72), rgb(0 0 0 / 0));
+  color: #fff;
+}
+
+.mox-lines--video .mox-line-tag--small,
+.mox-lines--video .mox-line-card__meta,
+.mox-lines--video .mox-link {
+  color: #fff;
+}
+
+.mox-lines--video .mox-line-card__text {
+  display: none;
+}
+
+.mox-lines--video .mox-line-card__name {
+  font-size: 1.375rem;
+}
+
+.mox-lines--video .mox-line-card__meta {
+  padding-top: 0;
+}
+
+/* ---------- Tarjetas de cristal ---------- */
+
+.mox-lens-cards {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: min(82vw, 340px);
+  gap: var(--mox-space-4);
+  margin: 0 calc(var(--page-margin, 20px) * -1);
+  padding: 0 var(--page-margin, 20px);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--page-margin, 20px);
+  scrollbar-width: none;
+}
+
+.mox-lens-cards::-webkit-scrollbar {
+  display: none;
+}
+
+.mox-lens-cards > li {
+  scroll-snap-align: center;
+}
+
+@media screen and (min-width: 750px) {
+  .mox-lens-cards {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--mox-space-5);
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+}
+
+.mox-lens-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--mox-line);
+  border-top: 4px solid var(--mox-line-color);
+  border-radius: var(--mox-radius);
+  background: var(--mox-surface);
+  overflow: hidden;
+}
+
+.mox-lens-card__media {
+  display: block;
+  aspect-ratio: 16 / 9;
+  max-height: 20svh;
+  width: 100%;
+  background: color-mix(in srgb, var(--mox-line-color) 8%, #fff);
+}
+
+.mox-lens-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mox-lens-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  padding: var(--mox-space-4) var(--mox-space-5) var(--mox-space-5);
+}
+
+.mox-lens-card__name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.mox-lens-card__name a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mox-lens-card__name a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.mox-lens-card__tag {
+  width: fit-content;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--mox-line-color) 16%, #fff);
+  color: color-mix(in srgb, var(--mox-line-color) 60%, #000);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mox-lens-card__uses {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+}
+
+.mox-lens-card__uses:empty {
+  display: none;
+}
+
+.mox-lens-card__uses li {
+  display: flex;
+  align-items: baseline;
+  gap: var(--mox-space-2);
+}
+
+.mox-lens-card__uses li::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mox-line-color);
+  transform: translateY(-2px);
+}
+
+.mox-lens-card__metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--mox-space-3);
+  margin: var(--mox-space-2) 0 0;
+  padding-top: var(--mox-space-3);
+  border-top: 1px solid var(--mox-line);
+}
+
+.mox-lens-card__metrics dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mox-muted);
+}
+
+.mox-lens-card__metrics dd {
+  margin: 2px 0 0;
+}
+
+.mox-lens-card__metric {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.mox-lens-card__metric--accent {
+  color: color-mix(in srgb, var(--mox-line-color) 80%, #000);
+}
+
+/* Barra de espectro visible (380–700 nm): la parte oscura es lo que bloquea el cristal. */
+.mox-spectrum {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: linear-gradient(
+    to right,
+    #7a00c8 0%,
+    #3b3bff 16%,
+    #00a8ff 30%,
+    #00c28a 40%,
+    #5fd100 50%,
+    #ffe600 61%,
+    #ff9d00 72%,
+    #ff3b00 85%,
+    #b00000 100%
+  );
+}
+
+.mox-spectrum__blocked {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--mox-cut);
+  background: #151515;
+}
+
+.mox-spectrum__mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--mox-cut);
+  width: 2px;
+  background: #fff;
+  transform: translateX(-1px);
+}
+
+.mox-spectrum__scale {
+  display: flex;
+  justify-content: space-between;
+  margin: -6px 0 0;
+  font-size: 0.6875rem;
+  color: var(--mox-muted);
+}
+
+.mox-lens-card__report {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mox-space-2);
+  width: fit-content;
+  margin: auto 0 0;
+  min-height: var(--mox-tap);
+  color: var(--mox-ink);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.mox-lens-card__report-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mox-ok);
+}
+
+.mox-lens-card__pending {
+  color: var(--mox-muted);
+  font-style: italic;
+  font-weight: 400;
 }

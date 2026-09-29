@@ -98,7 +98,7 @@
         "moneyFormat": {{ shop.money_format | json }},
         "currency": {{ cart.currency.iso_code | json }},
         "current": {{ p.handle | json }},
-        "ui": { "missingFrame": {{ s.missing_frame | json }}, "chooseFrame": {{ s.choose_frame | json }}, "chooseAll": {{ s.choose_all | json }}, "scrollToKit": {{ s.scroll_to_kit | json }} },
+        "ui": { "missingFrame": {{ s.missing_frame | json }}, "chooseFrame": {{ s.choose_frame | json }}, "chooseAll": {{ s.choose_all | json }}, "scrollToKit": {{ s.scroll_to_kit | json }}, "priceLabel": {{ s.price_label | json }}, "priceLabelKit": {{ s.price_label_kit | json }} },
         "lines": [
           {%- for n in (1..3) -%}
             {%- liquid
@@ -197,7 +197,7 @@
       assign base_compare = base_variant.compare_at_price | default: 0 | times: initial_tier
     -%}
     <div class="mox-price" aria-live="polite">
-      <p class="mox-price__label" data-mox-price-label>{% if initial_tier > 1 %}Total del kit de {{ initial_tier }}{% else %}Precio{% endif %}</p>
+      <p class="mox-price__label" data-mox-price-label>{% if initial_tier > 1 %}{{ s.price_label_kit }} {{ initial_tier }}{% else %}{{ s.price_label }}{% endif %}</p>
       <div class="mox-price__row">
         <span class="mox-price__current" data-mox-price>{{ base_total | money }}</span>
         <s class="mox-price__compare" data-mox-compare {% unless base_compare > base_total %}hidden{% endunless %}>
@@ -365,6 +365,7 @@
                 {%- assign tier_label_key = 'tier_' | append: t | append: '_label' -%}
                 <span class="mox-tier__name">{{ s[tier_label_key] }}</span>
                 <span class="mox-tier__note">{% if t == 1 %}{{ s.single_note }}{% else %}{{ s.kit_note }}{% endif %}{% unless tv.available %} · agotado{% endunless %}</span>
+                {%- if t > 1 and s.kit_badge != blank -%}<span class="mox-tier__badge">{% render 'mox-icon', name: 'truck' %}{{ s.kit_badge }}</span>{%- endif -%}
               </span>
               <span class="mox-tier__prices">
                 <span class="mox-tier__unit">{{ tv.price | money }} <small>c/u</small></span>
@@ -417,9 +418,17 @@
       <p class="visually-hidden" aria-live="polite" data-mox-live></p>
     </form>
 
+    {%- if s.show_certificates -%}
+      {%- render 'mox-certificates', compact: true -%}
+    {%- endif -%}
+
     <ul class="mox-assurance">
+      {%- comment -%} El envío gratis es desde 2 anteojos: el texto cambia con la opción elegida. {%- endcomment -%}
+      {%- if settings.mox_shipping_text_single != blank -%}
+        <li data-mox-ship="single" {% if initial_tier > 1 %}hidden{% endif %}>{% render 'mox-icon', name: 'truck' %}<span>{{ settings.mox_shipping_text_single }}</span></li>
+      {%- endif -%}
       {%- if settings.mox_shipping_text != blank -%}
-        <li>{% render 'mox-icon', name: 'truck' %}<span>{{ settings.mox_shipping_text }}</span></li>
+        <li data-mox-ship="kit" {% if initial_tier < 2 %}hidden{% endif %}>{% render 'mox-icon', name: 'truck' %}<span>{{ settings.mox_shipping_text }}</span></li>
       {%- endif -%}
       {%- if settings.mox_returns_text != blank -%}
         <li>{% render 'mox-icon', name: 'return' %}<span>{{ settings.mox_returns_text }}</span></li>
@@ -524,6 +533,33 @@
       "id": "kit_note",
       "label": "Aclaración del kit",
       "default": "Elegí la línea y el armazón de cada uno"
+    },
+    {
+      "type": "text",
+      "id": "kit_badge",
+      "label": "Etiqueta de las opciones de 2 y 3",
+      "default": "Envío gratis",
+      "info": "Vacío = no se muestra. Solo si el descuento de envío con mínimo de 2 artículos está activo."
+    },
+    {
+      "type": "text",
+      "id": "price_label",
+      "label": "Texto sobre el precio (1 anteojo)",
+      "default": "Precio"
+    },
+    {
+      "type": "text",
+      "id": "price_label_kit",
+      "label": "Texto sobre el precio (2 o 3 anteojos)",
+      "default": "Precio llevando",
+      "info": "Se completa con la cantidad: \"Precio llevando 2\"."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_certificates",
+      "label": "Mostrar certificados debajo del botón",
+      "default": true,
+      "info": "Se cargan en Configuración del tema → MOX · Certificados."
     },
     {
       "type": "text",

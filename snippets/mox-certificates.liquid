@@ -1,0 +1,67 @@
+{%- comment -%}
+  MOX · Certificados de los cristales. El contenido sale de Configuración del
+  tema → MOX · Certificados, así la ficha y la sección muestran lo mismo.
+  Sin certificados cargados no se muestra nada en la tienda (en el editor se
+  muestra un aviso para completarlos).
+
+  @param compact {boolean} - Versión reducida para debajo del botón de compra.
+  @param hide_heading {boolean} - Opcional. No muestra el título (la sección ya tiene el suyo).
+  @param text {string} - Opcional. Reemplaza el texto configurado.
+{%- endcomment -%}
+{%- liquid
+  assign cert_count = 0
+  for n in (1..3)
+    assign ki = 'mox_cert_' | append: n | append: '_image'
+    assign kn = 'mox_cert_' | append: n | append: '_name'
+    if settings[ki] != blank or settings[kn] != blank
+      assign cert_count = cert_count | plus: 1
+    endif
+  endfor
+  assign cert_heading = settings.mox_cert_title
+  if hide_heading
+    assign cert_heading = ''
+  endif
+  assign cert_text = text | default: settings.mox_cert_text
+-%}
+
+{%- if cert_count > 0 -%}
+  <div class="mox-certs{% if compact %} mox-certs--compact{% endif %}">
+    {%- if cert_heading != blank -%}
+      {%- if compact -%}
+        <p class="mox-certs__title">{% render 'mox-icon', name: 'check' %}{{ cert_heading }}</p>
+      {%- else -%}
+        <h3 class="mox-certs__title">{{ cert_heading }}</h3>
+      {%- endif -%}
+    {%- endif -%}
+    {%- if cert_text != blank -%}<p class="mox-certs__text">{{ cert_text }}</p>{%- endif -%}
+    <ul class="mox-certs__list" role="list">
+      {%- for n in (1..3) -%}
+        {%- liquid
+          assign ki = 'mox_cert_' | append: n | append: '_image'
+          assign kn = 'mox_cert_' | append: n | append: '_name'
+          assign kl = 'mox_cert_' | append: n | append: '_link'
+          assign image = settings[ki]
+          assign name = settings[kn]
+          assign link = settings[kl]
+        -%}
+        {%- if image != blank or name != blank -%}
+          <li class="mox-cert">
+            {%- if link != blank -%}<a class="mox-cert__link" href="{{ link }}" target="_blank" rel="noopener">{%- endif -%}
+            {%- if image != blank -%}
+              <span class="mox-cert__media">
+                {{ image | image_url: width: 240 | image_tag: widths: '120, 240', sizes: '120px', loading: 'lazy', alt: image.alt | default: name }}
+              </span>
+            {%- endif -%}
+            {%- if name != blank -%}<span class="mox-cert__name">{{ name }}</span>{%- endif -%}
+            {%- if link != blank -%}<span class="mox-cert__cta">Ver documento{% render 'mox-icon', name: 'arrow' %}</span></a>{%- endif -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+{%- elsif request.design_mode -%}
+  <div class="mox-certs mox-certs--empty{% if compact %} mox-certs--compact{% endif %}">
+    <p class="mox-certs__title">{{ settings.mox_cert_title | default: 'Certificados' }}</p>
+    <p class="mox-certs__text">Cargá los certificados en Configuración del tema → MOX · Certificados. Este aviso solo se ve en el editor.</p>
+  </div>
+{%- endif -%}

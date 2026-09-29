@@ -54,7 +54,32 @@ No se borró ni modificó nada existente.
 - Plazos de entrega, horario de atención y política de cambios.
 - Fotografías reales de producto y de uso: las actuales parecen generadas por IA (archivos "ChatGPT_Image…"). Para el hero, conviene cargar además un recorte vertical para celular.
 
+## Cambios de septiembre 2026
+
+Base: el tema publicado **"MOX 2026 - Actualizado"** (#189836591409), que tenía cambios posteriores al repositorio y se trajo al repo antes de empezar. "Rebel" ya no es el tema publicado.
+
+| Pedido | Qué se hizo |
+|---|---|
+| "Falta elegir armazón" en rojo | El aviso y el borde del selector de armazón se muestran en rojo (`aria-invalid`) hasta que se elija uno. |
+| Texto sobre el precio | "Precio llevando 2" / "Precio llevando 3" (con 1: "Precio"). Editable en el bloque Compra MOX. |
+| Secciones a pantalla completa | Cada sección MOX ocupa al menos el alto de la pantalla (portada sin tope de 760 px). Se desactiva en MOX · Diseño. |
+| Videos en la segunda sección | Carrusel de videos 9:16 con reproducción automática, sin sonido, en bucle y `playsinline`, con "Ver Mañana/Tarde/Noche →" y "Deslizá para ver más →". Sin video se muestra la foto de la línea. Los videos se cargan en Personalizar → Líneas MOX. |
+| Envío gratis desde 2 | La ficha muestra "Envío gratis llevando 2 o más" con 1 anteojo, y el texto de envío gratis y la etiqueta "Envío gratis" con 2 y 3. También se corrigieron las preguntas frecuentes y el acordeón "Detalles". |
+| Certificados | Bloque debajo de "Agregar al carrito" y sección "Certificados MOX" en Cómo elegir. Se cargan en Configuración del tema → MOX · Certificados. Sin certificados cargados no se muestra nada. |
+| Tarjetas estilo NoMercy | Sección "Cristales MOX" (portada y Cómo elegir): borde y etiqueta del color del cristal, usos, luz azul (%), corte (nm), barra de espectro 380–700 nm e informe de laboratorio. Los datos se cargan en Configuración del tema → MOX → cada línea ("Tarjeta de cristal · …"). Lo vacío no se muestra. |
+
+Pendiente de MOX o del Admin:
+
+- **Acceso de chanchi con permisos completos.** Configuración → Usuarios → Agregar usuarios. Tiene que agregarlo el propietario de la tienda con todos los permisos. Si es colaborador de una agencia, tiene que pedir acceso desde su Partner Dashboard y el propietario lo aprueba con todos los permisos. Si ya tiene cuenta y no puede editar algunas cosas, el propietario tiene que abrir su usuario en Configuración → Usuarios y marcar todos los permisos. Algunas funciones solo las puede usar el propietario, por ejemplo transferir la tienda o ver ciertos datos de facturación.
+- **Descuento de envío gratis.** Editar el descuento automático "MOX - descuentos" (o crear uno de envío gratis) con requisito mínimo **2 artículos**. Sin esto, Shopify sigue cobrando igual que antes, aunque el tema ya diga lo correcto.
+- **Datos de las tarjetas de cristal:** uso, usos, % de luz azul, nm de corte e informe (PDF en Contenido → Archivos).
+- **Certificados:** imágenes, nombres y documentos.
+- **Videos** de cada línea (9:16).
+- **Texto debajo del precio (punto 4):** el cliente todavía no definió qué cambiar.
+
 ## Limitaciones conocidas
+
+- "Pantalla completa" garantiza el alto mínimo. Las secciones con mucho contenido (grilla de productos, comparador y preguntas frecuentes en celular, ficha de producto) siguen siendo más altas que la pantalla.
 
 - El precio por kit depende de variantes y del recálculo desde el tema. Un cambio hecho fuera del tema, como una API externa o una app, se corrige recién en la próxima carga de una página de la tienda. Para una regla que no dependa del navegador, la opción robusta es una función de descuento de Shopify o bundles nativos.
 - Dos unidades del mismo producto agregadas por separado se unen en una línea con cantidad 2 y pasan al precio de "Llevando 2". Dos productos distintos agregados por separado no forman un kit.

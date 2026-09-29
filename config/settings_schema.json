@@ -119,6 +119,36 @@
         "info": "Opcional. Si no hay, se usa la foto del primer producto de la colección."
       },
       {
+        "type": "text",
+        "id": "mox_line_1_use_tag",
+        "label": "Tarjeta de cristal · Uso",
+        "info": "Etiqueta corta con el momento de uso. Vacío = no se muestra."
+      },
+      {
+        "type": "textarea",
+        "id": "mox_line_1_uses",
+        "label": "Tarjeta de cristal · Usos recomendados",
+        "info": "Uno por renglón (hasta 3)."
+      },
+      {
+        "type": "number",
+        "id": "mox_line_1_blue_light",
+        "label": "Tarjeta de cristal · Luz azul bloqueada (%)",
+        "info": "Dato del informe de laboratorio. Vacío = se oculta."
+      },
+      {
+        "type": "number",
+        "id": "mox_line_1_cutoff",
+        "label": "Tarjeta de cristal · Corte total (nm)",
+        "info": "Longitud de onda hasta la que bloquea. Define la barra de espectro. Vacío = se oculta."
+      },
+      {
+        "type": "url",
+        "id": "mox_line_1_report",
+        "label": "Tarjeta de cristal · Informe de laboratorio",
+        "info": "Subí el PDF en Contenido → Archivos y pegá el enlace. Vacío = se oculta el enlace."
+      },
+      {
         "type": "header",
         "content": "Línea 2"
       },
@@ -172,6 +202,36 @@
         "id": "mox_line_2_image",
         "label": "Imagen",
         "info": "Opcional. Si no hay, se usa la foto del primer producto de la colección."
+      },
+      {
+        "type": "text",
+        "id": "mox_line_2_use_tag",
+        "label": "Tarjeta de cristal · Uso",
+        "info": "Etiqueta corta con el momento de uso. Vacío = no se muestra."
+      },
+      {
+        "type": "textarea",
+        "id": "mox_line_2_uses",
+        "label": "Tarjeta de cristal · Usos recomendados",
+        "info": "Uno por renglón (hasta 3)."
+      },
+      {
+        "type": "number",
+        "id": "mox_line_2_blue_light",
+        "label": "Tarjeta de cristal · Luz azul bloqueada (%)",
+        "info": "Dato del informe de laboratorio. Vacío = se oculta."
+      },
+      {
+        "type": "number",
+        "id": "mox_line_2_cutoff",
+        "label": "Tarjeta de cristal · Corte total (nm)",
+        "info": "Longitud de onda hasta la que bloquea. Define la barra de espectro. Vacío = se oculta."
+      },
+      {
+        "type": "url",
+        "id": "mox_line_2_report",
+        "label": "Tarjeta de cristal · Informe de laboratorio",
+        "info": "Subí el PDF en Contenido → Archivos y pegá el enlace. Vacío = se oculta el enlace."
       },
       {
         "type": "header",
@@ -229,15 +289,52 @@
         "info": "Opcional. Si no hay, se usa la foto del primer producto de la colección."
       },
       {
+        "type": "text",
+        "id": "mox_line_3_use_tag",
+        "label": "Tarjeta de cristal · Uso",
+        "info": "Etiqueta corta con el momento de uso. Vacío = no se muestra."
+      },
+      {
+        "type": "textarea",
+        "id": "mox_line_3_uses",
+        "label": "Tarjeta de cristal · Usos recomendados",
+        "info": "Uno por renglón (hasta 3)."
+      },
+      {
+        "type": "number",
+        "id": "mox_line_3_blue_light",
+        "label": "Tarjeta de cristal · Luz azul bloqueada (%)",
+        "info": "Dato del informe de laboratorio. Vacío = se oculta."
+      },
+      {
+        "type": "number",
+        "id": "mox_line_3_cutoff",
+        "label": "Tarjeta de cristal · Corte total (nm)",
+        "info": "Longitud de onda hasta la que bloquea. Define la barra de espectro. Vacío = se oculta."
+      },
+      {
+        "type": "url",
+        "id": "mox_line_3_report",
+        "label": "Tarjeta de cristal · Informe de laboratorio",
+        "info": "Subí el PDF en Contenido → Archivos y pegá el enlace. Vacío = se oculta el enlace."
+      },
+      {
         "type": "header",
         "content": "Condiciones de compra"
       },
       {
         "type": "text",
         "id": "mox_shipping_text",
-        "label": "Envío",
+        "label": "Envío llevando 2 o más",
         "default": "Envío gratis a todo el país",
-        "info": "Verificado: descuento automático de envío gratis \"MOX - descuentos\" activo. Vacío = no se muestra."
+        "info": "Se muestra al elegir 2 o 3 anteojos. Requiere un descuento automático de envío gratis con mínimo de 2 artículos. Vacío = no se muestra."
+      },
+      {
+        "type": "text",
+        "id": "mox_shipping_text_single",
+        "label": "Envío llevando 1",
+        "default": "Envío gratis llevando 2 o más",
+        "info": "Se muestra al elegir 1 anteojo. No prometas envío gratis para 1 unidad. Vacío = no se muestra."
       },
       {
         "type": "checkbox",
@@ -341,8 +438,96 @@
         "default": 12
       },
       {
+        "type": "checkbox",
+        "id": "mox_full_screen",
+        "label": "Secciones a pantalla completa",
+        "default": true,
+        "info": "Cada sección MOX ocupa al menos el alto de la pantalla, como la portada."
+      },
+      {
         "type": "paragraph",
         "content": "La tipografía, el logo y los colores del encabezado se editan en sus apartados generales del tema."
+      }
+    ]
+  },
+  {
+    "name": "MOX · Certificados",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Se muestran debajo de \"Agregar al carrito\" y en la sección \"Certificados MOX\". Sin certificados cargados no se muestra nada en la tienda."
+      },
+      {
+        "type": "text",
+        "id": "mox_cert_title",
+        "label": "Título",
+        "default": "Cristales certificados"
+      },
+      {
+        "type": "textarea",
+        "id": "mox_cert_text",
+        "label": "Texto",
+        "info": "Qué certifica y quién lo emite. Solo información verificada."
+      },
+      {
+        "type": "header",
+        "content": "Certificado 1"
+      },
+      {
+        "type": "image_picker",
+        "id": "mox_cert_1_image",
+        "label": "Imagen o sello"
+      },
+      {
+        "type": "text",
+        "id": "mox_cert_1_name",
+        "label": "Nombre"
+      },
+      {
+        "type": "url",
+        "id": "mox_cert_1_link",
+        "label": "Enlace al documento",
+        "info": "PDF subido en Contenido → Archivos."
+      },
+      {
+        "type": "header",
+        "content": "Certificado 2"
+      },
+      {
+        "type": "image_picker",
+        "id": "mox_cert_2_image",
+        "label": "Imagen o sello"
+      },
+      {
+        "type": "text",
+        "id": "mox_cert_2_name",
+        "label": "Nombre"
+      },
+      {
+        "type": "url",
+        "id": "mox_cert_2_link",
+        "label": "Enlace al documento",
+        "info": "PDF subido en Contenido → Archivos."
+      },
+      {
+        "type": "header",
+        "content": "Certificado 3"
+      },
+      {
+        "type": "image_picker",
+        "id": "mox_cert_3_image",
+        "label": "Imagen o sello"
+      },
+      {
+        "type": "text",
+        "id": "mox_cert_3_name",
+        "label": "Nombre"
+      },
+      {
+        "type": "url",
+        "id": "mox_cert_3_link",
+        "label": "Enlace al documento",
+        "info": "PDF subido en Contenido → Archivos."
       }
     ]
   },

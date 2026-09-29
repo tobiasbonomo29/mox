@@ -171,7 +171,7 @@
           "type": "question",
           "settings": {
             "question": "¿Cuánto cuesta el envío?",
-            "answer": "<p>El envío es gratis a todo el país.</p>"
+            "answer": "<p>El envío es gratis llevando 2 anteojos o más. Si llevás 1, el costo de envío se calcula en el checkout.</p>"
           }
         }
       },

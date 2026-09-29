@@ -58,7 +58,7 @@
             <details>
               <summary>{{ s.shipping_label }}</summary>
               <div class="mox-accordion__content">
-                {%- if settings.mox_shipping_text != blank -%}<p>{{ settings.mox_shipping_text }}.</p>{%- endif -%}
+                {%- if settings.mox_shipping_text != blank -%}<p>{{ settings.mox_shipping_text }} llevando 2 anteojos o más.{% if settings.mox_shipping_text_single != blank %} Con 1 anteojo, el envío se calcula en el checkout.{% endif %}</p>{%- endif -%}
                 {%- if settings.mox_returns_text != blank -%}<p>{{ settings.mox_returns_text }}</p>{%- endif -%}
               </div>
             </details>

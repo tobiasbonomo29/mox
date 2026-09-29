@@ -51,7 +51,7 @@
   </head>
 
   <body
-    class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if settings.mox_whatsapp_managed %} mox-wa-managed{% endif %}"
+    class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}{% if settings.mox_whatsapp_managed %} mox-wa-managed{% endif %}{% if settings.mox_full_screen %} mox-full-screen{% endif %}"
     data-cart-count="{{ cart.item_count }}"
   >
     {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}

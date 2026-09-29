@@ -1,0 +1,218 @@
+{%- comment -%}
+  MOX · Tarjetas de cristal (Mañana / Tarde / Noche) con uso, usos recomendados,
+  métricas de laboratorio y barra de espectro. Los datos salen de Configuración
+  del tema → MOX (campos "Tarjeta de cristal" de cada línea). Lo que esté vacío
+  no se muestra en la tienda; en el editor se marca como pendiente.
+{%- endcomment -%}
+{%- liquid
+  assign s = section.settings
+  comment
+    Rango visible de la barra de espectro, en nm.
+  endcomment
+  assign spectrum_min = 380
+  assign spectrum_max = 700
+  assign spectrum_span = spectrum_max | minus: spectrum_min
+-%}
+<section class="mox-section{% if s.surface %} mox-section--surface{% endif %}" id="cristales" aria-labelledby="mox-lens-{{ section.id }}">
+  <div class="mox-container">
+    <div class="mox-section__head">
+      <div>
+        {%- if s.eyebrow != blank -%}<p class="mox-eyebrow">{{ s.eyebrow }}</p>{%- endif -%}
+        <h2 class="mox-heading" id="mox-lens-{{ section.id }}">{{ s.heading }}</h2>
+        {%- if s.text != blank -%}<p class="mox-lead">{{ s.text }}</p>{%- endif -%}
+      </div>
+    </div>
+    <ul class="mox-lens-cards" role="list">
+      {%- for n in (1..3) -%}
+        {%- liquid
+          assign prefix = 'mox_line_' | append: n
+          assign k = prefix | append: '_name'
+          assign name = settings[k]
+          assign k = prefix | append: '_color'
+          assign color = settings[k]
+          assign k = prefix | append: '_lens'
+          assign lens = settings[k]
+          assign k = prefix | append: '_use_tag'
+          assign use_tag = settings[k]
+          assign k = prefix | append: '_uses'
+          assign uses = settings[k] | newline_to_br | split: '<br />'
+          assign k = prefix | append: '_blue_light'
+          assign blue = settings[k]
+          assign k = prefix | append: '_cutoff'
+          assign cutoff = settings[k]
+          assign k = prefix | append: '_report'
+          assign report = settings[k]
+          assign k = prefix | append: '_collection'
+          assign col = settings[k]
+          assign k = prefix | append: '_image'
+          assign image = settings[k]
+          if image == blank and col != blank
+            assign image = col.products.first.featured_image
+          endif
+          assign url = routes.all_products_collection_url
+          if col != blank
+            assign url = col.url
+          endif
+        -%}
+        <li>
+          <article class="mox-lens-card" style="--mox-line-color: {{ color }};">
+            {%- if s.show_image -%}
+              <span class="mox-lens-card__media">
+                {%- if image != blank -%}
+                  {{ image | image_url: width: 720 | image_tag: widths: '360, 540, 720', sizes: '(min-width: 750px) 33vw, 85vw', loading: 'lazy', alt: '', width: image.width, height: image.height }}
+                {%- endif -%}
+              </span>
+            {%- endif -%}
+            <div class="mox-lens-card__body">
+              <h3 class="mox-lens-card__name"><a href="{{ url }}">{{ s.title_prefix }} {{ name }}</a></h3>
+              {%- if use_tag != blank -%}
+                <p class="mox-lens-card__tag">{{ use_tag }}</p>
+              {%- elsif request.design_mode -%}
+                <p class="mox-lens-card__tag mox-lens-card__pending">Uso pendiente</p>
+              {%- endif -%}
+              <p class="mox-line-tag mox-line-tag--small"><span class="mox-line-tag__dot" aria-hidden="true"></span>{{ s.lens_label }} {{ lens | downcase }}</p>
+
+              {%- assign uses_shown = 0 -%}
+              <ul class="mox-lens-card__uses">
+                {%- for use in uses limit: 3 -%}
+                  {%- assign use_text = use | strip -%}
+                  {%- if use_text != blank -%}
+                    {%- assign uses_shown = uses_shown | plus: 1 -%}
+                    <li>{{ use_text }}</li>
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- if uses_shown == 0 and request.design_mode -%}
+                  <li class="mox-lens-card__pending">Usos recomendados pendientes</li>
+                {%- endif -%}
+              </ul>
+
+              {%- if blue != blank or cutoff != blank or request.design_mode -%}
+                <dl class="mox-lens-card__metrics">
+                  {%- if blue != blank or request.design_mode -%}
+                    <div>
+                      <dt>{{ s.blue_label }}</dt>
+                      <dd class="mox-lens-card__metric mox-lens-card__metric--accent">{% if blue != blank %}{{ blue }}%{% else %}<span class="mox-lens-card__pending">—</span>{% endif %}</dd>
+                    </div>
+                  {%- endif -%}
+                  {%- if cutoff != blank or request.design_mode -%}
+                    <div>
+                      <dt>{{ s.cutoff_label }}</dt>
+                      <dd class="mox-lens-card__metric">{% if cutoff != blank %}{{ cutoff }} nm{% else %}<span class="mox-lens-card__pending">—</span>{% endif %}</dd>
+                    </div>
+                  {%- endif -%}
+                </dl>
+              {%- endif -%}
+
+              {%- if cutoff != blank -%}
+                {%- liquid
+                  assign cut_pct = cutoff | minus: spectrum_min | times: 100.0 | divided_by: spectrum_span | at_least: 0 | at_most: 100 | round: 1
+                -%}
+                <div class="mox-spectrum" role="img" aria-label="{{ s.spectrum_label }} {{ cutoff }} nm" style="--mox-cut: {{ cut_pct }}%;">
+                  <span class="mox-spectrum__blocked" aria-hidden="true"></span>
+                  <span class="mox-spectrum__mark" aria-hidden="true"></span>
+                </div>
+                <p class="mox-spectrum__scale" aria-hidden="true"><span>{{ spectrum_min }} nm</span><span>{{ spectrum_max }} nm</span></p>
+              {%- endif -%}
+
+              {%- if report != blank -%}
+                <a class="mox-lens-card__report" href="{{ report }}" target="_blank" rel="noopener"><span class="mox-lens-card__report-dot" aria-hidden="true"></span>{{ s.report_label }}</a>
+              {%- elsif request.design_mode -%}
+                <p class="mox-lens-card__report mox-lens-card__pending">Informe de laboratorio pendiente</p>
+              {%- endif -%}
+            </div>
+          </article>
+        </li>
+      {%- endfor -%}
+    </ul>
+    {%- if s.swipe_hint != blank -%}<p class="mox-swipe-hint mox-swipe-hint--mobile" aria-hidden="true">{{ s.swipe_hint }}</p>{%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Cristales MOX",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Uso, usos recomendados, luz azul, corte (nm) e informe de laboratorio de cada línea se cargan en Configuración del tema → MOX. Lo que esté vacío no se muestra en la tienda."
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Antetítulo",
+      "default": "Tres cristales"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Qué filtra cada cristal"
+    },
+    {
+      "type": "textarea",
+      "id": "text",
+      "label": "Texto"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Mostrar imagen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title_prefix",
+      "label": "Texto antes del nombre de la línea",
+      "default": "Línea"
+    },
+    {
+      "type": "text",
+      "id": "lens_label",
+      "label": "Etiqueta del cristal",
+      "default": "Cristal"
+    },
+    {
+      "type": "text",
+      "id": "blue_label",
+      "label": "Etiqueta de luz azul",
+      "default": "Luz azul"
+    },
+    {
+      "type": "text",
+      "id": "cutoff_label",
+      "label": "Etiqueta del corte",
+      "default": "Corte total"
+    },
+    {
+      "type": "text",
+      "id": "spectrum_label",
+      "label": "Descripción de la barra (lectores de pantalla)",
+      "default": "Bloquea la luz hasta"
+    },
+    {
+      "type": "text",
+      "id": "report_label",
+      "label": "Texto del informe",
+      "default": "Ver informe de laboratorio"
+    },
+    {
+      "type": "text",
+      "id": "swipe_hint",
+      "label": "Indicación de deslizar (celular)",
+      "default": "Deslizá para ver más →"
+    },
+    {
+      "type": "checkbox",
+      "id": "surface",
+      "label": "Fondo blanco",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cristales MOX"
+    }
+  ]
+}
+{% endschema %}

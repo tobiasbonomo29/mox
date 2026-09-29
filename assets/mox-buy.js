@@ -250,11 +250,15 @@ class MoxBuy extends HTMLElement {
         }
       }
 
+      if (handle) frameSelect.removeAttribute('aria-invalid');
+      else frameSelect.setAttribute('aria-invalid', 'true');
+
       const status = el.querySelector('[data-mox-unit-status]');
       if (status) {
         if (!handle) {
+          // Sin armazón elegido el aviso se muestra como error (rojo) hasta que se elija uno.
           status.textContent = line ? (this.ui.missingFrame ?? 'Falta elegir armazón.') : 'Elegí una línea.';
-          status.classList.remove('is-warning');
+          status.classList.add('is-warning');
         } else {
           const variant = variantForTier(this.catalog[handle], tier);
           status.textContent = variant ? `${this.#money(variant.price)} por unidad` : 'No disponible en este kit';
@@ -277,7 +281,13 @@ class MoxBuy extends HTMLElement {
     const compare = complete ? result.compareTotal : fallback && fallback.compareAtPrice > fallback.price ? fallback.compareAtPrice * tier : total;
 
     if (priceEl) priceEl.textContent = this.#money(total);
-    if (labelEl) labelEl.textContent = tier > 1 ? `Total del kit de ${tier}` : 'Precio';
+    if (labelEl) {
+      labelEl.textContent = tier > 1 ? `${this.ui.priceLabelKit ?? 'Precio llevando'} ${tier}` : this.ui.priceLabel ?? 'Precio';
+    }
+    // El envío gratis es desde 2 anteojos.
+    for (const el of this.querySelectorAll('[data-mox-ship]')) {
+      /** @type {HTMLElement} */ (el).hidden = (el.getAttribute('data-mox-ship') === 'kit') !== tier > 1;
+    }
     if (compareEl) {
       compareEl.hidden = !(compare > total);
       compareEl.textContent = compare > total ? this.#money(compare) : '';

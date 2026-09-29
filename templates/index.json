@@ -40,7 +40,8 @@
         "lens_label": "Cristal",
         "level_label": "Filtrado",
         "guide_note": "Elegí tu armazón y combinalo con otras líneas en tu kit.",
-        "show_count": true
+        "show_count": true,
+        "swipe_hint": "Deslizá para ver más →"
       }
     },
     "compare": {
@@ -138,7 +139,7 @@
           "type": "question",
           "settings": {
             "question": "¿Cuánto cuesta el envío?",
-            "answer": "<p>El envío es gratis a todo el país.</p>"
+            "answer": "<p>El envío es gratis llevando 2 anteojos o más. Si llevás 1, el costo de envío se calcula en el checkout.</p>"
           }
         },
         "q6": {
@@ -161,11 +162,16 @@
         "text": "",
         "open_first": false
       }
+    },
+    "lens_cards": {
+      "type": "mox-lens-cards",
+      "settings": {}
     }
   },
   "order": [
     "hero",
     "lines",
+    "lens_cards",
     "compare",
     "featured",
     "editorial",

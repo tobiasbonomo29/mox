@@ -38,8 +38,19 @@
         <li>
           <article class="mox-line-card" style="--mox-line-color: {{ settings[kc] }};">
             <span class="mox-line-card__media">
-              {%- if s.video_cards and video != blank -%}
-                {{ video | video_tag: image_size: '800x', autoplay: false, loop: true, muted: true, controls: true, preload: 'none', class: 'mox-line-card__video' }}
+              {%- if s.video_cards -%}
+                {%- comment -%}
+                  Video vertical 9:16 a tamaño completo. Mientras no haya video se usa la
+                  foto de la línea como marcador (o el color de la línea si no hay foto).
+                {%- endcomment -%}
+                {%- if video != blank -%}
+                  {{ video | video_tag: image_size: '720x', autoplay: true, loop: true, muted: true, controls: false, playsinline: true, preload: 'metadata', class: 'mox-line-card__video' }}
+                {%- elsif image != blank -%}
+                  {{ image | image_url: width: 720 | image_tag: widths: '360, 540, 720', sizes: '(min-width: 750px) 30vw, 70vw', loading: 'lazy', alt: '', class: 'mox-line-card__poster' }}
+                {%- endif -%}
+                {%- if video == blank and request.design_mode -%}
+                  <span class="mox-line-card__pending">Video pendiente: cargalo en esta sección</span>
+                {%- endif -%}
               {%- elsif image != blank -%}
                 {{ image | image_url: width: 800 | image_tag: widths: '360, 540, 800', sizes: '(min-width: 750px) 33vw, 100vw', loading: 'lazy', alt: '', width: image.width, height: image.height }}
               {%- endif -%}
@@ -61,6 +72,9 @@
         </li>
       {%- endfor -%}
     </ul>
+    {%- if s.video_cards and s.swipe_hint != blank -%}
+      <p class="mox-swipe-hint mox-swipe-hint--mobile" aria-hidden="true">{{ s.swipe_hint }}</p>
+    {%- endif -%}
   </div>
 </section>
 
@@ -107,7 +121,15 @@
       "type": "checkbox",
       "id": "video_cards",
       "label": "Tarjetas de video vertical",
+      "info": "Videos 9:16 en carrusel, con reproducción automática y sin sonido. Sin video se usa la foto de la línea.",
       "default": false
+    },
+    {
+      "type": "text",
+      "id": "swipe_hint",
+      "label": "Indicación de deslizar",
+      "default": "Deslizá para ver más →",
+      "info": "Se muestra en celular, donde los videos se deslizan de costado."
     },
     {
       "type": "video",
