@@ -229,17 +229,47 @@
         </s>
       </div>
       <p class="mox-price__unit" data-mox-unit-price {% if initial_tier < 2 %}hidden{% endif %}>{{ s.unit_price | replace: '[precio]', base_price_money }}</p>
-      {%- if settings.mox_installments_enabled or settings.mox_cash_enabled -%}
-        <ul class="mox-price__payments">
-          {%- if settings.mox_installments_enabled -%}
-            <li data-mox-installments>{{ settings.mox_installments_count }} cuotas {{ settings.mox_installments_text }}</li>
-          {%- endif -%}
-          {%- if settings.mox_cash_enabled -%}
-            <li data-mox-cash>{{ settings.mox_cash_percent }}% {{ settings.mox_cash_label }}</li>
-          {%- endif -%}
-        </ul>
-      {%- endif -%}
     </div>
+
+    {%- comment -%}
+      Información de compra en desplegables. Cada ítem se muestra solo si tiene
+      texto cargado; en el editor se listan los tres con un aviso para completarlos.
+    {%- endcomment -%}
+    {%- liquid
+      assign info_filled = 0
+      for n in (1..3)
+        assign kt = 'mox_info_' | append: n | append: '_title'
+        assign kb = 'mox_info_' | append: n | append: '_body'
+        if settings[kt] != blank and settings[kb] != blank
+          assign info_filled = info_filled | plus: 1
+        endif
+      endfor
+    -%}
+    {%- if info_filled > 0 or request.design_mode -%}
+      <div class="mox-accordion mox-accordion--boxed">
+        {%- for n in (1..3) -%}
+          {%- liquid
+            assign kt = 'mox_info_' | append: n | append: '_title'
+            assign kb = 'mox_info_' | append: n | append: '_body'
+            assign info_title = settings[kt]
+            assign info_body = settings[kb]
+          -%}
+          {%- if info_title != blank and info_body != blank -%}
+            <details>
+              <summary>{{ info_title }}</summary>
+              <div class="mox-accordion__content">{{ info_body }}</div>
+            </details>
+          {%- elsif info_title != blank and request.design_mode -%}
+            <details>
+              <summary>{{ info_title }}</summary>
+              <div class="mox-accordion__content">
+                <p>Cargá el texto de «{{ info_title }}» en este bloque. Este aviso solo se ve en el editor.</p>
+              </div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
 
     {%- comment -%} Armazones de esta línea: cada uno es un producto propio. {%- endcomment -%}
     {%- if s.show_frames and line_index > 0 -%}
@@ -682,13 +712,13 @@
       "type": "text",
       "id": "unit_price",
       "label": "Precio por unidad",
-      "default": "[precio] por unidad"
+      "default": "Llevando [n]: [precio] c/u"
     },
     {
       "type": "text",
       "id": "unit_price_from",
       "label": "Precio por unidad (varios precios)",
-      "default": "Desde [precio] por unidad"
+      "default": "Llevando [n]: desde [precio] c/u"
     },
     {
       "type": "text",

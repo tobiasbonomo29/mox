@@ -78,7 +78,10 @@ export class QuickAddComponent extends Component {
   #updateVariantPicker(newHtml) {
     const modalContent = document.getElementById('quick-add-modal-content');
     if (!modalContent) return;
-    const variantPicker = /** @type {VariantPicker} */ (modalContent.querySelector('variant-picker'));
+    // Las fichas MÖX arman el kit con su propio bloque y no tienen <variant-picker>.
+    // Sin esta guarda el acceso lanza y el modal nunca llega a abrirse.
+    const variantPicker = /** @type {VariantPicker | null} */ (modalContent.querySelector('variant-picker'));
+    if (!variantPicker) return;
     variantPicker.updateVariantPicker(newHtml);
   }
 

@@ -6,9 +6,8 @@
   assign s = section.settings
   assign cert_count = 0
   for n in (1..3)
-    assign ki = 'mox_cert_' | append: n | append: '_image'
     assign kn = 'mox_cert_' | append: n | append: '_name'
-    if settings[ki] != blank or settings[kn] != blank
+    if settings[kn] != blank
       assign cert_count = cert_count | plus: 1
     endif
   endfor
@@ -34,7 +33,7 @@
   "settings": [
     {
       "type": "paragraph",
-      "content": "Los certificados (imagen, nombre y documento) se cargan en Configuración del tema → MOX · Certificados."
+      "content": "Los certificados (nombre y PDF) se cargan en Configuración del tema → MOX · Certificados."
     },
     {
       "type": "text",

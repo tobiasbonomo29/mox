@@ -26,6 +26,32 @@
   if product.variants_count == 1 or product.options.size == 1 and product.selected_variant
     assign quick_add_button = 'add'
   endif
+
+  # MÖX: los productos con opción "Kit" se agregan de a un anteojo desde la
+  # tarjeta. El modal de Horizon no sirve acá porque la ficha arma el kit con su
+  # propio bloque y no tiene <variant-picker>. Para kits de 2 o 3 se entra a la
+  # ficha, que es donde se eligen los armazones.
+  assign mox_kit_index = -1
+  for opt in product.options_with_values
+    if opt.name == 'Kit'
+      assign mox_kit_index = forloop.index0
+      break
+    endif
+  endfor
+  if mox_kit_index > -1
+    for v in product.variants
+      if v.options[mox_kit_index] contains '1'
+        assign variant = v
+        assign quick_add_button = 'add'
+        break
+      endif
+    endfor
+    if variant.available
+      assign can_add_to_cart = true
+    else
+      assign can_add_to_cart = false
+    endif
+  endif
 %}
 
 <quick-add-component

@@ -439,15 +439,6 @@ header-component .menu-list__link.is-active {
   color: var(--mox-muted);
 }
 
-.mox-price__payments {
-  display: grid;
-  gap: var(--mox-space-1);
-  margin: var(--mox-space-3) 0 0;
-  padding: 0;
-  list-style: none;
-  font-size: 0.9375rem;
-}
-
 .mox-choice {
   display: flex;
   flex-direction: column;
@@ -1530,8 +1521,27 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
     display: none;
   }
 
+  /* Carrusel horizontal: una tarjeta por pantalla y la siguiente asomada, para
+     que se note que se desliza. En escritorio se sigue usando la tabla. */
   .mox-compare__cards {
     display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 85%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--page-margin, 20px);
+    scrollbar-width: none;
+    margin-inline: calc(var(--page-margin, 20px) * -1);
+    padding-inline: var(--page-margin, 20px);
+  }
+
+  .mox-compare__cards::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mox-compare__cards > li {
+    scroll-snap-align: start;
   }
 }
 
@@ -1773,6 +1783,43 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 
 .mox-accordion__content > :last-child {
   margin-bottom: 0;
+}
+
+/* Acordeón en caja: filas con borde fino, esquinas redondeadas y un "+" circular
+   a la derecha. Se usa debajo del precio en la ficha. */
+.mox-accordion--boxed {
+  display: grid;
+  gap: var(--mox-space-2);
+  margin-top: var(--mox-space-5);
+  border-top: 0;
+  max-width: none;
+}
+
+.mox-accordion--boxed details {
+  border: 1px solid var(--mox-line);
+  border-radius: var(--mox-radius-sm);
+  background: var(--mox-bg);
+}
+
+.mox-accordion--boxed summary {
+  min-height: 52px;
+  padding: var(--mox-space-3) var(--mox-space-4);
+  font-size: 0.9375rem;
+  font-weight: 400;
+}
+
+.mox-accordion--boxed summary::after {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--mox-line);
+  border-radius: 50%;
+  background:
+    linear-gradient(currentColor, currentColor) center / 11px 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1.5px 11px no-repeat;
+}
+
+.mox-accordion--boxed .mox-accordion__content {
+  padding: 0 var(--mox-space-4) var(--mox-space-4);
 }
 
 .mox-specs {
@@ -2158,6 +2205,14 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
   object-fit: contain;
 }
 
+/* El certificado ahora es un PDF: en lugar del sello se muestra un ícono de
+   documento, que no debe estirarse como hacía la imagen. */
+.mox-cert__media .mox-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--mox-muted);
+}
+
 .mox-cert__name {
   font-size: 0.875rem;
   font-weight: 500;
@@ -2226,14 +2281,21 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 /* ---------- Líneas: carrusel de videos verticales 9:16 ---------- */
 
 .mox-lines--video {
-  /* Ancho de cada video: entra completo en la pantalla junto al título. */
-  --mox-video-w: min(78vw, 360px, calc((100svh - var(--header-height, 72px) - 290px) * 9 / 16));
+  /* Referencia NoMercy: 3 videos 9:16 ocupando ~77% del ancho con 24px de
+     separación (≈472px cada uno en una pantalla de 1920). El tercer término
+     impide que el bloque se pase del alto de la pantalla en monitores bajos. */
+  --mox-video-gap: 24px;
+  --mox-video-w: min(
+    calc((77vw - var(--mox-video-gap) * 2) / 3),
+    472px,
+    calc((100svh - var(--header-height, 72px) - 230px) * 9 / 16)
+  );
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: var(--mox-video-w);
   grid-template-columns: none;
   justify-content: safe center;
-  gap: var(--mox-space-4);
+  gap: var(--mox-video-gap);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
@@ -2245,8 +2307,8 @@ body.mox-wa-managed.mox-panel-open .mox-wa-target {
 
 @media screen and (max-width: 749px) {
   .mox-lines--video {
-    /* En celular el título ocupa más renglones. */
-    --mox-video-w: min(78vw, calc((100svh - var(--header-height, 64px) - 340px) * 9 / 16));
+    /* Un video por pantalla: se asoma el siguiente para que se note el swipe. */
+    --mox-video-w: min(85vw, calc((100dvh - var(--header-height, 64px) - 300px) * 9 / 16));
   }
 }
 

@@ -11,9 +11,8 @@
 {%- liquid
   assign cert_count = 0
   for n in (1..3)
-    assign ki = 'mox_cert_' | append: n | append: '_image'
     assign kn = 'mox_cert_' | append: n | append: '_name'
-    if settings[ki] != blank or settings[kn] != blank
+    if settings[kn] != blank
       assign cert_count = cert_count | plus: 1
     endif
   endfor
@@ -37,23 +36,17 @@
     <ul class="mox-certs__list" role="list">
       {%- for n in (1..3) -%}
         {%- liquid
-          assign ki = 'mox_cert_' | append: n | append: '_image'
           assign kn = 'mox_cert_' | append: n | append: '_name'
           assign kl = 'mox_cert_' | append: n | append: '_link'
-          assign image = settings[ki]
           assign name = settings[kn]
           assign link = settings[kl]
         -%}
-        {%- if image != blank or name != blank -%}
+        {%- if name != blank -%}
           <li class="mox-cert">
             {%- if link != blank -%}<a class="mox-cert__link" href="{{ link }}" target="_blank" rel="noopener">{%- endif -%}
-            {%- if image != blank -%}
-              <span class="mox-cert__media">
-                {{ image | image_url: width: 240 | image_tag: widths: '120, 240', sizes: '120px', loading: 'lazy', alt: image.alt | default: name }}
-              </span>
-            {%- endif -%}
-            {%- if name != blank -%}<span class="mox-cert__name">{{ name }}</span>{%- endif -%}
-            {%- if link != blank -%}<span class="mox-cert__cta">Ver documento{% render 'mox-icon', name: 'arrow' %}</span></a>{%- endif -%}
+            <span class="mox-cert__media" aria-hidden="true">{% render 'mox-icon', name: 'document' %}</span>
+            <span class="mox-cert__name">{{ name }}</span>
+            {%- if link != blank -%}<span class="mox-cert__cta">{{ settings.mox_t_cert_cta | default: 'Ver PDF' }}{% render 'mox-icon', name: 'arrow' %}</span></a>{%- endif -%}
           </li>
         {%- endif -%}
       {%- endfor -%}

@@ -474,11 +474,6 @@
         "content": "Certificado 1"
       },
       {
-        "type": "image_picker",
-        "id": "mox_cert_1_image",
-        "label": "Imagen o sello"
-      },
-      {
         "type": "text",
         "id": "mox_cert_1_name",
         "label": "Nombre"
@@ -486,17 +481,12 @@
       {
         "type": "url",
         "id": "mox_cert_1_link",
-        "label": "Enlace al documento",
-        "info": "PDF subido en Contenido → Archivos."
+        "label": "PDF del certificado",
+        "info": "Subí el PDF en Contenido → Archivos, copiá su URL y pegala acá."
       },
       {
         "type": "header",
         "content": "Certificado 2"
-      },
-      {
-        "type": "image_picker",
-        "id": "mox_cert_2_image",
-        "label": "Imagen o sello"
       },
       {
         "type": "text",
@@ -506,17 +496,12 @@
       {
         "type": "url",
         "id": "mox_cert_2_link",
-        "label": "Enlace al documento",
-        "info": "PDF subido en Contenido → Archivos."
+        "label": "PDF del certificado",
+        "info": "Subí el PDF en Contenido → Archivos, copiá su URL y pegala acá."
       },
       {
         "type": "header",
         "content": "Certificado 3"
-      },
-      {
-        "type": "image_picker",
-        "id": "mox_cert_3_image",
-        "label": "Imagen o sello"
       },
       {
         "type": "text",
@@ -526,8 +511,62 @@
       {
         "type": "url",
         "id": "mox_cert_3_link",
-        "label": "Enlace al documento",
-        "info": "PDF subido en Contenido → Archivos."
+        "label": "PDF del certificado",
+        "info": "Subí el PDF en Contenido → Archivos, copiá su URL y pegala acá."
+      }
+    ]
+  },
+  {
+    "name": "MOX · Información de compra",
+    "settings": [
+      {
+        "type": "paragraph",
+        "content": "Tres desplegables debajo del precio en la ficha de producto. Cada uno se muestra solo cuando tiene título y texto; sin texto no aparece en la tienda."
+      },
+      {
+        "type": "header",
+        "content": "Desplegable 1"
+      },
+      {
+        "type": "text",
+        "id": "mox_info_1_title",
+        "label": "Título",
+        "default": "Medios de pago"
+      },
+      {
+        "type": "richtext",
+        "id": "mox_info_1_body",
+        "label": "Texto"
+      },
+      {
+        "type": "header",
+        "content": "Desplegable 2"
+      },
+      {
+        "type": "text",
+        "id": "mox_info_2_title",
+        "label": "Título",
+        "default": "Garantía 60 días"
+      },
+      {
+        "type": "richtext",
+        "id": "mox_info_2_body",
+        "label": "Texto"
+      },
+      {
+        "type": "header",
+        "content": "Desplegable 3"
+      },
+      {
+        "type": "text",
+        "id": "mox_info_3_title",
+        "label": "Título",
+        "default": "Envíos"
+      },
+      {
+        "type": "richtext",
+        "id": "mox_info_3_body",
+        "label": "Texto"
       }
     ]
   },
@@ -576,8 +615,8 @@
       {
         "type": "text",
         "id": "mox_t_kit_note",
-        "label": "Precio en kit de 3",
-        "default": "Kit de 3: [precio] c/u"
+        "label": "Precio llevando 3",
+        "default": "Llevando 3: [precio] c/u"
       },
       {
         "type": "text",
@@ -617,7 +656,7 @@
         "type": "text",
         "id": "mox_t_compare_from",
         "label": "Comparador: precio en kit",
-        "default": "Desde [precio] c/u en kit de 3"
+        "default": "Desde [precio] c/u llevando 3"
       },
       {
         "type": "text",

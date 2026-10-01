@@ -144,6 +144,9 @@
         </li>
       {%- endfor -%}
     </ul>
+    {%- if s.swipe_hint != blank -%}
+      <p class="mox-swipe-hint mox-swipe-hint--mobile" aria-hidden="true">{{ s.swipe_hint }}</p>
+    {%- endif -%}
 
     {%- if s.note != blank -%}<p class="mox-compare__note">{{ s.note }}</p>{%- endif -%}
   </div>
@@ -157,6 +160,13 @@
     {
       "type": "paragraph",
       "content": "Los datos salen de Configuración del tema → MOX y de los productos de cada colección. No agregues porcentajes de filtrado ni beneficios que no estén verificados."
+    },
+    {
+      "type": "text",
+      "id": "swipe_hint",
+      "label": "Indicación de deslizar",
+      "default": "Deslizá para ver más →",
+      "info": "Solo en celular, donde las tarjetas se deslizan. Vacío = no se muestra."
     },
     {
       "type": "text",

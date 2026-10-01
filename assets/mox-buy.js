@@ -282,7 +282,7 @@ class MoxBuy extends HTMLElement {
         } else {
           const variant = variantForTier(this.catalog[handle], tier);
           status.textContent = variant
-            ? this.#t('unitPrice', '[precio] por unidad', { precio: this.#money(variant.price) })
+            ? this.#t('unitPrice', 'Llevando [n]: [precio] c/u', { n: tier, precio: this.#money(variant.price) })
             : this.#t('unavailable', 'No disponible en este kit');
           status.classList.toggle('is-warning', !variant || !variant.available);
         }
@@ -321,17 +321,8 @@ class MoxBuy extends HTMLElement {
       unitEl.hidden = tier < 2 || !prices.length;
       unitEl.textContent =
         min === max
-          ? this.#t('unitPrice', '[precio] por unidad', { precio: this.#money(min) })
-          : this.#t('unitPriceFrom', 'Desde [precio] por unidad', { precio: this.#money(min) });
-    }
-
-    const quotaEl = this.querySelector('[data-mox-installments]');
-    if (quotaEl && this.payments?.installments) {
-      quotaEl.textContent = `${this.payments.installments.count} cuotas ${this.payments.installments.text}`.trim();
-    }
-    const cashEl = this.querySelector('[data-mox-cash]');
-    if (cashEl && this.payments?.cash) {
-      cashEl.textContent = `${this.payments.cash.percent}% ${this.payments.cash.label}`;
+          ? this.#t('unitPrice', 'Llevando [n]: [precio] c/u', { n: tier, precio: this.#money(min) })
+          : this.#t('unitPriceFrom', 'Llevando [n]: desde [precio] c/u', { n: tier, precio: this.#money(min) });
     }
 
     const stickyPrice = this.querySelector('[data-mox-sticky-price]');
