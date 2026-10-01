@@ -13,7 +13,9 @@
       "type": "mox-collection-head",
       "settings": {
         "all_title": "Anteojos",
-        "all_intro": "Tres líneas, Mañana, Tarde y Noche, y varios armazones. Elegí la línea por el momento del día y el armazón por tu estilo."
+        "all_intro": "Tres líneas, Mañana, Tarde y Noche, y varios armazones. Elegí la línea por el momento del día y el armazón por tu estilo.",
+        "all_label": "Todos",
+        "line_label": "Línea"
       }
     },
     "main": {
@@ -115,4 +117,3 @@
     "main"
   ]
 }
-

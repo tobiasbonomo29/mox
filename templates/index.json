@@ -33,15 +33,34 @@
         "eyebrow": "Tres líneas",
         "heading": "Elegí según el momento del día",
         "text": "Cada línea se distingue por el color de su cristal. Los armazones se eligen aparte.",
-        "surface": false,
+        "surface": true,
         "guide": false,
         "video_cards": true,
+        "swipe_hint": "Deslizá para ver más →",
+        "video_1": "shopify://files/videos/mox_glasses_motion_1080x1920.mp4",
         "view_label": "Ver",
         "lens_label": "Cristal",
         "level_label": "Filtrado",
         "guide_note": "Elegí tu armazón y combinalo con otras líneas en tu kit.",
-        "show_count": true,
-        "swipe_hint": "Deslizá para ver más →"
+        "show_count": true
+      }
+    },
+    "lens_cards": {
+      "type": "mox-lens-cards",
+      "disabled": true,
+      "settings": {
+        "eyebrow": "Tres cristales",
+        "heading": "Qué filtra cada cristal",
+        "text": "",
+        "show_image": true,
+        "title_prefix": "Línea",
+        "lens_label": "Cristal",
+        "blue_label": "Luz azul",
+        "cutoff_label": "Corte total",
+        "spectrum_label": "Bloquea la luz hasta",
+        "report_label": "Ver informe de laboratorio",
+        "swipe_hint": "Deslizá para ver más →",
+        "surface": false
       }
     },
     "compare": {
@@ -69,10 +88,10 @@
         "text": "",
         "source": "manual",
         "products": [
-          "manana-armazon-negro",
-          "tarde-armazon-azul",
-          "noche-armazon-marron",
-          "manana-armazon-negro-y-amarillo"
+          "noche-armazon-negro",
+          "manana-armazon-negro-y-amarillo",
+          "tarde-armazon-transparente",
+          "manana-armazon-marron"
         ],
         "collection": "",
         "limit": 4,
@@ -162,10 +181,6 @@
         "text": "",
         "open_first": false
       }
-    },
-    "lens_cards": {
-      "type": "mox-lens-cards",
-      "settings": {}
     }
   },
   "order": [
