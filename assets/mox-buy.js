@@ -44,7 +44,6 @@ class MoxBuy extends HTMLElement {
     this.currency = data.currency;
     this.lines = data.lines;
     this.current = data.current;
-    this.payments = data.payments;
     this.ui = data.ui || {};
     this.catalog = {};
     this.meta = {};
